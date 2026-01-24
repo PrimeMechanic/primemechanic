@@ -4,7 +4,7 @@
     "slug": "primemechanic",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "scheme": "primemechanic",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -15,7 +15,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/icon.png"
+        "foregroundImage": "./assets/images/logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -23,7 +23,7 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/logo.png"
     },
     "plugins": [
       [
