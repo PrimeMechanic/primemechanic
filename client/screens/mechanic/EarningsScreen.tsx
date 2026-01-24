@@ -78,12 +78,7 @@ export default function EarningsScreen() {
           <ThemedText style={styles.totalLabel}>
             {selectedPeriod === 0 ? "Today's" : selectedPeriod === 1 ? "This Week's" : "This Month's"} Earnings
           </ThemedText>
-          <ThemedText 
-            style={styles.totalAmount}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.5}
-          >
+          <ThemedText style={styles.totalAmount}>
             ${selectedPeriod === 0 ? earningsData.today.toLocaleString() : selectedPeriod === 1 ? earningsData.thisWeek.toLocaleString() : earningsData.thisMonth.toLocaleString()}
           </ThemedText>
           <View style={styles.totalStats}>
@@ -207,22 +202,21 @@ const styles = StyleSheet.create({
   totalCard: {
     backgroundColor: Colors.dark.primary,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     alignItems: "center",
   },
   totalLabel: {
     fontSize: 14,
     color: "rgba(255, 255, 255, 0.7)",
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   totalAmount: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: Colors.dark.buttonText,
-    marginBottom: Spacing.md,
-    textAlign: "center",
-    width: "100%",
+    marginBottom: Spacing.sm,
   },
   totalStats: {
     flexDirection: "row",
