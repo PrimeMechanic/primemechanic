@@ -4,16 +4,19 @@ import { HeaderButton } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
+import MechanicTabNavigator from "@/navigation/MechanicTabNavigator";
 import BookServiceScreen from "@/screens/BookServiceScreen";
 import MechanicProfileScreen from "@/screens/MechanicProfileScreen";
 import BookingDetailScreen from "@/screens/BookingDetailScreen";
 import ChatScreen from "@/screens/ChatScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
+import { useUser } from "@/context/UserContext";
 import { Colors } from "@/constants/theme";
 import { conversations, mechanics } from "@/data/mockData";
 
 export type RootStackParamList = {
   Main: undefined;
+  MechanicMain: undefined;
   BookService: { serviceId?: string };
   MechanicProfile: { mechanicId: string };
   BookingDetail: { bookingId: string };
@@ -24,14 +27,23 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
+  const { role } = useUser();
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen
-        name="Main"
-        component={MainTabNavigator}
-        options={{ headerShown: false }}
-      />
+      {role === "customer" ? (
+        <Stack.Screen
+          name="Main"
+          component={MainTabNavigator}
+          options={{ headerShown: false }}
+        />
+      ) : (
+        <Stack.Screen
+          name="MechanicMain"
+          component={MechanicTabNavigator}
+          options={{ headerShown: false }}
+        />
+      )}
       <Stack.Screen
         name="BookService"
         component={BookServiceScreen}

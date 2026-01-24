@@ -9,6 +9,7 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { currentUser } from "@/data/mockData";
+import { useUser } from "@/context/UserContext";
 
 interface SettingsItemProps {
   icon: string;
@@ -17,6 +18,7 @@ interface SettingsItemProps {
   showBadge?: boolean;
   badgeText?: string;
   danger?: boolean;
+  highlight?: boolean;
 }
 
 function SettingsItem({
@@ -26,6 +28,7 @@ function SettingsItem({
   showBadge,
   badgeText,
   danger,
+  highlight,
 }: SettingsItemProps) {
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -37,14 +40,22 @@ function SettingsItem({
       style={({ pressed }) => [styles.settingsItem, pressed && styles.settingsItemPressed]}
       onPress={handlePress}
     >
-      <View style={[styles.settingsIconContainer, danger && styles.dangerIconContainer]}>
+      <View style={[
+        styles.settingsIconContainer, 
+        danger && styles.dangerIconContainer,
+        highlight && styles.highlightIconContainer
+      ]}>
         <Feather
           name={icon as any}
           size={20}
-          color={danger ? Colors.dark.error : Colors.dark.accent}
+          color={danger ? Colors.dark.error : highlight ? Colors.dark.primary : Colors.dark.accent}
         />
       </View>
-      <ThemedText style={[styles.settingsLabel, danger && styles.dangerLabel]}>
+      <ThemedText style={[
+        styles.settingsLabel, 
+        danger && styles.dangerLabel,
+        highlight && styles.highlightLabel
+      ]}>
         {label}
       </ThemedText>
       <View style={styles.settingsRight}>
@@ -63,8 +74,14 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
+  const { toggleRole } = useUser();
 
   const vehicle = currentUser.vehicles[0];
+
+  const handleSwitchToMechanic = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    toggleRole();
+  };
 
   return (
     <ScrollView
@@ -118,6 +135,18 @@ export default function ProfileScreen() {
           <SettingsItem icon="credit-card" label="Payment Methods" onPress={() => {}} />
           <SettingsItem icon="map-pin" label="Saved Addresses" onPress={() => {}} />
           <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>Demo</ThemedText>
+        <View style={styles.settingsGroup}>
+          <SettingsItem
+            icon="tool"
+            label="Switch to Mechanic View"
+            onPress={handleSwitchToMechanic}
+            highlight
+          />
         </View>
       </View>
 
@@ -250,6 +279,9 @@ const styles = StyleSheet.create({
   dangerIconContainer: {
     backgroundColor: "rgba(239, 68, 68, 0.1)",
   },
+  highlightIconContainer: {
+    backgroundColor: "rgba(13, 27, 42, 0.1)",
+  },
   settingsLabel: {
     flex: 1,
     fontSize: 16,
@@ -257,6 +289,10 @@ const styles = StyleSheet.create({
   },
   dangerLabel: {
     color: Colors.dark.error,
+  },
+  highlightLabel: {
+    color: Colors.dark.primary,
+    fontWeight: "600",
   },
   settingsRight: {
     flexDirection: "row",

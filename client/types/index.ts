@@ -63,4 +63,43 @@ export interface User {
   phone: string;
   avatar: any;
   vehicles: Vehicle[];
+  role: "customer" | "mechanic";
+}
+
+export interface JobRequest {
+  id: string;
+  customer: {
+    id: string;
+    name: string;
+    avatar: any;
+  };
+  service: Service;
+  vehicle: Vehicle;
+  date: string;
+  time: string;
+  location: string;
+  notes?: string;
+  status: "pending" | "accepted" | "declined" | "in_progress" | "completed";
+  totalPrice: number;
+  createdAt: string;
+}
+
+export interface EarningsData {
+  today: number;
+  thisWeek: number;
+  thisMonth: number;
+  pending: number;
+  totalJobs: number;
+}
+
+export interface MechanicConversation {
+  id: string;
+  customer: {
+    id: string;
+    name: string;
+    avatar: any;
+  };
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
 }
