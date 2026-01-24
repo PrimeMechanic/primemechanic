@@ -5,7 +5,7 @@ export const Colors = {
     text: "#0D1B2A",
     textSecondary: "#64748B",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#64748B",
+    tabIconDefault: "#000000",
     tabIconSelected: "#00D4FF",
     link: "#00D4FF",
     primary: "#0D1B2A",
