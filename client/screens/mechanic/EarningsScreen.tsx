@@ -22,7 +22,7 @@ function EarningsCard({ title, amount, subtitle, icon, color }: EarningsCardProp
   return (
     <View style={styles.earningsCard}>
       <View style={[styles.earningsIconContainer, { backgroundColor: `${color}15` }]}>
-        <Feather name={icon as any} size={24} color={color} />
+        <Feather name={icon as any} size={18} color={color} />
       </View>
       <View style={styles.earningsContent}>
         <ThemedText style={styles.earningsTitle}>{title}</ThemedText>
@@ -215,11 +215,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   totalAmount: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: Colors.dark.buttonText,
     marginBottom: Spacing.md,
+    textAlign: "center",
   },
   totalStats: {
     flexDirection: "row",
@@ -286,17 +287,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+    padding: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.dark.border,
   },
   earningsIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   earningsContent: {},
   earningsTitle: {
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   earningsAmount: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: Colors.dark.text,
