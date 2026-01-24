@@ -8,9 +8,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ConversationCard } from "@/components/ConversationCard";
 import { EmptyState } from "@/components/EmptyState";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { conversations } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { useTheme } from "@/context/ThemeContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -19,13 +20,14 @@ export default function MessagesScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   const handleConversationPress = (conversationId: string) => {
     navigation.navigate("Chat", { conversationId });
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
       <FlatList
         data={conversations}
         keyExtractor={(item) => item.id}
@@ -60,7 +62,6 @@ export default function MessagesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   listContent: {
     paddingHorizontal: Spacing.lg,

@@ -9,10 +9,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { BookingCard } from "@/components/BookingCard";
 import { EmptyState } from "@/components/EmptyState";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { bookings } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Booking } from "@/types";
+import { useTheme } from "@/context/ThemeContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -21,6 +22,7 @@ export default function BookingsScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const upcomingBookings = bookings.filter(
@@ -62,8 +64,8 @@ export default function BookingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
+      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md, backgroundColor: colors.backgroundRoot }]}>
         <SegmentedControl
           segments={["Upcoming", "Past"]}
           selectedIndex={selectedIndex}
@@ -92,12 +94,10 @@ export default function BookingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   header: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.md,
-    backgroundColor: Colors.dark.backgroundRoot,
   },
   listContent: {
     paddingHorizontal: Spacing.lg,

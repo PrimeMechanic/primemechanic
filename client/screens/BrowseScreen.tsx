@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View, FlatList, ScrollView } from "react-native";
+import { StyleSheet, View, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -11,9 +11,10 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { MechanicCard } from "@/components/MechanicCard";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { EmptyState } from "@/components/EmptyState";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { services, mechanics } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { useTheme } from "@/context/ThemeContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -21,6 +22,7 @@ export default function BrowseScreen() {
   const navigation = useNavigation<NavigationProp>();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
+  const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredMechanics = mechanics.filter(
@@ -42,7 +44,7 @@ export default function BrowseScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
@@ -60,7 +62,7 @@ export default function BrowseScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Services</ThemedText>
+          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Services</ThemedText>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -77,7 +79,7 @@ export default function BrowseScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Nearby Mechanics</ThemedText>
+          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Nearby Mechanics</ThemedText>
           {filteredMechanics.length > 0 ? (
             <View style={styles.mechanicsGrid}>
               {filteredMechanics.map((mechanic) => (
@@ -109,7 +111,6 @@ export default function BrowseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   scrollView: {
     flex: 1,
@@ -125,7 +126,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
     paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
   },
