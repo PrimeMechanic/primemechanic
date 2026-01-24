@@ -88,5 +88,6 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 12,
+    fontWeight: "600",
   },
 });
