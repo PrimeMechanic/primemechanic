@@ -17,6 +17,7 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { mechanicProfile } from "@/data/mechanicData";
 import { services } from "@/data/mockData";
 import { useUser } from "@/context/UserContext";
+import { useTheme } from "@/context/ThemeContext";
 
 interface SettingsItemProps {
   icon: string;
@@ -83,6 +84,7 @@ export default function MechanicProfileEditScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { toggleRole } = useUser();
+  const { isDark, toggleTheme } = useTheme();
   const [isAvailable, setIsAvailable] = useState(mechanicProfile.isAvailable);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
@@ -94,6 +96,11 @@ export default function MechanicProfileEditScreen() {
   const handleAvailabilityToggle = (value: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setIsAvailable(value);
+  };
+
+  const handleThemeToggle = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    toggleTheme();
   };
 
   const mechanicServices = mechanicProfile.services.map((ms) => {
@@ -216,6 +223,19 @@ export default function MechanicProfileEditScreen() {
             icon="file-text"
             label="About Me"
             onPress={() => {}}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>Appearance</ThemedText>
+        <View style={styles.settingsGroup}>
+          <SettingsItem
+            icon={isDark ? "moon" : "sun"}
+            label="Dark Mode"
+            toggle
+            toggleValue={isDark}
+            onToggle={handleThemeToggle}
           />
         </View>
       </View>

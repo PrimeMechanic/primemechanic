@@ -130,7 +130,7 @@ export default function EarningsScreen() {
           title="Available Balance"
           amount={earningsData.thisWeek - earningsData.pending}
           subtitle="Ready to withdraw"
-          icon="wallet"
+          icon="credit-card"
           color={Colors.dark.success}
         />
         <EarningsCard

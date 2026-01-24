@@ -24,6 +24,12 @@ The platform operates on a 20% commission model per completed job, similar to Ub
   - MechanicProfileEditScreen: Availability toggle, services management, profile settings
 - Added UserContext for role switching between Customer and Mechanic views
 - Demo mode: Toggle between views via Profile screen "Switch to Mechanic/Customer View"
+- **Added Dark/Light Mode Support**:
+  - ThemeContext with AsyncStorage persistence
+  - Theme toggle switch in both Customer and Mechanic Profile screens under "Appearance" section
+  - Dynamic sun/moon icon changes based on current theme
+  - Light theme: White backgrounds, Midnight Blue primary
+  - Dark theme: Slate backgrounds (#0F172A, #1E293B), Electric Blue accent
 
 ## User Preferences
 
@@ -40,10 +46,10 @@ Preferred communication style: Simple, everyday language.
   - UserContext manages role switching between views
   - Floating action button for quick service booking (customer only)
 - **State Management**: TanStack React Query for server state management
-- **Styling**: Custom theme system with light mode, using design tokens (Colors, Spacing, Typography, BorderRadius)
-  - Primary: Midnight Blue (#0D1B2A)
-  - Accent: Electric Blue (#00D4FF)
-  - Background: White (#FFFFFF)
+- **Styling**: Custom theme system with light/dark mode support, using design tokens (Colors, Spacing, Typography, BorderRadius)
+  - ThemeContext provides dynamic colors based on current theme (stored in AsyncStorage)
+  - Light mode: White background (#FFFFFF), Midnight Blue primary (#0D1B2A)
+  - Dark mode: Slate background (#0F172A), Electric Blue accent (#00D4FF)
   - Secondary Text: Slate Gray (#64748B)
 - **Animation**: React Native Reanimated for smooth UI animations with haptic feedback via Expo Haptics
 - **Fonts**: Montserrat (Google Fonts) for professional automotive aesthetic

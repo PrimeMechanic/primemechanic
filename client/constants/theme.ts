@@ -21,25 +21,27 @@ export const Colors = {
     backgroundTertiary: "#E2E8F0",
   },
   dark: {
-    text: "#0D1B2A",
-    textSecondary: "#64748B",
+    text: "#FFFFFF",
+    textSecondary: "#94A3B8",
     buttonText: "#FFFFFF",
     tabIconDefault: "#64748B",
     tabIconSelected: "#00D4FF",
     link: "#00D4FF",
-    primary: "#0D1B2A",
-    primaryVariant: "#1B2838",
+    primary: "#00D4FF",
+    primaryVariant: "#0EA5E9",
     accent: "#00D4FF",
     success: "#22C55E",
     warning: "#F59E0B",
     error: "#EF4444",
-    border: "#E2E8F0",
-    backgroundRoot: "#FFFFFF",
-    backgroundDefault: "#F8FAFC",
-    backgroundSecondary: "#F1F5F9",
-    backgroundTertiary: "#E2E8F0",
+    border: "#334155",
+    backgroundRoot: "#0F172A",
+    backgroundDefault: "#1E293B",
+    backgroundSecondary: "#334155",
+    backgroundTertiary: "#475569",
   },
 };
+
+export type ThemeColors = typeof Colors.light;
 
 export const Spacing = {
   xs: 4,

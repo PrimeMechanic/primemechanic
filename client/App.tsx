@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
@@ -20,8 +20,24 @@ import { queryClient } from "@/lib/query-client";
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { UserProvider } from "@/context/UserContext";
+import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
+
+function AppContent() {
+  const { isDark, colors } = useTheme();
+  
+  return (
+    <GestureHandlerRootView style={[styles.root, { backgroundColor: colors.backgroundRoot }]}>
+      <KeyboardProvider>
+        <NavigationContainer>
+          <RootStackNavigator />
+        </NavigationContainer>
+        <StatusBar style={isDark ? "light" : "dark"} />
+      </KeyboardProvider>
+    </GestureHandlerRootView>
+  );
+}
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
@@ -44,18 +60,13 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <UserProvider>
-          <SafeAreaProvider>
-            <GestureHandlerRootView style={styles.root}>
-              <KeyboardProvider>
-                <NavigationContainer>
-                  <RootStackNavigator />
-                </NavigationContainer>
-                <StatusBar style="dark" />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </SafeAreaProvider>
-        </UserProvider>
+        <ThemeProvider>
+          <UserProvider>
+            <SafeAreaProvider>
+              <AppContent />
+            </SafeAreaProvider>
+          </UserProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
@@ -64,6 +75,5 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
   },
 });
