@@ -15,7 +15,8 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { conversations, mechanics } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Message } from "@/types";
@@ -65,6 +66,7 @@ export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const flatListRef = useRef<FlatList>(null);
+  const { colors } = useTheme();
 
   const conversation = conversations.find((c) => c.id === route.params.conversationId);
   const mechanic = conversation?.mechanic || mechanics[0];
@@ -99,13 +101,27 @@ export default function ChatScreen() {
       <View
         style={[
           styles.messageBubble,
-          isUser ? styles.userMessage : styles.mechanicMessage,
+          isUser
+            ? {
+                alignSelf: "flex-end",
+                backgroundColor: colors.primary,
+                borderBottomRightRadius: 4,
+              }
+            : {
+                alignSelf: "flex-start",
+                backgroundColor: colors.backgroundRoot,
+                borderBottomLeftRadius: 4,
+                borderWidth: 1,
+                borderColor: colors.border,
+              },
         ]}
       >
         <ThemedText
           style={[
             styles.messageText,
-            isUser ? styles.userMessageText : styles.mechanicMessageText,
+            {
+              color: isUser ? colors.buttonText : colors.text,
+            },
           ]}
         >
           {item.text}
@@ -113,7 +129,14 @@ export default function ChatScreen() {
         <ThemedText
           style={[
             styles.messageTime,
-            isUser ? styles.userMessageTime : styles.mechanicMessageTime,
+            isUser
+              ? {
+                  color: "rgba(255, 255, 255, 0.7)",
+                  textAlign: "right",
+                }
+              : {
+                  color: colors.textSecondary,
+                },
           ]}
         >
           {item.timestamp}
@@ -125,8 +148,10 @@ export default function ChatScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <Image source={mechanic.avatar} style={styles.emptyAvatar} />
-      <ThemedText style={styles.emptyTitle}>Start a conversation</ThemedText>
-      <ThemedText style={styles.emptyMessage}>
+      <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>
+        Start a conversation
+      </ThemedText>
+      <ThemedText style={[styles.emptyMessage, { color: colors.textSecondary }]}>
         Send a message to {mechanic.name} about your vehicle service.
       </ThemedText>
     </View>
@@ -134,7 +159,7 @@ export default function ChatScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.backgroundDefault }]}
       behavior="padding"
       keyboardVerticalOffset={0}
     >
@@ -153,21 +178,40 @@ export default function ChatScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      <View style={[styles.inputContainer, { paddingBottom: insets.bottom + Spacing.sm }]}>
-        <View style={styles.inputWrapper}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            paddingBottom: insets.bottom + Spacing.sm,
+            backgroundColor: colors.backgroundRoot,
+            borderTopColor: colors.border,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.inputWrapper,
+            {
+              backgroundColor: colors.backgroundSecondary,
+              borderColor: colors.border,
+            },
+          ]}
+        >
           <TextInput
-            style={styles.textInput}
+            style={[styles.textInput, { color: colors.text }]}
             value={inputText}
             onChangeText={setInputText}
             placeholder="Type a message..."
-            placeholderTextColor={Colors.dark.textSecondary}
+            placeholderTextColor={colors.textSecondary}
             multiline
             maxLength={500}
           />
           <Pressable
             style={[
               styles.sendButton,
-              !inputText.trim() && styles.sendButtonDisabled,
+              !inputText.trim()
+                ? { backgroundColor: colors.backgroundTertiary }
+                : { backgroundColor: colors.primary },
             ]}
             onPress={handleSend}
             disabled={!inputText.trim()}
@@ -175,7 +219,9 @@ export default function ChatScreen() {
             <Feather
               name="send"
               size={20}
-              color={inputText.trim() ? Colors.dark.buttonText : Colors.dark.textSecondary}
+              color={
+                inputText.trim() ? colors.buttonText : colors.textSecondary
+              }
             />
           </Pressable>
         </View>
@@ -187,7 +233,6 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   messagesList: {
     paddingHorizontal: Spacing.lg,
@@ -204,38 +249,13 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     marginBottom: Spacing.sm,
   },
-  userMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: Colors.dark.primary,
-    borderBottomRightRadius: 4,
-  },
-  mechanicMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderBottomLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-  },
   messageText: {
     fontSize: 15,
     lineHeight: 20,
   },
-  userMessageText: {
-    color: Colors.dark.buttonText,
-  },
-  mechanicMessageText: {
-    color: Colors.dark.text,
-  },
   messageTime: {
     fontSize: 11,
     marginTop: 4,
-  },
-  userMessageTime: {
-    color: "rgba(255, 255, 255, 0.7)",
-    textAlign: "right",
-  },
-  mechanicMessageTime: {
-    color: Colors.dark.textSecondary,
   },
   emptyContainer: {
     alignItems: "center",
@@ -251,37 +271,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
     marginBottom: Spacing.sm,
   },
   emptyMessage: {
     fontSize: 15,
-    color: Colors.dark.textSecondary,
     textAlign: "center",
     lineHeight: 22,
   },
   inputContainer: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
-    backgroundColor: Colors.dark.backgroundRoot,
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.border,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "flex-end",
-    backgroundColor: Colors.dark.backgroundSecondary,
     borderRadius: BorderRadius.lg,
     paddingLeft: Spacing.md,
     paddingRight: 4,
     paddingVertical: 4,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   textInput: {
     flex: 1,
     fontSize: 16,
-    color: Colors.dark.text,
     maxHeight: 100,
     paddingVertical: Spacing.sm,
   },
@@ -289,11 +302,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.dark.primary,
     alignItems: "center",
     justifyContent: "center",
-  },
-  sendButtonDisabled: {
-    backgroundColor: Colors.dark.backgroundTertiary,
   },
 });

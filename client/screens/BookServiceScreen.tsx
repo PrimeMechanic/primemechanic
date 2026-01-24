@@ -15,7 +15,8 @@ import * as Haptics from "expo-haptics";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { services, currentUser, mechanics } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
@@ -26,6 +27,7 @@ export default function BookServiceScreen() {
   const route = useRoute<BookServiceRouteProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const { colors } = useTheme();
 
   const preselectedServiceId = route.params?.serviceId;
 
@@ -52,7 +54,7 @@ export default function BookServiceScreen() {
   const selectedServiceData = services.find((s) => s.id === selectedService);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
       <KeyboardAwareScrollViewCompat
         style={styles.scrollView}
         contentContainerStyle={[
@@ -65,22 +67,23 @@ export default function BookServiceScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Select Service</ThemedText>
+          <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Select Service</ThemedText>
           <View style={styles.servicesGrid}>
             {services.map((service) => (
               <Pressable
                 key={service.id}
                 style={[
                   styles.serviceOption,
-                  selectedService === service.id && styles.serviceOptionSelected,
+                  { backgroundColor: colors.backgroundRoot, borderColor: colors.border },
+                  selectedService === service.id && { borderColor: colors.accent, backgroundColor: "rgba(0, 212, 255, 0.05)" },
                 ]}
                 onPress={() => handleServiceSelect(service.id)}
               >
                 <View
                   style={[
                     styles.serviceIconContainer,
-                    selectedService === service.id &&
-                      styles.serviceIconContainerSelected,
+                    { backgroundColor: "rgba(0, 212, 255, 0.1)" },
+                    selectedService === service.id && { backgroundColor: colors.accent },
                   ]}
                 >
                   <Feather
@@ -88,15 +91,15 @@ export default function BookServiceScreen() {
                     size={22}
                     color={
                       selectedService === service.id
-                        ? Colors.dark.buttonText
-                        : Colors.dark.accent
+                        ? colors.buttonText
+                        : colors.accent
                     }
                   />
                 </View>
-                <ThemedText style={styles.serviceOptionName}>
+                <ThemedText style={[styles.serviceOptionName, { color: colors.text }]}>
                   {service.name}
                 </ThemedText>
-                <ThemedText style={styles.serviceOptionPrice}>
+                <ThemedText style={[styles.serviceOptionPrice, { color: colors.textSecondary }]}>
                   ${service.price}
                 </ThemedText>
               </Pressable>
@@ -105,78 +108,78 @@ export default function BookServiceScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Vehicle</ThemedText>
-          <Pressable style={styles.inputCard}>
-            <View style={styles.iconContainer}>
-              <Feather name="truck" size={20} color={Colors.dark.accent} />
+          <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Vehicle</ThemedText>
+          <Pressable style={[styles.inputCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+            <View style={[styles.iconContainer, { backgroundColor: "rgba(0, 212, 255, 0.1)" }]}>
+              <Feather name="truck" size={20} color={colors.accent} />
             </View>
             <View style={styles.inputContent}>
-              <ThemedText style={styles.inputValue}>
+              <ThemedText style={[styles.inputValue, { color: colors.text }]}>
                 {selectedVehicle.year} {selectedVehicle.make}{" "}
                 {selectedVehicle.model}
               </ThemedText>
-              <ThemedText style={styles.inputSubtext}>
+              <ThemedText style={[styles.inputSubtext, { color: colors.textSecondary }]}>
                 {selectedVehicle.licensePlate}
               </ThemedText>
             </View>
             <Feather
               name="chevron-right"
               size={20}
-              color={Colors.dark.textSecondary}
+              color={colors.textSecondary}
             />
           </Pressable>
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Date & Time</ThemedText>
+          <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Date & Time</ThemedText>
           <View style={styles.dateTimeRow}>
-            <Pressable style={[styles.inputCard, styles.dateCard]}>
-              <View style={styles.iconContainer}>
-                <Feather name="calendar" size={20} color={Colors.dark.accent} />
+            <Pressable style={[styles.inputCard, styles.dateCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+              <View style={[styles.iconContainer, { backgroundColor: "rgba(0, 212, 255, 0.1)" }]}>
+                <Feather name="calendar" size={20} color={colors.accent} />
               </View>
               <View style={styles.inputContent}>
-                <ThemedText style={styles.inputLabel}>Date</ThemedText>
-                <ThemedText style={styles.inputValue}>{selectedDate}</ThemedText>
+                <ThemedText style={[styles.inputLabel, { color: colors.textSecondary }]}>Date</ThemedText>
+                <ThemedText style={[styles.inputValue, { color: colors.text }]}>{selectedDate}</ThemedText>
               </View>
             </Pressable>
-            <Pressable style={[styles.inputCard, styles.timeCard]}>
-              <View style={styles.iconContainer}>
-                <Feather name="clock" size={20} color={Colors.dark.accent} />
+            <Pressable style={[styles.inputCard, styles.timeCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+              <View style={[styles.iconContainer, { backgroundColor: "rgba(0, 212, 255, 0.1)" }]}>
+                <Feather name="clock" size={20} color={colors.accent} />
               </View>
               <View style={styles.inputContent}>
-                <ThemedText style={styles.inputLabel}>Time</ThemedText>
-                <ThemedText style={styles.inputValue}>{selectedTime}</ThemedText>
+                <ThemedText style={[styles.inputLabel, { color: colors.textSecondary }]}>Time</ThemedText>
+                <ThemedText style={[styles.inputValue, { color: colors.text }]}>{selectedTime}</ThemedText>
               </View>
             </Pressable>
           </View>
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Location</ThemedText>
-          <Pressable style={styles.inputCard}>
-            <View style={styles.iconContainer}>
-              <Feather name="map-pin" size={20} color={Colors.dark.accent} />
+          <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Location</ThemedText>
+          <Pressable style={[styles.inputCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+            <View style={[styles.iconContainer, { backgroundColor: "rgba(0, 212, 255, 0.1)" }]}>
+              <Feather name="map-pin" size={20} color={colors.accent} />
             </View>
             <View style={styles.inputContent}>
-              <ThemedText style={styles.inputValue}>{location}</ThemedText>
+              <ThemedText style={[styles.inputValue, { color: colors.text }]}>{location}</ThemedText>
             </View>
             <Feather
               name="chevron-right"
               size={20}
-              color={Colors.dark.textSecondary}
+              color={colors.textSecondary}
             />
           </Pressable>
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Special Instructions</ThemedText>
-          <View style={styles.textAreaContainer}>
+          <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Special Instructions</ThemedText>
+          <View style={[styles.textAreaContainer, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
             <TextInput
-              style={styles.textArea}
+              style={[styles.textArea, { color: colors.text }]}
               value={notes}
               onChangeText={setNotes}
               placeholder="Any details we should know about?"
-              placeholderTextColor={Colors.dark.textSecondary}
+              placeholderTextColor={colors.textSecondary}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
@@ -185,24 +188,24 @@ export default function BookServiceScreen() {
         </View>
 
         {selectedServiceData ? (
-          <View style={styles.summaryCard}>
-            <ThemedText style={styles.summaryTitle}>Booking Summary</ThemedText>
+          <View style={[styles.summaryCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+            <ThemedText style={[styles.summaryTitle, { color: colors.text }]}>Booking Summary</ThemedText>
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Service</ThemedText>
-              <ThemedText style={styles.summaryValue}>
+              <ThemedText style={[styles.summaryLabel, { color: colors.textSecondary }]}>Service</ThemedText>
+              <ThemedText style={[styles.summaryValue, { color: colors.text }]}>
                 {selectedServiceData.name}
               </ThemedText>
             </View>
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Duration</ThemedText>
-              <ThemedText style={styles.summaryValue}>
+              <ThemedText style={[styles.summaryLabel, { color: colors.textSecondary }]}>Duration</ThemedText>
+              <ThemedText style={[styles.summaryValue, { color: colors.text }]}>
                 ~{selectedServiceData.duration} mins
               </ThemedText>
             </View>
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.totalLabel}>Estimated Total</ThemedText>
-              <ThemedText style={styles.totalValue}>
+              <ThemedText style={[styles.totalLabel, { color: colors.text }]}>Estimated Total</ThemedText>
+              <ThemedText style={[styles.totalValue, { color: colors.primary }]}>
                 ${selectedServiceData.price}
               </ThemedText>
             </View>
@@ -210,7 +213,7 @@ export default function BookServiceScreen() {
         ) : null}
       </KeyboardAwareScrollViewCompat>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.lg }]}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.lg, backgroundColor: colors.backgroundRoot, borderTopColor: colors.border }]}>
         <Button
           onPress={handleFindMechanics}
           disabled={!selectedService}
@@ -226,7 +229,6 @@ export default function BookServiceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   scrollView: {
     flex: 1,
@@ -240,7 +242,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: Colors.dark.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: Spacing.md,
@@ -255,52 +256,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.md,
     borderWidth: 2,
-    borderColor: Colors.dark.border,
   },
-  serviceOptionSelected: {
-    borderColor: Colors.dark.accent,
-    backgroundColor: "rgba(0, 212, 255, 0.05)",
-  },
+  serviceOptionSelected: {},
   serviceIconContainer: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: Spacing.sm,
   },
-  serviceIconContainerSelected: {
-    backgroundColor: Colors.dark.accent,
-  },
+  serviceIconContainerSelected: {},
   serviceOptionName: {
     fontSize: 12,
     fontWeight: "600",
-    color: Colors.dark.text,
     textAlign: "center",
     marginBottom: 2,
   },
   serviceOptionPrice: {
     fontSize: 11,
-    color: Colors.dark.textSecondary,
   },
   inputCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.md,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -310,17 +298,14 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
     marginBottom: 2,
   },
   inputValue: {
     fontSize: 15,
     fontWeight: "500",
-    color: Colors.dark.text,
   },
   inputSubtext: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
     marginTop: 2,
   },
   dateTimeRow: {
@@ -334,30 +319,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textAreaContainer: {
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   textArea: {
     fontSize: 15,
-    color: Colors.dark.text,
     minHeight: 80,
   },
   summaryCard: {
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
     marginBottom: Spacing.xl,
   },
   summaryTitle: {
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
     marginBottom: Spacing.md,
   },
   summaryRow: {
@@ -367,35 +346,28 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
   },
   summaryValue: {
     fontSize: 14,
     fontWeight: "500",
-    color: Colors.dark.text,
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.dark.border,
     marginVertical: Spacing.md,
   },
   totalLabel: {
     fontSize: 16,
     fontWeight: "600",
-    color: Colors.dark.text,
   },
   totalValue: {
     fontSize: 20,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.primary,
   },
   footer: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    backgroundColor: Colors.dark.backgroundRoot,
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.border,
   },
   button: {
     width: "100%",

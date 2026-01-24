@@ -10,18 +10,12 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { bookings } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type BookingDetailRouteProp = RouteProp<RootStackParamList, "BookingDetail">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-const statusColors: Record<string, { bg: string; text: string }> = {
-  upcoming: { bg: "rgba(0, 212, 255, 0.1)", text: Colors.dark.accent },
-  in_progress: { bg: "rgba(245, 158, 11, 0.1)", text: Colors.dark.warning },
-  completed: { bg: "rgba(34, 197, 94, 0.1)", text: Colors.dark.success },
-  cancelled: { bg: "rgba(239, 68, 68, 0.1)", text: Colors.dark.error },
-};
 
 const statusLabels: Record<string, string> = {
   upcoming: "Upcoming",
@@ -35,6 +29,15 @@ export default function BookingDetailScreen() {
   const route = useRoute<BookingDetailRouteProp>();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const { colors } = useTheme();
+  const styles = createDynamicStyles(colors);
+
+  const statusColors: Record<string, { bg: string; text: string }> = {
+    upcoming: { bg: "rgba(0, 212, 255, 0.1)", text: colors.accent },
+    in_progress: { bg: "rgba(245, 158, 11, 0.1)", text: colors.warning },
+    completed: { bg: "rgba(34, 197, 94, 0.1)", text: colors.success },
+    cancelled: { bg: "rgba(239, 68, 68, 0.1)", text: colors.error },
+  };
 
   const booking = bookings.find((b) => b.id === route.params.bookingId) || bookings[0];
   const statusStyle = statusColors[booking.status];
@@ -77,11 +80,11 @@ export default function BookingDetailScreen() {
         </View>
 
         <View style={styles.serviceCard}>
-          <View style={styles.iconContainer}>
+          <View style={[styles.iconContainer, { backgroundColor: `rgba(0, 212, 255, 0.1)` }]}>
             <Feather
               name={booking.service.icon as any}
               size={28}
-              color={Colors.dark.accent}
+              color={colors.accent}
             />
           </View>
           <ThemedText style={styles.serviceName}>{booking.service.name}</ThemedText>
@@ -93,7 +96,7 @@ export default function BookingDetailScreen() {
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Mechanic</ThemedText>
           <Pressable
-            style={styles.mechanicCard}
+            style={[styles.mechanicCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}
             onPress={() =>
               navigation.navigate("MechanicProfile", { mechanicId: booking.mechanic.id })
             }
@@ -104,7 +107,7 @@ export default function BookingDetailScreen() {
                 {booking.mechanic.name}
               </ThemedText>
               <View style={styles.mechanicStats}>
-                <Feather name="star" size={14} color={Colors.dark.warning} />
+                <Feather name="star" size={14} color={colors.warning} />
                 <ThemedText style={styles.mechanicRating}>
                   {booking.mechanic.rating}
                 </ThemedText>
@@ -113,18 +116,18 @@ export default function BookingDetailScreen() {
                 </ThemedText>
               </View>
             </View>
-            <Pressable style={styles.messageButton} onPress={handleMessage}>
-              <Feather name="message-circle" size={20} color={Colors.dark.accent} />
+            <Pressable style={[styles.messageButton, { backgroundColor: `rgba(0, 212, 255, 0.1)` }]} onPress={handleMessage}>
+              <Feather name="message-circle" size={20} color={colors.accent} />
             </Pressable>
           </Pressable>
         </View>
 
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Appointment Details</ThemedText>
-          <View style={styles.detailsCard}>
+          <View style={[styles.detailsCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
             <View style={styles.detailRow}>
-              <View style={styles.detailIconContainer}>
-                <Feather name="calendar" size={18} color={Colors.dark.accent} />
+              <View style={[styles.detailIconContainer, { backgroundColor: `rgba(0, 212, 255, 0.1)` }]}>
+                <Feather name="calendar" size={18} color={colors.accent} />
               </View>
               <View>
                 <ThemedText style={styles.detailLabel}>Date</ThemedText>
@@ -133,20 +136,20 @@ export default function BookingDetailScreen() {
                 </ThemedText>
               </View>
             </View>
-            <View style={styles.detailDivider} />
+            <View style={[styles.detailDivider, { backgroundColor: colors.border }]} />
             <View style={styles.detailRow}>
-              <View style={styles.detailIconContainer}>
-                <Feather name="clock" size={18} color={Colors.dark.accent} />
+              <View style={[styles.detailIconContainer, { backgroundColor: `rgba(0, 212, 255, 0.1)` }]}>
+                <Feather name="clock" size={18} color={colors.accent} />
               </View>
               <View>
                 <ThemedText style={styles.detailLabel}>Time</ThemedText>
                 <ThemedText style={styles.detailValue}>{booking.time}</ThemedText>
               </View>
             </View>
-            <View style={styles.detailDivider} />
+            <View style={[styles.detailDivider, { backgroundColor: colors.border }]} />
             <View style={styles.detailRow}>
-              <View style={styles.detailIconContainer}>
-                <Feather name="map-pin" size={18} color={Colors.dark.accent} />
+              <View style={[styles.detailIconContainer, { backgroundColor: `rgba(0, 212, 255, 0.1)` }]}>
+                <Feather name="map-pin" size={18} color={colors.accent} />
               </View>
               <View style={styles.detailContent}>
                 <ThemedText style={styles.detailLabel}>Location</ThemedText>
@@ -158,9 +161,9 @@ export default function BookingDetailScreen() {
 
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Vehicle</ThemedText>
-          <View style={styles.vehicleCard}>
-            <View style={styles.vehicleIconContainer}>
-              <Feather name="truck" size={22} color={Colors.dark.accent} />
+          <View style={[styles.vehicleCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+            <View style={[styles.vehicleIconContainer, { backgroundColor: `rgba(0, 212, 255, 0.1)` }]}>
+              <Feather name="truck" size={22} color={colors.accent} />
             </View>
             <View>
               <ThemedText style={styles.vehicleName}>
@@ -175,14 +178,14 @@ export default function BookingDetailScreen() {
 
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Payment</ThemedText>
-          <View style={styles.paymentCard}>
+          <View style={[styles.paymentCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
             <View style={styles.paymentRow}>
               <ThemedText style={styles.paymentLabel}>Service</ThemedText>
               <ThemedText style={styles.paymentValue}>
                 ${booking.service.price}
               </ThemedText>
             </View>
-            <View style={styles.paymentDivider} />
+            <View style={[styles.paymentDivider, { backgroundColor: colors.border }]} />
             <View style={styles.paymentRow}>
               <ThemedText style={styles.totalLabel}>Total</ThemedText>
               <ThemedText style={styles.totalValue}>${booking.totalPrice}</ThemedText>
@@ -192,8 +195,8 @@ export default function BookingDetailScreen() {
       </ScrollView>
 
       {booking.status === "upcoming" ? (
-        <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.md }]}>
-          <Button onPress={handleCancel} style={styles.cancelButton}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.md, backgroundColor: colors.backgroundRoot, borderTopColor: colors.border }]}>
+          <Button onPress={handleCancel} style={[styles.cancelButton, { backgroundColor: colors.error }]}>
             Cancel Booking
           </Button>
         </View>
@@ -202,10 +205,9 @@ export default function BookingDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const staticStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   scrollView: {
     flex: 1,
@@ -241,12 +243,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.text,
     marginBottom: 4,
   },
   serviceDescription: {
     fontSize: 15,
-    color: Colors.dark.textSecondary,
     textAlign: "center",
   },
   section: {
@@ -256,7 +256,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: Colors.dark.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
     marginBottom: Spacing.md,
@@ -264,11 +263,9 @@ const styles = StyleSheet.create({
   mechanicCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   mechanicAvatar: {
     width: 50,
@@ -282,7 +279,6 @@ const styles = StyleSheet.create({
   mechanicName: {
     fontSize: 16,
     fontWeight: "600",
-    color: Colors.dark.text,
     marginBottom: 4,
   },
   mechanicStats: {
@@ -293,26 +289,21 @@ const styles = StyleSheet.create({
   mechanicRating: {
     fontSize: 14,
     fontWeight: "600",
-    color: Colors.dark.text,
   },
   mechanicReviews: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
   },
   messageButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
   detailsCard: {
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   detailRow: {
     flexDirection: "row",
@@ -332,27 +323,22 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
     marginBottom: 2,
   },
   detailValue: {
     fontSize: 15,
     fontWeight: "500",
-    color: Colors.dark.text,
   },
   detailDivider: {
     height: 1,
-    backgroundColor: Colors.dark.border,
     marginVertical: Spacing.md,
   },
   vehicleCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   vehicleIconContainer: {
     width: 48,
@@ -366,19 +352,15 @@ const styles = StyleSheet.create({
   vehicleName: {
     fontSize: 16,
     fontWeight: "500",
-    color: Colors.dark.text,
     marginBottom: 2,
   },
   vehiclePlate: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
   },
   paymentCard: {
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   paymentRow: {
     flexDirection: "row",
@@ -387,28 +369,23 @@ const styles = StyleSheet.create({
   },
   paymentLabel: {
     fontSize: 15,
-    color: Colors.dark.textSecondary,
   },
   paymentValue: {
     fontSize: 15,
     fontWeight: "500",
-    color: Colors.dark.text,
   },
   paymentDivider: {
     height: 1,
-    backgroundColor: Colors.dark.border,
     marginVertical: Spacing.md,
   },
   totalLabel: {
     fontSize: 16,
     fontWeight: "600",
-    color: Colors.dark.text,
   },
   totalValue: {
     fontSize: 22,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.primary,
   },
   footer: {
     position: "absolute",
@@ -417,11 +394,105 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    backgroundColor: Colors.dark.backgroundRoot,
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.border,
   },
-  cancelButton: {
-    backgroundColor: Colors.dark.error,
-  },
+  cancelButton: {},
 });
+
+const createDynamicStyles = (colors: any) =>
+  StyleSheet.create({
+    ...staticStyles,
+    container: {
+      ...staticStyles.container,
+      backgroundColor: colors.backgroundDefault,
+    },
+    serviceName: {
+      ...staticStyles.serviceName,
+      color: colors.text,
+    },
+    serviceDescription: {
+      ...staticStyles.serviceDescription,
+      color: colors.textSecondary,
+    },
+    sectionTitle: {
+      ...staticStyles.sectionTitle,
+      color: colors.textSecondary,
+    },
+    mechanicCard: {
+      ...staticStyles.mechanicCard,
+      backgroundColor: colors.backgroundRoot,
+      borderColor: colors.border,
+    },
+    mechanicName: {
+      ...staticStyles.mechanicName,
+      color: colors.text,
+    },
+    mechanicRating: {
+      ...staticStyles.mechanicRating,
+      color: colors.text,
+    },
+    mechanicReviews: {
+      ...staticStyles.mechanicReviews,
+      color: colors.textSecondary,
+    },
+    detailsCard: {
+      ...staticStyles.detailsCard,
+      backgroundColor: colors.backgroundRoot,
+      borderColor: colors.border,
+    },
+    detailLabel: {
+      ...staticStyles.detailLabel,
+      color: colors.textSecondary,
+    },
+    detailValue: {
+      ...staticStyles.detailValue,
+      color: colors.text,
+    },
+    detailDivider: {
+      ...staticStyles.detailDivider,
+      backgroundColor: colors.border,
+    },
+    vehicleCard: {
+      ...staticStyles.vehicleCard,
+      backgroundColor: colors.backgroundRoot,
+      borderColor: colors.border,
+    },
+    vehicleName: {
+      ...staticStyles.vehicleName,
+      color: colors.text,
+    },
+    vehiclePlate: {
+      ...staticStyles.vehiclePlate,
+      color: colors.textSecondary,
+    },
+    paymentCard: {
+      ...staticStyles.paymentCard,
+      backgroundColor: colors.backgroundRoot,
+      borderColor: colors.border,
+    },
+    paymentLabel: {
+      ...staticStyles.paymentLabel,
+      color: colors.textSecondary,
+    },
+    paymentValue: {
+      ...staticStyles.paymentValue,
+      color: colors.text,
+    },
+    paymentDivider: {
+      ...staticStyles.paymentDivider,
+      backgroundColor: colors.border,
+    },
+    totalLabel: {
+      ...staticStyles.totalLabel,
+      color: colors.text,
+    },
+    totalValue: {
+      ...staticStyles.totalValue,
+      color: colors.primary,
+    },
+    footer: {
+      ...staticStyles.footer,
+      backgroundColor: colors.backgroundRoot,
+      borderTopColor: colors.border,
+    },
+  });
