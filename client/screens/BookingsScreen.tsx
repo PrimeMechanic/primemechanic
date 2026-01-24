@@ -1,0 +1,112 @@
+import React, { useState } from "react";
+import { StyleSheet, View, FlatList } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { SegmentedControl } from "@/components/SegmentedControl";
+import { BookingCard } from "@/components/BookingCard";
+import { EmptyState } from "@/components/EmptyState";
+import { Colors, Spacing } from "@/constants/theme";
+import { bookings } from "@/data/mockData";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { Booking } from "@/types";
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+export default function BookingsScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const upcomingBookings = bookings.filter(
+    (b) => b.status === "upcoming" || b.status === "in_progress"
+  );
+  const pastBookings = bookings.filter(
+    (b) => b.status === "completed" || b.status === "cancelled"
+  );
+
+  const displayedBookings = selectedIndex === 0 ? upcomingBookings : pastBookings;
+
+  const handleBookingPress = (booking: Booking) => {
+    navigation.navigate("BookingDetail", { bookingId: booking.id });
+  };
+
+  const handleBookNow = () => {
+    navigation.navigate("BookService", {});
+  };
+
+  const renderEmptyState = () => {
+    if (selectedIndex === 0) {
+      return (
+        <EmptyState
+          image={require("../../assets/images/empty-bookings.png")}
+          title="No Upcoming Bookings"
+          message="Book your first service and let a mechanic come to you."
+          actionLabel="Book Now"
+          onAction={handleBookNow}
+        />
+      );
+    }
+    return (
+      <EmptyState
+        image={require("../../assets/images/empty-bookings.png")}
+        title="No Past Bookings"
+        message="Your completed appointments will appear here."
+      />
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
+        <SegmentedControl
+          segments={["Upcoming", "Past"]}
+          selectedIndex={selectedIndex}
+          onIndexChange={setSelectedIndex}
+        />
+      </View>
+      <FlatList
+        data={displayedBookings}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <BookingCard booking={item} onPress={() => handleBookingPress(item)} />
+        )}
+        contentContainerStyle={[
+          styles.listContent,
+          { paddingBottom: tabBarHeight + Spacing.xl },
+          displayedBookings.length === 0 && styles.emptyContainer,
+        ]}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={renderEmptyState}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.dark.backgroundRoot,
+  },
+  header: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.md,
+    backgroundColor: Colors.dark.backgroundRoot,
+  },
+  listContent: {
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.md,
+  },
+  emptyContainer: {
+    flexGrow: 1,
+  },
+  separator: {
+    height: Spacing.md,
+  },
+});

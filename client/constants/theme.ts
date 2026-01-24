@@ -1,30 +1,43 @@
 import { Platform } from "react-native";
 
-const tintColorLight = "#007AFF";
-const tintColorDark = "#0A84FF";
-
 export const Colors = {
   light: {
-    text: "#11181C",
+    text: "#FFFFFF",
+    textSecondary: "#9EA3AB",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
-    link: "#007AFF",
-    backgroundRoot: "#FFFFFF", // Elevation 0
-    backgroundDefault: "#F2F2F2", // Elevation 1
-    backgroundSecondary: "#E6E6E6", // Elevation 2
-    backgroundTertiary: "#D9D9D9", // Elevation 3
+    tabIconDefault: "#9EA3AB",
+    tabIconSelected: "#FF6B35",
+    link: "#FF6B35",
+    primary: "#FF6B35",
+    primaryVariant: "#CC5529",
+    accent: "#00D9FF",
+    success: "#34C759",
+    warning: "#FFD60A",
+    error: "#FF453A",
+    border: "#3D444D",
+    backgroundRoot: "#0F1419",
+    backgroundDefault: "#1C2128",
+    backgroundSecondary: "#2D333B",
+    backgroundTertiary: "#3D444D",
   },
   dark: {
-    text: "#ECEDEE",
+    text: "#FFFFFF",
+    textSecondary: "#9EA3AB",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-    link: "#0A84FF",
-    backgroundRoot: "#1F2123", // Elevation 0
-    backgroundDefault: "#2A2C2E", // Elevation 1
-    backgroundSecondary: "#353739", // Elevation 2
-    backgroundTertiary: "#404244", // Elevation 3
+    tabIconDefault: "#9EA3AB",
+    tabIconSelected: "#FF6B35",
+    link: "#FF6B35",
+    primary: "#FF6B35",
+    primaryVariant: "#CC5529",
+    accent: "#00D9FF",
+    success: "#34C759",
+    warning: "#FFD60A",
+    error: "#FF453A",
+    border: "#3D444D",
+    backgroundRoot: "#0F1419",
+    backgroundDefault: "#1C2128",
+    backgroundSecondary: "#2D333B",
+    backgroundTertiary: "#3D444D",
   },
 };
 
@@ -55,24 +68,28 @@ export const BorderRadius = {
 
 export const Typography = {
   h1: {
-    fontSize: 32,
-    lineHeight: 40,
-    fontWeight: "700" as const,
-  },
-  h2: {
     fontSize: 28,
     lineHeight: 36,
     fontWeight: "700" as const,
+    fontFamily: "Montserrat_700Bold",
+  },
+  h2: {
+    fontSize: 22,
+    lineHeight: 30,
+    fontWeight: "600" as const,
+    fontFamily: "Montserrat_600SemiBold",
   },
   h3: {
-    fontSize: 24,
-    lineHeight: 32,
+    fontSize: 18,
+    lineHeight: 26,
     fontWeight: "600" as const,
+    fontFamily: "Montserrat_600SemiBold",
   },
   h4: {
-    fontSize: 20,
-    lineHeight: 28,
+    fontSize: 16,
+    lineHeight: 24,
     fontWeight: "600" as const,
+    fontFamily: "Montserrat_600SemiBold",
   },
   body: {
     fontSize: 16,
@@ -91,15 +108,28 @@ export const Typography = {
   },
 };
 
+export const Shadows = {
+  small: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  medium: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+};
+
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: "system-ui",
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: "ui-serif",
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: "ui-rounded",
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: "ui-monospace",
   },
   default: {
