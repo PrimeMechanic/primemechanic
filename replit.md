@@ -16,6 +16,14 @@ The platform operates on a 20% commission model per completed job, similar to Ub
 - Set up database schema with Drizzle ORM (Users, Vehicles, MechanicProfiles, Services, Bookings, Reviews, Conversations, Messages)
 - Implemented in-memory storage with seeded demo data for testing
 - Added REST API endpoints for all core features
+- **Updated to light theme** with Midnight Blue (#0D1B2A) primary, Electric Blue (#00D4FF) accent, White background
+- **Built complete Mechanic UI** with role-based navigation:
+  - MechanicDashboardScreen: Stats cards, today's schedule, earnings summary
+  - JobsScreen: Incoming requests with Accept/Decline, Active jobs, History
+  - EarningsScreen: Weekly chart, earnings cards, transaction history
+  - MechanicProfileEditScreen: Availability toggle, services management, profile settings
+- Added UserContext for role switching between Customer and Mechanic views
+- Demo mode: Toggle between views via Profile screen "Switch to Mechanic/Customer View"
 
 ## User Preferences
 
@@ -25,12 +33,18 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: React Native with Expo SDK 54 for cross-platform iOS, Android, and web support
-- **Navigation**: React Navigation with a hybrid structure:
-  - Bottom tab navigator (4 tabs: Browse, Bookings, Messages, Profile)
+- **Navigation**: React Navigation with role-based structure:
+  - **Customer Tabs** (4): Browse, Bookings, Messages, Profile
+  - **Mechanic Tabs** (4): Dashboard, Jobs, Earnings, Profile
   - Native stack navigator for push screens and modals
-  - Floating action button for quick service booking
+  - UserContext manages role switching between views
+  - Floating action button for quick service booking (customer only)
 - **State Management**: TanStack React Query for server state management
-- **Styling**: Custom theme system with dark mode as default, using a design token approach (Colors, Spacing, Typography, BorderRadius)
+- **Styling**: Custom theme system with light mode, using design tokens (Colors, Spacing, Typography, BorderRadius)
+  - Primary: Midnight Blue (#0D1B2A)
+  - Accent: Electric Blue (#00D4FF)
+  - Background: White (#FFFFFF)
+  - Secondary Text: Slate Gray (#64748B)
 - **Animation**: React Native Reanimated for smooth UI animations with haptic feedback via Expo Haptics
 - **Fonts**: Montserrat (Google Fonts) for professional automotive aesthetic
 
@@ -66,14 +80,22 @@ Preferred communication style: Simple, everyday language.
 ```
 
 ### Key Screens
+
+**Customer Screens:**
 1. **BrowseScreen**: Search bar, service category cards, nearby mechanics list with ratings and availability
 2. **BookingsScreen**: Segmented control (Upcoming/Past), booking cards with status badges
 3. **MessagesScreen**: Conversation list with unread indicators
-4. **ProfileScreen**: User info, vehicles list, settings options
+4. **ProfileScreen**: User info, vehicles list, settings, role switch option
 5. **BookServiceScreen**: Modal for creating new bookings
 6. **MechanicProfileScreen**: Detailed mechanic view with reviews, services, stats
 7. **BookingDetailScreen**: Individual booking details with status timeline
 8. **ChatScreen**: Real-time messaging with mechanics
+
+**Mechanic Screens:**
+1. **MechanicDashboardScreen**: Welcome header, earnings stats, today's schedule
+2. **JobsScreen**: Segmented control (Requests/Active/History), job cards with accept/decline
+3. **EarningsScreen**: Period selector, earnings summary, weekly chart, transactions list
+4. **MechanicProfileEditScreen**: Avatar, availability toggle, services management, settings
 
 ### User Roles Architecture
 Three distinct user roles with different capabilities:
