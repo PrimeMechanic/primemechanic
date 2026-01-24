@@ -56,7 +56,7 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
         <Feather name={service.icon as any} size={24} color={colors.text} />
       </View>
       <ThemedText style={[styles.name, { color: colors.text }]}>{service.name}</ThemedText>
-      <ThemedText style={[styles.price, { color: colors.textSecondary }]}>
+      <ThemedText style={[styles.price, { color: colors.text }]}>
         ${service.price}
       </ThemedText>
     </AnimatedPressable>
