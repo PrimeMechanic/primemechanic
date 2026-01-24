@@ -52,8 +52,8 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
         { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: `rgba(${colors.accent === "#00D4FF" ? "0, 212, 255" : "0, 212, 255"}, 0.1)` }]}>
-        <Feather name={service.icon as any} size={24} color={colors.accent} />
+      <View style={[styles.iconContainer, { backgroundColor: colors.backgroundSecondary }]}>
+        <Feather name={service.icon as any} size={24} color={colors.text} />
       </View>
       <ThemedText style={[styles.name, { color: colors.text }]}>{service.name}</ThemedText>
       <ThemedText style={[styles.price, { color: colors.textSecondary }]}>
