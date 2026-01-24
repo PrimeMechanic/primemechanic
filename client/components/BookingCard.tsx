@@ -20,10 +20,10 @@ interface BookingCardProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const statusColors: Record<string, { bg: string; text: string }> = {
-  upcoming: { bg: "rgba(0, 212, 255, 0.15)", text: Colors.dark.primary },
-  in_progress: { bg: "rgba(255, 214, 10, 0.15)", text: Colors.dark.warning },
-  completed: { bg: "rgba(52, 199, 89, 0.15)", text: Colors.dark.success },
-  cancelled: { bg: "rgba(255, 69, 58, 0.15)", text: Colors.dark.error },
+  upcoming: { bg: "rgba(0, 212, 255, 0.1)", text: Colors.dark.accent },
+  in_progress: { bg: "rgba(245, 158, 11, 0.1)", text: Colors.dark.warning },
+  completed: { bg: "rgba(34, 197, 94, 0.1)", text: Colors.dark.success },
+  cancelled: { bg: "rgba(239, 68, 68, 0.1)", text: Colors.dark.error },
 };
 
 const statusLabels: Record<string, string> = {
@@ -77,7 +77,7 @@ export function BookingCard({ booking, onPress }: BookingCardProps) {
             <Feather
               name={booking.service.icon as any}
               size={20}
-              color={Colors.dark.primary}
+              color={Colors.dark.accent}
             />
           </View>
           <View>
@@ -134,7 +134,7 @@ export function BookingCard({ booking, onPress }: BookingCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.dark.border,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,

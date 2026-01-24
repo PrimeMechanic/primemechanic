@@ -41,7 +41,7 @@ function SettingsItem({
         <Feather
           name={icon as any}
           size={20}
-          color={danger ? Colors.dark.error : Colors.dark.primary}
+          color={danger ? Colors.dark.error : Colors.dark.accent}
         />
       </View>
       <ThemedText style={[styles.settingsLabel, danger && styles.dangerLabel]}>
@@ -85,7 +85,7 @@ export default function ProfileScreen() {
         <ThemedText style={styles.sectionTitle}>My Vehicles</ThemedText>
         <View style={styles.vehicleCard}>
           <View style={styles.vehicleIconContainer}>
-            <Feather name="truck" size={24} color={Colors.dark.primary} />
+            <Feather name="truck" size={24} color={Colors.dark.accent} />
           </View>
           <View style={styles.vehicleInfo}>
             <ThemedText style={styles.vehicleName}>
@@ -100,7 +100,7 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
         <Pressable style={styles.addVehicleButton}>
-          <Feather name="plus" size={20} color={Colors.dark.primary} />
+          <Feather name="plus" size={20} color={Colors.dark.accent} />
           <ThemedText style={styles.addVehicleText}>Add Vehicle</ThemedText>
         </Pressable>
       </View>
@@ -135,7 +135,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundRoot,
+    backgroundColor: Colors.dark.backgroundDefault,
   },
   profileSection: {
     alignItems: "center",
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: Spacing.md,
     borderWidth: 3,
-    borderColor: Colors.dark.primary,
+    borderColor: Colors.dark.accent,
   },
   name: {
     fontSize: 22,
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   vehicleCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -217,11 +217,11 @@ const styles = StyleSheet.create({
   addVehicleText: {
     fontSize: 15,
     fontWeight: "600",
-    color: Colors.dark.primary,
+    color: Colors.dark.accent,
     marginLeft: Spacing.sm,
   },
   settingsGroup: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.dark.border,
@@ -242,13 +242,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
   },
   dangerIconContainer: {
-    backgroundColor: "rgba(255, 69, 58, 0.15)",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
   },
   settingsLabel: {
     flex: 1,

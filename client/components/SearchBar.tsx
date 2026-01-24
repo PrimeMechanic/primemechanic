@@ -20,7 +20,7 @@ export function SearchBar({ value, onChangeText, placeholder = "Search..." }: Se
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={Colors.dark.textSecondary}
-        selectionColor={Colors.dark.primary}
+        selectionColor={Colors.dark.accent}
       />
       {value.length > 0 ? (
         <Feather
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundSecondary,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,

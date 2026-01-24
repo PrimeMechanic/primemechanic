@@ -109,7 +109,7 @@ export default function BrowseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundRoot,
+    backgroundColor: Colors.dark.backgroundDefault,
   },
   scrollView: {
     flex: 1,

@@ -1,10 +1,5 @@
 import React from "react";
 import { StyleSheet, View, Pressable } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  useSharedValue,
-} from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -56,7 +51,7 @@ export function SegmentedControl({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundSecondary,
     borderRadius: BorderRadius.sm,
     padding: 4,
   },

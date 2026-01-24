@@ -8,7 +8,6 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
 import { BorderRadius, Spacing, Colors } from "@/constants/theme";
 
 interface ButtonProps {
@@ -16,6 +15,7 @@ interface ButtonProps {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  variant?: "primary" | "secondary" | "accent";
 }
 
 const springConfig: WithSpringConfig = {
@@ -33,8 +33,8 @@ export function Button({
   children,
   style,
   disabled = false,
+  variant = "primary",
 }: ButtonProps) {
-  const { theme } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -53,6 +53,17 @@ export function Button({
     }
   };
 
+  const getBackgroundColor = () => {
+    if (variant === "accent") return Colors.dark.accent;
+    if (variant === "secondary") return Colors.dark.backgroundSecondary;
+    return Colors.dark.primary;
+  };
+
+  const getTextColor = () => {
+    if (variant === "secondary") return Colors.dark.text;
+    return Colors.dark.buttonText;
+  };
+
   return (
     <AnimatedPressable
       onPress={disabled ? undefined : onPress}
@@ -62,7 +73,7 @@ export function Button({
       style={[
         styles.button,
         {
-          backgroundColor: Colors.dark.primary,
+          backgroundColor: getBackgroundColor(),
           opacity: disabled ? 0.5 : 1,
         },
         style,
@@ -71,7 +82,7 @@ export function Button({
     >
       <ThemedText
         type="body"
-        style={[styles.buttonText, { color: Colors.dark.buttonText }]}
+        style={[styles.buttonText, { color: getTextColor() }]}
       >
         {children}
       </ThemedText>

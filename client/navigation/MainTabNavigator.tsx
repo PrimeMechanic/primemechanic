@@ -29,12 +29,12 @@ export default function MainTabNavigator() {
       initialRouteName="BrowseTab"
       screenOptions={{
         ...screenOptions,
-        tabBarActiveTintColor: Colors.dark.primary,
+        tabBarActiveTintColor: Colors.dark.accent,
         tabBarInactiveTintColor: Colors.dark.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
-            ios: "transparent",
+            ios: "rgba(255, 255, 255, 0.95)",
             android: Colors.dark.backgroundRoot,
             web: Colors.dark.backgroundRoot,
           }),
@@ -46,7 +46,7 @@ export default function MainTabNavigator() {
           Platform.OS === "ios" ? (
             <BlurView
               intensity={100}
-              tint="dark"
+              tint="light"
               style={StyleSheet.absoluteFill}
             />
           ) : null,
@@ -85,7 +85,7 @@ export default function MainTabNavigator() {
           ),
           tabBarBadge: 1,
           tabBarBadgeStyle: {
-            backgroundColor: Colors.dark.primary,
+            backgroundColor: Colors.dark.accent,
             fontSize: 10,
           },
         }}

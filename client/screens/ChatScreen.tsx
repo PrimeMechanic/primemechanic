@@ -187,7 +187,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundRoot,
+    backgroundColor: Colors.dark.backgroundDefault,
   },
   messagesList: {
     paddingHorizontal: Spacing.lg,
@@ -211,8 +211,10 @@ const styles = StyleSheet.create({
   },
   mechanicMessage: {
     alignSelf: "flex-start",
-    backgroundColor: Colors.dark.backgroundSecondary,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   messageText: {
     fontSize: 15,
@@ -268,7 +270,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "flex-end",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundSecondary,
     borderRadius: BorderRadius.lg,
     paddingLeft: Spacing.md,
     paddingRight: 4,
@@ -292,6 +294,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   sendButtonDisabled: {
-    backgroundColor: Colors.dark.backgroundSecondary,
+    backgroundColor: Colors.dark.backgroundTertiary,
   },
 });

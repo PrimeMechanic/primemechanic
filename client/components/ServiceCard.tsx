@@ -50,7 +50,7 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
         <Feather
           name={service.icon as any}
           size={24}
-          color={Colors.dark.primary}
+          color={Colors.dark.accent}
         />
       </View>
       <ThemedText style={styles.name}>{service.name}</ThemedText>
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: Spacing.sm,

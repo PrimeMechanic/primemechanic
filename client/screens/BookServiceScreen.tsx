@@ -89,7 +89,7 @@ export default function BookServiceScreen() {
                     color={
                       selectedService === service.id
                         ? Colors.dark.buttonText
-                        : Colors.dark.primary
+                        : Colors.dark.accent
                     }
                   />
                 </View>
@@ -108,7 +108,7 @@ export default function BookServiceScreen() {
           <ThemedText style={styles.sectionTitle}>Vehicle</ThemedText>
           <Pressable style={styles.inputCard}>
             <View style={styles.iconContainer}>
-              <Feather name="truck" size={20} color={Colors.dark.primary} />
+              <Feather name="truck" size={20} color={Colors.dark.accent} />
             </View>
             <View style={styles.inputContent}>
               <ThemedText style={styles.inputValue}>
@@ -132,7 +132,7 @@ export default function BookServiceScreen() {
           <View style={styles.dateTimeRow}>
             <Pressable style={[styles.inputCard, styles.dateCard]}>
               <View style={styles.iconContainer}>
-                <Feather name="calendar" size={20} color={Colors.dark.primary} />
+                <Feather name="calendar" size={20} color={Colors.dark.accent} />
               </View>
               <View style={styles.inputContent}>
                 <ThemedText style={styles.inputLabel}>Date</ThemedText>
@@ -141,7 +141,7 @@ export default function BookServiceScreen() {
             </Pressable>
             <Pressable style={[styles.inputCard, styles.timeCard]}>
               <View style={styles.iconContainer}>
-                <Feather name="clock" size={20} color={Colors.dark.primary} />
+                <Feather name="clock" size={20} color={Colors.dark.accent} />
               </View>
               <View style={styles.inputContent}>
                 <ThemedText style={styles.inputLabel}>Time</ThemedText>
@@ -155,7 +155,7 @@ export default function BookServiceScreen() {
           <ThemedText style={styles.sectionTitle}>Location</ThemedText>
           <Pressable style={styles.inputCard}>
             <View style={styles.iconContainer}>
-              <Feather name="map-pin" size={20} color={Colors.dark.primary} />
+              <Feather name="map-pin" size={20} color={Colors.dark.accent} />
             </View>
             <View style={styles.inputContent}>
               <ThemedText style={styles.inputValue}>{location}</ThemedText>
@@ -226,7 +226,7 @@ export default function BookServiceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundRoot,
+    backgroundColor: Colors.dark.backgroundDefault,
   },
   scrollView: {
     flex: 1,
@@ -255,26 +255,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.md,
     borderWidth: 2,
     borderColor: Colors.dark.border,
   },
   serviceOptionSelected: {
-    borderColor: Colors.dark.primary,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
+    borderColor: Colors.dark.accent,
+    backgroundColor: "rgba(0, 212, 255, 0.05)",
   },
   serviceIconContainer: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: Spacing.sm,
   },
   serviceIconContainerSelected: {
-    backgroundColor: Colors.dark.primary,
+    backgroundColor: Colors.dark.accent,
   },
   serviceOptionName: {
     fontSize: 12,
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   inputCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.md,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   textAreaContainer: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     borderWidth: 1,
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
   },
   summaryCard: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,

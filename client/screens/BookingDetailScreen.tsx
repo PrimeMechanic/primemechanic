@@ -17,10 +17,10 @@ type BookingDetailRouteProp = RouteProp<RootStackParamList, "BookingDetail">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const statusColors: Record<string, { bg: string; text: string }> = {
-  upcoming: { bg: "rgba(0, 212, 255, 0.15)", text: Colors.dark.primary },
-  in_progress: { bg: "rgba(255, 214, 10, 0.15)", text: Colors.dark.warning },
-  completed: { bg: "rgba(52, 199, 89, 0.15)", text: Colors.dark.success },
-  cancelled: { bg: "rgba(255, 69, 58, 0.15)", text: Colors.dark.error },
+  upcoming: { bg: "rgba(0, 212, 255, 0.1)", text: Colors.dark.accent },
+  in_progress: { bg: "rgba(245, 158, 11, 0.1)", text: Colors.dark.warning },
+  completed: { bg: "rgba(34, 197, 94, 0.1)", text: Colors.dark.success },
+  cancelled: { bg: "rgba(239, 68, 68, 0.1)", text: Colors.dark.error },
 };
 
 const statusLabels: Record<string, string> = {
@@ -81,7 +81,7 @@ export default function BookingDetailScreen() {
             <Feather
               name={booking.service.icon as any}
               size={28}
-              color={Colors.dark.primary}
+              color={Colors.dark.accent}
             />
           </View>
           <ThemedText style={styles.serviceName}>{booking.service.name}</ThemedText>
@@ -114,7 +114,7 @@ export default function BookingDetailScreen() {
               </View>
             </View>
             <Pressable style={styles.messageButton} onPress={handleMessage}>
-              <Feather name="message-circle" size={20} color={Colors.dark.primary} />
+              <Feather name="message-circle" size={20} color={Colors.dark.accent} />
             </Pressable>
           </Pressable>
         </View>
@@ -124,7 +124,7 @@ export default function BookingDetailScreen() {
           <View style={styles.detailsCard}>
             <View style={styles.detailRow}>
               <View style={styles.detailIconContainer}>
-                <Feather name="calendar" size={18} color={Colors.dark.primary} />
+                <Feather name="calendar" size={18} color={Colors.dark.accent} />
               </View>
               <View>
                 <ThemedText style={styles.detailLabel}>Date</ThemedText>
@@ -136,7 +136,7 @@ export default function BookingDetailScreen() {
             <View style={styles.detailDivider} />
             <View style={styles.detailRow}>
               <View style={styles.detailIconContainer}>
-                <Feather name="clock" size={18} color={Colors.dark.primary} />
+                <Feather name="clock" size={18} color={Colors.dark.accent} />
               </View>
               <View>
                 <ThemedText style={styles.detailLabel}>Time</ThemedText>
@@ -146,7 +146,7 @@ export default function BookingDetailScreen() {
             <View style={styles.detailDivider} />
             <View style={styles.detailRow}>
               <View style={styles.detailIconContainer}>
-                <Feather name="map-pin" size={18} color={Colors.dark.primary} />
+                <Feather name="map-pin" size={18} color={Colors.dark.accent} />
               </View>
               <View style={styles.detailContent}>
                 <ThemedText style={styles.detailLabel}>Location</ThemedText>
@@ -160,7 +160,7 @@ export default function BookingDetailScreen() {
           <ThemedText style={styles.sectionTitle}>Vehicle</ThemedText>
           <View style={styles.vehicleCard}>
             <View style={styles.vehicleIconContainer}>
-              <Feather name="truck" size={22} color={Colors.dark.primary} />
+              <Feather name="truck" size={22} color={Colors.dark.accent} />
             </View>
             <View>
               <ThemedText style={styles.vehicleName}>
@@ -205,7 +205,7 @@ export default function BookingDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundRoot,
+    backgroundColor: Colors.dark.backgroundDefault,
   },
   scrollView: {
     flex: 1,
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: Spacing.md,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   mechanicCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -303,12 +303,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
   detailsCard: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   vehicleCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(0, 212, 255, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     color: Colors.dark.textSecondary,
   },
   paymentCard: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,

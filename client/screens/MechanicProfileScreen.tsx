@@ -90,7 +90,7 @@ export default function MechanicProfileScreen() {
           </View>
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
-              <Feather name="map-pin" size={20} color={Colors.dark.primary} />
+              <Feather name="map-pin" size={20} color={Colors.dark.accent} />
             </View>
             <ThemedText style={styles.statValue}>{mechanic.distance}</ThemedText>
             <ThemedText style={styles.statLabel}>Away</ThemedText>
@@ -116,7 +116,7 @@ export default function MechanicProfileScreen() {
                 <Feather
                   name={service.icon as any}
                   size={18}
-                  color={Colors.dark.primary}
+                  color={Colors.dark.accent}
                 />
                 <ThemedText style={styles.serviceName}>{service.name}</ThemedText>
                 <ThemedText style={styles.servicePrice}>${service.price}</ThemedText>
@@ -153,11 +153,9 @@ export default function MechanicProfileScreen() {
         <Button
           onPress={handleMessage}
           style={styles.messageButton}
+          variant="secondary"
         >
-          <View style={styles.buttonContent}>
-            <Feather name="message-circle" size={20} color={Colors.dark.buttonText} />
-            <ThemedText style={styles.buttonText}>Message</ThemedText>
-          </View>
+          Message
         </Button>
         <Button onPress={handleBookNow} style={styles.bookButton}>
           Book Now
@@ -170,7 +168,7 @@ export default function MechanicProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundRoot,
+    backgroundColor: Colors.dark.backgroundDefault,
   },
   scrollView: {
     flex: 1,
@@ -186,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     marginBottom: Spacing.md,
     borderWidth: 4,
-    borderColor: Colors.dark.primary,
+    borderColor: Colors.dark.accent,
   },
   name: {
     fontSize: 24,
@@ -203,7 +201,7 @@ const styles = StyleSheet.create({
   availableBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(52, 199, 89, 0.15)",
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -229,7 +227,7 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -271,7 +269,7 @@ const styles = StyleSheet.create({
     color: Colors.dark.textSecondary,
   },
   aboutCard: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -283,7 +281,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   servicesGrid: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.dark.border,
@@ -308,7 +306,7 @@ const styles = StyleSheet.create({
     color: Colors.dark.primary,
   },
   reviewCard: {
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
@@ -355,18 +353,8 @@ const styles = StyleSheet.create({
   },
   messageButton: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundSecondary,
   },
   bookButton: {
     flex: 2,
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  buttonText: {
-    color: Colors.dark.buttonText,
-    fontWeight: "600",
   },
 });

@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.dark.border,
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: Colors.dark.success,
     borderWidth: 2,
-    borderColor: Colors.dark.backgroundDefault,
+    borderColor: Colors.dark.backgroundRoot,
   },
   content: {
     flex: 1,
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   unreadBadge: {
-    backgroundColor: Colors.dark.primary,
+    backgroundColor: Colors.dark.accent,
     minWidth: 20,
     height: 20,
     borderRadius: 10,

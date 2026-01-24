@@ -37,6 +37,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.text,
+    color: Colors.dark.primary,
   },
 });

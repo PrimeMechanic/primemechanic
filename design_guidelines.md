@@ -4,7 +4,7 @@
 
 **Purpose**: Connect vehicle owners with trusted mobile mechanics for on-demand automotive services.
 
-**Aesthetic Direction**: Professional/Modern - This app handles people's vehicles, so it must feel CONFIDENT and TRUSTWORTHY. Midnight blue palette with electric blue accents and clean white text. The memorable element: a distinctive "service status" visual language using color-coded progress indicators.
+**Aesthetic Direction**: Clean/Professional - This app handles people's vehicles, so it must feel CONFIDENT and TRUSTWORTHY. White background with Midnight Blue primary elements and Electric Blue accents. Clean, modern, and professional.
 
 **Differentiation**: Real-time mechanic tracking map and transparent pricing before booking - no surprises.
 
@@ -25,18 +25,18 @@
 
 ## Color Palette
 
-- **Primary**: #00D4FF (Electric Blue - modern, tech-forward, trustworthy)
-- **Primary Variant**: #00A8CC (pressed state)
-- **Background**: #0D1B2A (Midnight Blue)
-- **Surface**: #1B2838 (Dark Blue-Gray)
-- **Surface Elevated**: #253649 (Card backgrounds)
-- **Text Primary**: #FFFFFF
-- **Text Secondary**: #9CA3AF
-- **Accent**: #00D4FF (Electric Blue - for status indicators)
-- **Success**: #34C759
-- **Warning**: #FFD60A
-- **Error**: #FF453A
-- **Border**: #2D3748
+- **Primary**: #0D1B2A (Midnight Blue - headers, buttons, key UI elements)
+- **Primary Variant**: #1B2838 (pressed state)
+- **Accent**: #00D4FF (Electric Blue - highlights, icons, badges, active states)
+- **Background Root**: #FFFFFF (White - main background)
+- **Background Default**: #F8FAFC (Light gray - secondary surfaces)
+- **Background Secondary**: #F1F5F9 (Cards, inputs)
+- **Text Primary**: #0D1B2A (Midnight Blue)
+- **Text Secondary**: #64748B (Slate Gray)
+- **Success**: #22C55E
+- **Warning**: #F59E0B
+- **Error**: #EF4444
+- **Border**: #E2E8F0
 
 ## Typography
 
@@ -53,18 +53,16 @@
 ## Visual Design
 
 - Icons: Feather icons from @expo/vector-icons
-- All touchable elements have 80% opacity on press
-- Cards have subtle border (1px, Border color)
-- FAB uses shadow: shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.10, shadowRadius: 2
-- Primary accent backgrounds use rgba(0, 212, 255, 0.15)
+- All touchable elements have subtle scale animation on press
+- Cards have light border (1px, #E2E8F0)
+- FAB uses Midnight Blue with shadow for depth
+- Accent color backgrounds use rgba(0, 212, 255, 0.1)
+- Status bar: dark (dark text on light background)
 
 ## Assets
 
 1. **icon.png** - App icon featuring stylized wrench/gear symbol in Electric Blue on Midnight Blue background
-2. **splash-icon.png** - Same icon on Midnight Blue background
-3. **empty-bookings.png** - Illustration of clipboard with checkmark
-4. **empty-messages.png** - Illustration of chat bubbles
-5. **empty-mechanics.png** - Illustration of map pin
-6. **avatar-default.png** - Circular avatar placeholder with wrench icon
-7. **mechanic-avatar-1.png** - Professional mechanic avatar option 1
-8. **mechanic-avatar-2.png** - Professional mechanic avatar option 2
+2. **splash-icon.png** - Same icon on white background
+3. **empty-bookings.png** - Illustration with Electric Blue accents
+4. **empty-messages.png** - Illustration with Electric Blue accents
+5. **empty-mechanics.png** - Illustration with Electric Blue accents

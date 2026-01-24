@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    backgroundColor: Colors.dark.backgroundDefault,
+    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.dark.border,
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   availableBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(52, 199, 89, 0.15)",
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
