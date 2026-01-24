@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontSize: 28,
+    lineHeight: 40,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: Colors.dark.buttonText,
