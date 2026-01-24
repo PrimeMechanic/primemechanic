@@ -82,8 +82,9 @@ export default function EarningsScreen() {
             style={styles.totalAmount}
             numberOfLines={1}
             adjustsFontSizeToFit
+            minimumFontScale={0.5}
           >
-            ${selectedPeriod === 0 ? earningsData.today : selectedPeriod === 1 ? earningsData.thisWeek : earningsData.thisMonth}
+            ${selectedPeriod === 0 ? earningsData.today.toLocaleString() : selectedPeriod === 1 ? earningsData.thisWeek.toLocaleString() : earningsData.thisMonth.toLocaleString()}
           </ThemedText>
           <View style={styles.totalStats}>
             <View style={styles.totalStatItem}>
@@ -215,12 +216,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   totalAmount: {
-    fontSize: 28,
+    fontSize: 36,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: Colors.dark.buttonText,
     marginBottom: Spacing.md,
     textAlign: "center",
+    width: "100%",
   },
   totalStats: {
     flexDirection: "row",
