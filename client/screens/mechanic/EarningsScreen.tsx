@@ -26,7 +26,7 @@ function EarningsCard({ title, amount, subtitle, icon, color }: EarningsCardProp
       </View>
       <View style={styles.earningsContent}>
         <ThemedText style={styles.earningsTitle}>{title}</ThemedText>
-        <ThemedText style={styles.earningsAmount}>${amount}</ThemedText>
+        <ThemedText style={styles.earningsAmount} numberOfLines={1} adjustsFontSizeToFit>${amount}</ThemedText>
         <ThemedText style={styles.earningsSubtitle}>{subtitle}</ThemedText>
       </View>
     </View>
@@ -78,7 +78,11 @@ export default function EarningsScreen() {
           <ThemedText style={styles.totalLabel}>
             {selectedPeriod === 0 ? "Today's" : selectedPeriod === 1 ? "This Week's" : "This Month's"} Earnings
           </ThemedText>
-          <ThemedText style={styles.totalAmount}>
+          <ThemedText 
+            style={styles.totalAmount}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             ${selectedPeriod === 0 ? earningsData.today : selectedPeriod === 1 ? earningsData.thisWeek : earningsData.thisMonth}
           </ThemedText>
           <View style={styles.totalStats}>
@@ -211,7 +215,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   totalAmount: {
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: Colors.dark.buttonText,
