@@ -36,7 +36,7 @@ function EarningsCard({ title, amount, subtitle, icon, color }: EarningsCardProp
 }
 
 export default function EarningsScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const [selectedPeriod, setSelectedPeriod] = useState(1);
@@ -77,17 +77,17 @@ export default function EarningsScreen() {
       </View>
 
       <View style={styles.summarySection}>
-        <View style={[styles.totalCard, { backgroundColor: colors.primary }]}>
-          <ThemedText style={[styles.totalLabel, { color: "rgba(255, 255, 255, 0.7)" }]}>
+        <View style={[styles.totalCard, { backgroundColor: isDark ? colors.backgroundSecondary : colors.primary }]}>
+          <ThemedText style={[styles.totalLabel, { color: isDark ? colors.textSecondary : "rgba(255, 255, 255, 0.7)" }]}>
             {selectedPeriod === 0 ? "Today's" : selectedPeriod === 1 ? "This Week's" : "This Month's"} Earnings
           </ThemedText>
-          <ThemedText style={[styles.totalAmount, { color: colors.buttonText }]}>
+          <ThemedText style={[styles.totalAmount, { color: isDark ? colors.accent : colors.buttonText }]}>
             ${selectedPeriod === 0 ? earningsData.today.toLocaleString() : selectedPeriod === 1 ? earningsData.thisWeek.toLocaleString() : earningsData.thisMonth.toLocaleString()}
           </ThemedText>
           <View style={styles.totalStats}>
             <View style={styles.totalStatItem}>
               <Feather name="briefcase" size={16} color={colors.accent} />
-              <ThemedText style={[styles.totalStatText, { color: "rgba(255, 255, 255, 0.8)" }]}>
+              <ThemedText style={[styles.totalStatText, { color: isDark ? colors.textSecondary : "rgba(255, 255, 255, 0.8)" }]}>
                 {selectedPeriod === 0 ? "2" : selectedPeriod === 1 ? "8" : "32"} jobs
               </ThemedText>
             </View>
