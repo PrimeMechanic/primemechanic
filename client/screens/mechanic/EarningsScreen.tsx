@@ -61,7 +61,7 @@ export default function EarningsScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.backgroundDefault }]}
+      style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
         paddingTop: headerHeight + Spacing.lg,
         paddingBottom: tabBarHeight + Spacing["3xl"],
