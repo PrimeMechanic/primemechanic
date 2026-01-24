@@ -22,9 +22,9 @@ export const Colors = {
   },
   dark: {
     text: "#FFFFFF",
-    textSecondary: "#9CA3AF",
+    textSecondary: "#94A3B8",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#6B7280",
+    tabIconDefault: "#64748B",
     tabIconSelected: "#00D4FF",
     link: "#00D4FF",
     primary: "#00D4FF",
@@ -33,11 +33,11 @@ export const Colors = {
     success: "#22C55E",
     warning: "#F59E0B",
     error: "#EF4444",
-    border: "#2A2A2A",
-    backgroundRoot: "#000000",
-    backgroundDefault: "#000000",
-    backgroundSecondary: "#1A1A1A",
-    backgroundTertiary: "#2A2A2A",
+    border: "#334155",
+    backgroundRoot: "#0F172A",
+    backgroundDefault: "#1E293B",
+    backgroundSecondary: "#334155",
+    backgroundTertiary: "#475569",
   },
 };
 
