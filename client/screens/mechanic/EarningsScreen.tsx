@@ -22,13 +22,13 @@ function EarningsCard({ title, amount, subtitle, icon, color }: EarningsCardProp
   return (
     <View style={styles.earningsCard}>
       <View style={[styles.earningsIconContainer, { backgroundColor: `${color}15` }]}>
-        <Feather name={icon as any} size={18} color={color} />
+        <Feather name={icon as any} size={20} color={color} />
       </View>
       <View style={styles.earningsContent}>
         <ThemedText style={styles.earningsTitle}>{title}</ThemedText>
-        <ThemedText style={styles.earningsAmount} numberOfLines={1} adjustsFontSizeToFit>${amount}</ThemedText>
-        <ThemedText style={styles.earningsSubtitle}>{subtitle}</ThemedText>
+        <ThemedText style={styles.earningsAmount}>${amount}</ThemedText>
       </View>
+      <ThemedText style={styles.earningsSubtitle}>{subtitle}</ThemedText>
     </View>
   );
 }
@@ -278,13 +278,14 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cardsSection: {
-    flexDirection: "row",
+    flexDirection: "column",
     paddingHorizontal: Spacing.lg,
-    gap: Spacing.md,
+    gap: Spacing.sm,
     marginBottom: Spacing.xl,
   },
   earningsCard: {
-    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
@@ -292,25 +293,25 @@ const styles = StyleSheet.create({
     borderColor: Colors.dark.border,
   },
   earningsIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: Spacing.sm,
+    marginRight: Spacing.md,
   },
-  earningsContent: {},
+  earningsContent: {
+    flex: 1,
+  },
   earningsTitle: {
     fontSize: 13,
     color: Colors.dark.textSecondary,
-    marginBottom: 4,
   },
   earningsAmount: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: Colors.dark.text,
-    marginBottom: 2,
   },
   earningsSubtitle: {
     fontSize: 12,
