@@ -28,7 +28,7 @@ export default function MainTabNavigator() {
       initialRouteName="BrowseTab"
       screenOptions={{
         headerStyle: {
-          backgroundColor: "transparent",
+          backgroundColor: colors.backgroundRoot,
         },
         headerTintColor: colors.text,
         headerTitleStyle: {
@@ -37,7 +37,7 @@ export default function MainTabNavigator() {
           color: colors.text,
         },
         headerShadowVisible: false,
-        headerTransparent: true,
+        headerTransparent: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarStyle: {
