@@ -20,7 +20,7 @@ interface BookingCardProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const statusColors: Record<string, { bg: string; text: string }> = {
-  upcoming: { bg: "rgba(0, 217, 255, 0.15)", text: Colors.dark.accent },
+  upcoming: { bg: "rgba(0, 212, 255, 0.15)", text: Colors.dark.primary },
   in_progress: { bg: "rgba(255, 214, 10, 0.15)", text: Colors.dark.warning },
   completed: { bg: "rgba(52, 199, 89, 0.15)", text: Colors.dark.success },
   cancelled: { bg: "rgba(255, 69, 58, 0.15)", text: Colors.dark.error },
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 107, 53, 0.15)",
+    backgroundColor: "rgba(0, 212, 255, 0.15)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,

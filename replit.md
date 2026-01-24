@@ -1,8 +1,8 @@
-# MechaniX - Mobile Mechanic Marketplace
+# PrimeMechanic - Mobile Mechanic Marketplace
 
 ## Overview
 
-MechaniX is a two-sided marketplace mobile application connecting vehicle owners with mobile mechanics for on-demand automotive services. Built with React Native (Expo) for cross-platform mobile development and a Node.js/Express backend, the platform enables customers to browse mechanics, book services, and track appointments while mechanics can manage their profiles, accept jobs, and handle payouts.
+PrimeMechanic is a two-sided marketplace mobile application connecting vehicle owners with mobile mechanics for on-demand automotive services. Built with React Native (Expo) for cross-platform mobile development and a Node.js/Express backend, the platform enables customers to browse mechanics, book services, and track appointments while mechanics can manage their profiles, accept jobs, and handle payouts.
 
 The platform operates on a 20% commission model per completed job, similar to Uber's marketplace model but for mobile auto repair services.
 

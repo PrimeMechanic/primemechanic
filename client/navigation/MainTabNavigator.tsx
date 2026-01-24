@@ -57,7 +57,7 @@ export default function MainTabNavigator() {
         component={BrowseScreen}
         options={{
           title: "Browse",
-          headerTitle: () => <HeaderTitle title="MechaniX" />,
+          headerTitle: () => <HeaderTitle title="PrimeMechanic" />,
           tabBarIcon: ({ color, size }) => (
             <Feather name="search" size={size} color={color} />
           ),

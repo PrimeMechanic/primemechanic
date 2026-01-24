@@ -90,7 +90,7 @@ export default function MechanicProfileScreen() {
           </View>
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
-              <Feather name="map-pin" size={20} color={Colors.dark.accent} />
+              <Feather name="map-pin" size={20} color={Colors.dark.primary} />
             </View>
             <ThemedText style={styles.statValue}>{mechanic.distance}</ThemedText>
             <ThemedText style={styles.statLabel}>Away</ThemedText>

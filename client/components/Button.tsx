@@ -9,7 +9,7 @@ import Animated, {
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { BorderRadius, Spacing } from "@/constants/theme";
+import { BorderRadius, Spacing, Colors } from "@/constants/theme";
 
 interface ButtonProps {
   onPress?: () => void;
@@ -62,7 +62,7 @@ export function Button({
       style={[
         styles.button,
         {
-          backgroundColor: theme.link,
+          backgroundColor: Colors.dark.primary,
           opacity: disabled ? 0.5 : 1,
         },
         style,
@@ -71,7 +71,7 @@ export function Button({
     >
       <ThemedText
         type="body"
-        style={[styles.buttonText, { color: theme.buttonText }]}
+        style={[styles.buttonText, { color: Colors.dark.buttonText }]}
       >
         {children}
       </ThemedText>

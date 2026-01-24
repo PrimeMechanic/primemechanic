@@ -1,25 +1,25 @@
 {
   "expo": {
-    "name": "MechaniX",
-    "slug": "mechanix",
+    "name": "PrimeMechanic",
+    "slug": "primemechanic",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mechanix",
+    "scheme": "primemechanic",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mechanix.app"
+      "bundleIdentifier": "com.primemechanic.app"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0F1419",
+        "backgroundColor": "#0D1B2A",
         "foregroundImage": "./assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.mechanix.app"
+      "package": "com.primemechanic.app"
     },
     "web": {
       "output": "single",
@@ -32,9 +32,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#0F1419",
+          "backgroundColor": "#0D1B2A",
           "dark": {
-            "backgroundColor": "#0F1419"
+            "backgroundColor": "#0D1B2A"
           }
         }
       ],
