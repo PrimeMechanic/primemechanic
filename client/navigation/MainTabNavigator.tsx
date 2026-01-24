@@ -3,61 +3,99 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Platform, StyleSheet } from "react-native";
-import HomeStackNavigator from "@/navigation/HomeStackNavigator";
-import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
-import { useTheme } from "@/hooks/useTheme";
+
+import BrowseScreen from "@/screens/BrowseScreen";
+import BookingsScreen from "@/screens/BookingsScreen";
+import MessagesScreen from "@/screens/MessagesScreen";
+import ProfileScreen from "@/screens/ProfileScreen";
+import { HeaderTitle } from "@/components/HeaderTitle";
+import { useScreenOptions } from "@/hooks/useScreenOptions";
+import { Colors } from "@/constants/theme";
 
 export type MainTabParamList = {
-  HomeTab: undefined;
+  BrowseTab: undefined;
+  BookingsTab: undefined;
+  MessagesTab: undefined;
   ProfileTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
-  const { theme, isDark } = useTheme();
+  const screenOptions = useScreenOptions();
 
   return (
     <Tab.Navigator
-      initialRouteName="HomeTab"
+      initialRouteName="BrowseTab"
       screenOptions={{
-        tabBarActiveTintColor: theme.tabIconSelected,
-        tabBarInactiveTintColor: theme.tabIconDefault,
+        ...screenOptions,
+        tabBarActiveTintColor: Colors.dark.primary,
+        tabBarInactiveTintColor: Colors.dark.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
             ios: "transparent",
-            android: theme.backgroundRoot,
+            android: Colors.dark.backgroundRoot,
+            web: Colors.dark.backgroundRoot,
           }),
-          borderTopWidth: 0,
+          borderTopWidth: 1,
+          borderTopColor: Colors.dark.border,
           elevation: 0,
         },
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
             <BlurView
               intensity={100}
-              tint={isDark ? "dark" : "light"}
+              tint="dark"
               style={StyleSheet.absoluteFill}
             />
           ) : null,
-        headerShown: false,
       }}
     >
       <Tab.Screen
-        name="HomeTab"
-        component={HomeStackNavigator}
+        name="BrowseTab"
+        component={BrowseScreen}
         options={{
-          title: "Home",
+          title: "Browse",
+          headerTitle: () => <HeaderTitle title="MechaniX" />,
           tabBarIcon: ({ color, size }) => (
-            <Feather name="home" size={size} color={color} />
+            <Feather name="search" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
+        name="BookingsTab"
+        component={BookingsScreen}
+        options={{
+          title: "Bookings",
+          headerTitle: "My Bookings",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="MessagesTab"
+        component={MessagesScreen}
+        options={{
+          title: "Messages",
+          headerTitle: "Messages",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="message-circle" size={size} color={color} />
+          ),
+          tabBarBadge: 1,
+          tabBarBadgeStyle: {
+            backgroundColor: Colors.dark.primary,
+            fontSize: 10,
+          },
+        }}
+      />
+      <Tab.Screen
         name="ProfileTab"
-        component={ProfileStackNavigator}
+        component={ProfileScreen}
         options={{
           title: "Profile",
+          headerTitle: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),

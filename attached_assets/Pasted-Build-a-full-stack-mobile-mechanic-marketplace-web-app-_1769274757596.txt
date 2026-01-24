@@ -1,0 +1,86 @@
+Build a full-stack mobile mechanic marketplace web app similar to Uber, but for mobile auto repair services.
+
+Core Concept:
+A two-sided marketplace connecting customers needing car repairs with mobile mechanics who set their own prices. The platform takes a 20% commission per completed job.
+
+Tech Stack:
+Frontend: Next.js + Tailwind CSS
+Backend: Node.js + Express
+Database: PostgreSQL
+Auth: Clerk authentication
+Payments: Stripe Connect (Express accounts) for marketplace split payments
+Hosting: Replit
+
+User Roles:
+1) Customer
+2) Mechanic
+3) Admin
+
+Customer Features:
+- Signup / Login
+- Add and manage vehicles (year, make, model, engine, VIN optional)
+- Browse nearby mechanics
+- View mechanic profiles, ratings, services, and pricing
+- Request service & schedule appointment
+- In-app payments
+- Job tracking (pending, accepted, in-progress, completed)
+- Messaging with mechanic
+- Review & rating system
+- Job history dashboard
+
+Mechanic Features:
+- Signup & onboarding
+- Profile creation
+- Identity verification flag (admin approval)
+- Set services offered and custom pricing
+- Set availability schedule
+- Accept / decline jobs
+- Job workflow management
+- Earnings dashboard
+- Stripe Connect onboarding
+- Payout withdrawal system
+- Job history
+
+Admin Dashboard:
+- Approve / reject mechanics
+- Set platform commission %
+- View platform revenue analytics
+- Manage users
+- Dispute resolution tools
+
+Core System Logic:
+- Customers create job requests
+- Mechanics accept jobs
+- Customer pays via Stripe
+- Platform takes 20% automatically
+- Mechanic receives remaining payout
+- Job completion releases funds
+- Review submitted
+
+Database Tables:
+Users
+MechanicProfiles
+Vehicles
+Services
+MechanicServices
+Jobs
+Payments
+Reviews
+
+API Structure:
+Auth routes
+Mechanic profile routes
+Customer routes
+Job creation & management routes
+Stripe payment & webhook routes
+
+Build Requirements:
+- Clean, scalable project architecture
+- RESTful API design
+- Fully responsive frontend UI
+- Secure authentication and authorization
+- Production-ready database schema
+- Stripe Connect integration for marketplace payments
+- Admin dashboard UI
+
+Generate full project structure, backend routes, frontend pages, and database schema.
