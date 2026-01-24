@@ -3,7 +3,8 @@ import { StyleSheet, View, Pressable } from "react-native";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 interface SegmentedControlProps {
   segments: string[];
@@ -16,6 +17,8 @@ export function SegmentedControl({
   selectedIndex,
   onIndexChange,
 }: SegmentedControlProps) {
+  const { colors } = useTheme();
+
   const handlePress = (index: number) => {
     if (index !== selectedIndex) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -24,19 +27,20 @@ export function SegmentedControl({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundSecondary }]}>
       {segments.map((segment, index) => (
         <Pressable
           key={segment}
           style={[
             styles.segment,
-            index === selectedIndex && styles.selectedSegment,
+            index === selectedIndex && { backgroundColor: colors.primary },
           ]}
           onPress={() => handlePress(index)}
         >
           <ThemedText
             style={[
               styles.segmentText,
+              { color: index === selectedIndex ? colors.buttonText : colors.textSecondary },
               index === selectedIndex && styles.selectedSegmentText,
             ]}
           >
@@ -51,7 +55,6 @@ export function SegmentedControl({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    backgroundColor: Colors.dark.backgroundSecondary,
     borderRadius: BorderRadius.sm,
     padding: 4,
   },
@@ -62,16 +65,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: BorderRadius.xs,
   },
-  selectedSegment: {
-    backgroundColor: Colors.dark.primary,
-  },
   segmentText: {
     fontSize: 14,
     fontWeight: "500",
-    color: Colors.dark.textSecondary,
   },
   selectedSegmentText: {
-    color: Colors.dark.buttonText,
     fontWeight: "600",
   },
 });

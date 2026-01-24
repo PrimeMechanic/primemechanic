@@ -3,7 +3,8 @@ import { StyleSheet, View, Image, ImageSourcePropType } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
-import { Colors, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 interface EmptyStateProps {
   image: ImageSourcePropType;
@@ -20,11 +21,13 @@ export function EmptyState({
   actionLabel,
   onAction,
 }: EmptyStateProps) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
       <Image source={image} style={styles.image} resizeMode="contain" />
-      <ThemedText style={styles.title}>{title}</ThemedText>
-      <ThemedText style={styles.message}>{message}</ThemedText>
+      <ThemedText style={[styles.title, { color: colors.text }]}>{title}</ThemedText>
+      <ThemedText style={[styles.message, { color: colors.textSecondary }]}>{message}</ThemedText>
       {actionLabel && onAction ? (
         <Button onPress={onAction} style={styles.button}>
           {actionLabel}
@@ -52,13 +55,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
     textAlign: "center",
     marginBottom: Spacing.sm,
   },
   message: {
     fontSize: 15,
-    color: Colors.dark.textSecondary,
     textAlign: "center",
     lineHeight: 22,
     marginBottom: Spacing.xl,

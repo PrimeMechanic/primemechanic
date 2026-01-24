@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   View,
   ScrollView,
   Pressable,
@@ -13,7 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { mechanicProfile } from "@/data/mechanicData";
 import { services } from "@/data/mockData";
 import { useUser } from "@/context/UserContext";
@@ -28,6 +27,7 @@ interface SettingsItemProps {
   toggleValue?: boolean;
   onToggle?: (value: boolean) => void;
   danger?: boolean;
+  colors: any;
 }
 
 function SettingsItem({
@@ -39,42 +39,57 @@ function SettingsItem({
   toggleValue,
   onToggle,
   danger,
+  colors,
 }: SettingsItemProps) {
   return (
     <Pressable
       style={({ pressed }) => [
-        styles.settingsItem,
-        pressed && !toggle && styles.settingsItemPressed,
+        {
+          flexDirection: "row",
+          alignItems: "center",
+          padding: Spacing.lg,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        },
+        pressed && !toggle && { backgroundColor: colors.backgroundSecondary },
       ]}
       onPress={toggle ? undefined : onPress}
     >
       <View
         style={[
-          styles.settingsIconContainer,
-          danger && styles.dangerIconContainer,
+          {
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: "rgba(0, 212, 255, 0.1)",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: Spacing.md,
+          },
+          danger && { backgroundColor: "rgba(239, 68, 68, 0.1)" },
         ]}
       >
         <Feather
           name={icon as any}
           size={20}
-          color={danger ? Colors.dark.error : Colors.dark.accent}
+          color={danger ? colors.error : colors.accent}
         />
       </View>
-      <View style={styles.settingsContent}>
-        <ThemedText style={[styles.settingsLabel, danger && styles.dangerLabel]}>
+      <View style={{ flex: 1 }}>
+        <ThemedText style={[{ fontSize: 16, color: colors.text }, danger && { color: colors.error }]}>
           {label}
         </ThemedText>
-        {value ? <ThemedText style={styles.settingsValue}>{value}</ThemedText> : null}
+        {value ? <ThemedText style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>{value}</ThemedText> : null}
       </View>
       {toggle ? (
         <Switch
           value={toggleValue}
           onValueChange={onToggle}
-          trackColor={{ false: Colors.dark.border, true: Colors.dark.accent }}
-          thumbColor={Colors.dark.buttonText}
+          trackColor={{ false: colors.border, true: colors.accent }}
+          thumbColor={colors.buttonText}
         />
       ) : (
-        <Feather name="chevron-right" size={20} color={Colors.dark.textSecondary} />
+        <Feather name="chevron-right" size={20} color={colors.textSecondary} />
       )}
     </Pressable>
   );
@@ -84,7 +99,7 @@ export default function MechanicProfileEditScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { toggleRole } = useUser();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, colors } = useTheme();
   const [isAvailable, setIsAvailable] = useState(mechanicProfile.isAvailable);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
@@ -110,56 +125,59 @@ export default function MechanicProfileEditScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: colors.backgroundDefault }}
       contentContainerStyle={{
         paddingTop: headerHeight + Spacing.lg,
         paddingBottom: tabBarHeight + Spacing["3xl"],
       }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.profileHeader}>
-        <View style={styles.avatarContainer}>
-          <Image source={mechanicProfile.avatar} style={styles.avatar} />
-          <Pressable style={styles.editAvatarButton}>
-            <Feather name="camera" size={16} color={Colors.dark.buttonText} />
+      <View style={{ alignItems: "center", paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl }}>
+        <View style={{ position: "relative", marginBottom: Spacing.md }}>
+          <Image source={mechanicProfile.avatar} style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 3, borderColor: colors.accent }} />
+          <Pressable style={{ position: "absolute", bottom: 0, right: 0, width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.backgroundDefault }}>
+            <Feather name="camera" size={16} color={colors.buttonText} />
           </Pressable>
         </View>
-        <ThemedText style={styles.name}>{mechanicProfile.name}</ThemedText>
-        <ThemedText style={styles.specialty}>{mechanicProfile.specialty}</ThemedText>
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Feather name="star" size={16} color={Colors.dark.warning} />
-            <ThemedText style={styles.statValue}>{mechanicProfile.rating}</ThemedText>
-            <ThemedText style={styles.statLabel}>Rating</ThemedText>
+        <ThemedText style={{ fontSize: 22, fontWeight: "700", fontFamily: "Montserrat_700Bold", color: colors.text, marginBottom: 4 }}>{mechanicProfile.name}</ThemedText>
+        <ThemedText style={{ fontSize: 15, color: colors.textSecondary, marginBottom: Spacing.lg }}>{mechanicProfile.specialty}</ThemedText>
+        <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, padding: Spacing.lg, borderWidth: 1, borderColor: colors.border }}>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Feather name="star" size={16} color={colors.warning} />
+            <ThemedText style={{ fontSize: 18, fontWeight: "700", fontFamily: "Montserrat_700Bold", color: colors.text, marginTop: 4 }}>{mechanicProfile.rating}</ThemedText>
+            <ThemedText style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Rating</ThemedText>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Feather name="briefcase" size={16} color={Colors.dark.accent} />
-            <ThemedText style={styles.statValue}>{mechanicProfile.completedJobs}</ThemedText>
-            <ThemedText style={styles.statLabel}>Jobs</ThemedText>
+          <View style={{ width: 1, height: 40, backgroundColor: colors.border }} />
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Feather name="briefcase" size={16} color={colors.accent} />
+            <ThemedText style={{ fontSize: 18, fontWeight: "700", fontFamily: "Montserrat_700Bold", color: colors.text, marginTop: 4 }}>{mechanicProfile.completedJobs}</ThemedText>
+            <ThemedText style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Jobs</ThemedText>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Feather name="message-circle" size={16} color={Colors.dark.success} />
-            <ThemedText style={styles.statValue}>{mechanicProfile.reviewCount}</ThemedText>
-            <ThemedText style={styles.statLabel}>Reviews</ThemedText>
+          <View style={{ width: 1, height: 40, backgroundColor: colors.border }} />
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Feather name="message-circle" size={16} color={colors.success} />
+            <ThemedText style={{ fontSize: 18, fontWeight: "700", fontFamily: "Montserrat_700Bold", color: colors.text, marginTop: 4 }}>{mechanicProfile.reviewCount}</ThemedText>
+            <ThemedText style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Reviews</ThemedText>
           </View>
         </View>
       </View>
 
-      <View style={styles.availabilityCard}>
-        <View style={styles.availabilityContent}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginHorizontal: Spacing.lg, marginBottom: Spacing.xl, backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, padding: Spacing.lg, borderWidth: 1, borderColor: colors.border }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View
-            style={[
-              styles.availabilityDot,
-              { backgroundColor: isAvailable ? Colors.dark.success : Colors.dark.textSecondary },
-            ]}
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: 6,
+              marginRight: Spacing.md,
+              backgroundColor: isAvailable ? colors.success : colors.textSecondary,
+            }}
           />
           <View>
-            <ThemedText style={styles.availabilityTitle}>
+            <ThemedText style={{ fontSize: 16, fontWeight: "600", color: colors.text }}>
               {isAvailable ? "Available for Jobs" : "Not Available"}
             </ThemedText>
-            <ThemedText style={styles.availabilitySubtitle}>
+            <ThemedText style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>
               {isAvailable
                 ? "Customers can see and book you"
                 : "You won't receive new job requests"}
@@ -169,329 +187,126 @@ export default function MechanicProfileEditScreen() {
         <Switch
           value={isAvailable}
           onValueChange={handleAvailabilityToggle}
-          trackColor={{ false: Colors.dark.border, true: Colors.dark.success }}
-          thumbColor={Colors.dark.buttonText}
+          trackColor={{ false: colors.border, true: colors.success }}
+          thumbColor={colors.buttonText}
         />
       </View>
 
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>My Services</ThemedText>
-        <View style={styles.servicesCard}>
+      <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl }}>
+        <ThemedText style={{ fontSize: 14, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: Spacing.md }}>My Services</ThemedText>
+        <View style={{ backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
           {mechanicServices.map((service, index) => (
-            <Pressable key={service?.id || index} style={styles.serviceItem}>
-              <View style={styles.serviceIconContainer}>
+            <Pressable key={service?.id || index} style={{ flexDirection: "row", alignItems: "center", padding: Spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(0, 212, 255, 0.1)", alignItems: "center", justifyContent: "center", marginRight: Spacing.md }}>
                 <Feather
                   name={(service?.icon as any) || "tool"}
                   size={18}
-                  color={Colors.dark.accent}
+                  color={colors.accent}
                 />
               </View>
-              <ThemedText style={styles.serviceName}>{service?.name}</ThemedText>
-              <ThemedText style={styles.servicePrice}>${service?.customPrice}</ThemedText>
-              <Feather name="edit-2" size={16} color={Colors.dark.textSecondary} />
+              <ThemedText style={{ flex: 1, fontSize: 15, color: colors.text }}>{service?.name}</ThemedText>
+              <ThemedText style={{ fontSize: 15, fontWeight: "600", color: colors.primary, marginRight: Spacing.md }}>${service?.customPrice}</ThemedText>
+              <Feather name="edit-2" size={16} color={colors.textSecondary} />
             </Pressable>
           ))}
-          <Pressable style={styles.addServiceButton}>
-            <Feather name="plus" size={18} color={Colors.dark.accent} />
-            <ThemedText style={styles.addServiceText}>Add Service</ThemedText>
+          <Pressable style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: Spacing.lg, gap: Spacing.sm }}>
+            <Feather name="plus" size={18} color={colors.accent} />
+            <ThemedText style={{ fontSize: 15, fontWeight: "600", color: colors.accent }}>Add Service</ThemedText>
           </Pressable>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Profile Settings</ThemedText>
-        <View style={styles.settingsGroup}>
+      <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl }}>
+        <ThemedText style={{ fontSize: 14, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: Spacing.md }}>Profile Settings</ThemedText>
+        <View style={{ backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
           <SettingsItem
             icon="user"
             label="Personal Info"
             value={mechanicProfile.name}
             onPress={() => {}}
+            colors={colors}
           />
           <SettingsItem
             icon="mail"
             label="Email"
             value={mechanicProfile.email}
             onPress={() => {}}
+            colors={colors}
           />
           <SettingsItem
             icon="phone"
             label="Phone"
             value={mechanicProfile.phone}
             onPress={() => {}}
+            colors={colors}
           />
           <SettingsItem
             icon="file-text"
             label="About Me"
             onPress={() => {}}
+            colors={colors}
           />
         </View>
       </View>
 
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Appearance</ThemedText>
-        <View style={styles.settingsGroup}>
+      <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl }}>
+        <ThemedText style={{ fontSize: 14, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: Spacing.md }}>Appearance</ThemedText>
+        <View style={{ backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
           <SettingsItem
             icon={isDark ? "moon" : "sun"}
             label="Dark Mode"
             toggle
             toggleValue={isDark}
             onToggle={handleThemeToggle}
+            colors={colors}
           />
         </View>
       </View>
 
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Preferences</ThemedText>
-        <View style={styles.settingsGroup}>
+      <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl }}>
+        <ThemedText style={{ fontSize: 14, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: Spacing.md }}>Preferences</ThemedText>
+        <View style={{ backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
           <SettingsItem
             icon="bell"
             label="Push Notifications"
             toggle
             toggleValue={notificationsEnabled}
             onToggle={setNotificationsEnabled}
+            colors={colors}
           />
           <SettingsItem
             icon="dollar-sign"
             label="Hourly Rate"
             value={`$${mechanicProfile.hourlyRate}/hr`}
             onPress={() => {}}
+            colors={colors}
           />
-          <SettingsItem icon="map-pin" label="Service Area" onPress={() => {}} />
-          <SettingsItem icon="credit-card" label="Bank Account" onPress={() => {}} />
+          <SettingsItem icon="map-pin" label="Service Area" onPress={() => {}} colors={colors} />
+          <SettingsItem icon="credit-card" label="Bank Account" onPress={() => {}} colors={colors} />
         </View>
       </View>
 
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Demo</ThemedText>
-        <View style={styles.settingsGroup}>
+      <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl }}>
+        <ThemedText style={{ fontSize: 14, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: Spacing.md }}>Demo</ThemedText>
+        <View style={{ backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
           <SettingsItem
             icon="users"
             label="Switch to Customer View"
             onPress={handleSwitchToCustomer}
+            colors={colors}
           />
         </View>
       </View>
 
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Account</ThemedText>
-        <View style={styles.settingsGroup}>
-          <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} />
-          <SettingsItem icon="log-out" label="Sign Out" onPress={() => {}} />
-          <SettingsItem icon="trash-2" label="Delete Account" onPress={() => {}} danger />
+      <View style={{ paddingHorizontal: Spacing.lg, marginBottom: Spacing.xl }}>
+        <ThemedText style={{ fontSize: 14, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: Spacing.md }}>Account</ThemedText>
+        <View style={{ backgroundColor: colors.backgroundRoot, borderRadius: BorderRadius.lg, borderWidth: 1, borderColor: colors.border, overflow: "hidden" }}>
+          <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} colors={colors} />
+          <SettingsItem icon="log-out" label="Sign Out" onPress={() => {}} colors={colors} />
+          <SettingsItem icon="trash-2" label="Delete Account" onPress={() => {}} danger colors={colors} />
         </View>
       </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
-  },
-  profileHeader: {
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
-  },
-  avatarContainer: {
-    position: "relative",
-    marginBottom: Spacing.md,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
-    borderColor: Colors.dark.accent,
-  },
-  editAvatarButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.dark.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: Colors.dark.backgroundDefault,
-  },
-  name: {
-    fontSize: 22,
-    fontWeight: "700",
-    fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.text,
-    marginBottom: 4,
-  },
-  specialty: {
-    fontSize: 15,
-    color: Colors.dark.textSecondary,
-    marginBottom: Spacing.lg,
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: Colors.dark.border,
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: "700",
-    fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.text,
-    marginTop: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: Colors.dark.textSecondary,
-    marginTop: 2,
-  },
-  availabilityCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-  },
-  availabilityContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  availabilityDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: Spacing.md,
-  },
-  availabilityTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.dark.text,
-  },
-  availabilitySubtitle: {
-    fontSize: 13,
-    color: Colors.dark.textSecondary,
-    marginTop: 2,
-  },
-  section: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: Colors.dark.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: Spacing.md,
-  },
-  servicesCard: {
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    overflow: "hidden",
-  },
-  serviceItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-  },
-  serviceIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: Spacing.md,
-  },
-  serviceName: {
-    flex: 1,
-    fontSize: 15,
-    color: Colors.dark.text,
-  },
-  servicePrice: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: Colors.dark.primary,
-    marginRight: Spacing.md,
-  },
-  addServiceButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: Spacing.lg,
-    gap: Spacing.sm,
-  },
-  addServiceText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: Colors.dark.accent,
-  },
-  settingsGroup: {
-    backgroundColor: Colors.dark.backgroundRoot,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    overflow: "hidden",
-  },
-  settingsItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
-  },
-  settingsItemPressed: {
-    backgroundColor: Colors.dark.backgroundSecondary,
-  },
-  settingsIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: Spacing.md,
-  },
-  dangerIconContainer: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
-  },
-  settingsContent: {
-    flex: 1,
-  },
-  settingsLabel: {
-    fontSize: 16,
-    color: Colors.dark.text,
-  },
-  dangerLabel: {
-    color: Colors.dark.error,
-  },
-  settingsValue: {
-    fontSize: 13,
-    color: Colors.dark.textSecondary,
-    marginTop: 2,
-  },
-});

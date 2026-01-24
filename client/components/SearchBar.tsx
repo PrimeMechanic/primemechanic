@@ -2,7 +2,8 @@ import React from "react";
 import { StyleSheet, View, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 interface SearchBarProps {
   value: string;
@@ -11,22 +12,24 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ value, onChangeText, placeholder = "Search..." }: SearchBarProps) {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <Feather name="search" size={20} color={Colors.dark.textSecondary} />
+    <View style={[styles.container, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
+      <Feather name="search" size={20} color={colors.textSecondary} />
       <TextInput
-        style={styles.input}
+        style={[styles.input, { color: colors.text }]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={Colors.dark.textSecondary}
-        selectionColor={Colors.dark.accent}
+        placeholderTextColor={colors.textSecondary}
+        selectionColor={colors.accent}
       />
       {value.length > 0 ? (
         <Feather
           name="x"
           size={18}
-          color={Colors.dark.textSecondary}
+          color={colors.textSecondary}
           onPress={() => onChangeText("")}
         />
       ) : null}
@@ -38,18 +41,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundSecondary,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
     gap: Spacing.sm,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: Colors.dark.text,
     paddingVertical: 4,
   },
 });

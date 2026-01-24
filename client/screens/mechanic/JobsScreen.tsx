@@ -16,7 +16,8 @@ import * as Haptics from "expo-haptics";
 import { ThemedText } from "@/components/ThemedText";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { Button } from "@/components/Button";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
+import { Spacing, BorderRadius } from "@/constants/theme";
 import { jobRequests, activeJobs, completedJobs } from "@/data/mechanicData";
 import { JobRequest } from "@/types";
 
@@ -29,6 +30,8 @@ interface JobCardProps {
 }
 
 function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProps) {
+  const { colors } = useTheme();
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const today = new Date();
@@ -41,25 +44,83 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
   };
 
   const statusColors: Record<string, { bg: string; text: string }> = {
-    pending: { bg: "rgba(0, 212, 255, 0.1)", text: Colors.dark.accent },
-    accepted: { bg: "rgba(34, 197, 94, 0.1)", text: Colors.dark.success },
-    in_progress: { bg: "rgba(245, 158, 11, 0.1)", text: Colors.dark.warning },
-    completed: { bg: "rgba(34, 197, 94, 0.1)", text: Colors.dark.success },
+    pending: { bg: `rgba(0, 212, 255, 0.1)`, text: colors.accent },
+    accepted: { bg: `rgba(34, 197, 94, 0.1)`, text: colors.success },
+    in_progress: { bg: `rgba(245, 158, 11, 0.1)`, text: colors.warning },
+    completed: { bg: `rgba(34, 197, 94, 0.1)`, text: colors.success },
   };
 
   const statusStyle = statusColors[job.status] || statusColors.pending;
 
+  const dynamicStyles = StyleSheet.create({
+    jobCard: {
+      backgroundColor: colors.backgroundRoot,
+      borderColor: colors.border,
+    },
+    jobCardPressed: {
+      backgroundColor: colors.backgroundSecondary,
+    },
+    jobHeader: {
+      borderBottomColor: colors.border,
+    },
+    customerName: {
+      color: colors.text,
+    },
+    vehicleText: {
+      color: colors.textSecondary,
+    },
+    serviceRow: {
+      color: colors.text,
+    },
+    serviceIconContainer: {
+      backgroundColor: `rgba(0, 212, 255, 0.1)`,
+    },
+    serviceName: {
+      color: colors.text,
+    },
+    servicePrice: {
+      color: colors.primary,
+    },
+    detailItem: {
+      color: colors.textSecondary,
+    },
+    notesContainer: {
+      backgroundColor: colors.backgroundSecondary,
+    },
+    notesLabel: {
+      color: colors.textSecondary,
+    },
+    notesText: {
+      color: colors.text,
+    },
+    actionsRow: {
+      borderTopColor: colors.border,
+    },
+    declineButton: {
+      borderRightColor: colors.border,
+    },
+    declineText: {
+      color: colors.error,
+    },
+    acceptButton: {
+      backgroundColor: colors.success,
+    },
+    acceptText: {
+      color: colors.buttonText,
+    },
+  });
+
   return (
     <Pressable
-      style={({ pressed }) => [styles.jobCard, pressed && styles.jobCardPressed]}
+      style={({ pressed }) => [styles.jobCard, dynamicStyles.jobCard, pressed && [styles.jobCardPressed, dynamicStyles.jobCardPressed]]}
       onPress={onPress}
     >
-      <View style={styles.jobHeader}>
+      <View style={[styles.jobHeader, dynamicStyles.jobHeader]}>
         <View style={styles.customerInfo}>
           <Image source={job.customer.avatar} style={styles.customerAvatar} />
           <View>
-            <ThemedText style={styles.customerName}>{job.customer.name}</ThemedText>
-            <ThemedText style={styles.vehicleText}>
+            <ThemedText style={[styles.customerName, dynamicStyles.customerName]}>{job.customer.name}</ThemedText>
+            <ThemedText style={[styles.vehicleText, dynamicStyles.vehicleText]}>
               {job.vehicle.year} {job.vehicle.make} {job.vehicle.model}
             </ThemedText>
           </View>
@@ -73,22 +134,22 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
 
       <View style={styles.jobDetails}>
         <View style={styles.serviceRow}>
-          <View style={styles.serviceIconContainer}>
-            <Feather name={job.service.icon as any} size={18} color={Colors.dark.accent} />
+          <View style={[styles.serviceIconContainer, dynamicStyles.serviceIconContainer]}>
+            <Feather name={job.service.icon as any} size={18} color={colors.accent} />
           </View>
-          <ThemedText style={styles.serviceName}>{job.service.name}</ThemedText>
-          <ThemedText style={styles.servicePrice}>${job.totalPrice}</ThemedText>
+          <ThemedText style={[styles.serviceName, dynamicStyles.serviceName]}>{job.service.name}</ThemedText>
+          <ThemedText style={[styles.servicePrice, dynamicStyles.servicePrice]}>${job.totalPrice}</ThemedText>
         </View>
 
         <View style={styles.detailsGrid}>
           <View style={styles.detailItem}>
-            <Feather name="calendar" size={14} color={Colors.dark.textSecondary} />
+            <Feather name="calendar" size={14} color={colors.textSecondary} />
             <ThemedText style={styles.detailText}>
               {formatDate(job.date)} at {job.time}
             </ThemedText>
           </View>
           <View style={styles.detailItem}>
-            <Feather name="map-pin" size={14} color={Colors.dark.textSecondary} />
+            <Feather name="map-pin" size={14} color={colors.textSecondary} />
             <ThemedText style={styles.detailText} numberOfLines={1}>
               {job.location}
             </ThemedText>
@@ -96,22 +157,22 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
         </View>
 
         {job.notes ? (
-          <View style={styles.notesContainer}>
-            <ThemedText style={styles.notesLabel}>Notes:</ThemedText>
-            <ThemedText style={styles.notesText}>{job.notes}</ThemedText>
+          <View style={[styles.notesContainer, dynamicStyles.notesContainer]}>
+            <ThemedText style={[styles.notesLabel, dynamicStyles.notesLabel]}>Notes:</ThemedText>
+            <ThemedText style={[styles.notesText, dynamicStyles.notesText]}>{job.notes}</ThemedText>
           </View>
         ) : null}
       </View>
 
       {showActions ? (
-        <View style={styles.actionsRow}>
-          <Pressable style={styles.declineButton} onPress={onDecline}>
-            <Feather name="x" size={18} color={Colors.dark.error} />
-            <ThemedText style={styles.declineText}>Decline</ThemedText>
+        <View style={[styles.actionsRow, dynamicStyles.actionsRow]}>
+          <Pressable style={[styles.declineButton, dynamicStyles.declineButton]} onPress={onDecline}>
+            <Feather name="x" size={18} color={colors.error} />
+            <ThemedText style={[styles.declineText, dynamicStyles.declineText]}>Decline</ThemedText>
           </Pressable>
-          <Pressable style={styles.acceptButton} onPress={onAccept}>
-            <Feather name="check" size={18} color={Colors.dark.buttonText} />
-            <ThemedText style={styles.acceptText}>Accept</ThemedText>
+          <Pressable style={[styles.acceptButton, dynamicStyles.acceptButton]} onPress={onAccept}>
+            <Feather name="check" size={18} color={colors.buttonText} />
+            <ThemedText style={[styles.acceptText, dynamicStyles.acceptText]}>Accept</ThemedText>
           </Pressable>
         </View>
       ) : null}
@@ -120,6 +181,7 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
 }
 
 export default function JobsScreen() {
+  const { colors } = useTheme();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
@@ -161,6 +223,21 @@ export default function JobsScreen() {
 
   const displayedJobs = getDisplayedJobs();
 
+  const dynamicScreenStyles = StyleSheet.create({
+    container: {
+      backgroundColor: colors.backgroundDefault,
+    },
+    header: {
+      backgroundColor: colors.backgroundRoot,
+    },
+    emptyTitle: {
+      color: colors.text,
+    },
+    emptyMessage: {
+      color: colors.textSecondary,
+    },
+  });
+
   const renderEmptyState = () => {
     const emptyMessages = [
       { title: "No Pending Requests", message: "New job requests will appear here." },
@@ -170,16 +247,16 @@ export default function JobsScreen() {
 
     return (
       <View style={styles.emptyContainer}>
-        <Feather name="briefcase" size={48} color={Colors.dark.textSecondary} />
-        <ThemedText style={styles.emptyTitle}>{emptyMessages[selectedIndex].title}</ThemedText>
-        <ThemedText style={styles.emptyMessage}>{emptyMessages[selectedIndex].message}</ThemedText>
+        <Feather name="briefcase" size={48} color={colors.textSecondary} />
+        <ThemedText style={[styles.emptyTitle, dynamicScreenStyles.emptyTitle]}>{emptyMessages[selectedIndex].title}</ThemedText>
+        <ThemedText style={[styles.emptyMessage, dynamicScreenStyles.emptyMessage]}>{emptyMessages[selectedIndex].message}</ThemedText>
       </View>
     );
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
+    <View style={[styles.container, dynamicScreenStyles.container]}>
+      <View style={[styles.header, dynamicScreenStyles.header, { paddingTop: headerHeight + Spacing.md }]}>
         <SegmentedControl
           segments={["Requests", "Active", "History"]}
           selectedIndex={selectedIndex}
@@ -213,12 +290,10 @@ export default function JobsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   header: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.md,
-    backgroundColor: Colors.dark.backgroundRoot,
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
@@ -231,14 +306,11 @@ const styles = StyleSheet.create({
     height: Spacing.md,
   },
   jobCard: {
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
     overflow: "hidden",
   },
   jobCardPressed: {
-    backgroundColor: Colors.dark.backgroundSecondary,
   },
   jobHeader: {
     flexDirection: "row",
@@ -246,7 +318,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
   },
   customerInfo: {
     flexDirection: "row",
@@ -262,11 +333,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
   },
   vehicleText: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
     marginTop: 2,
   },
   statusBadge: {
@@ -290,7 +359,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -299,13 +367,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: "500",
-    color: Colors.dark.text,
   },
   servicePrice: {
     fontSize: 18,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.primary,
   },
   detailsGrid: {
     gap: Spacing.sm,
@@ -317,30 +383,25 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
     flex: 1,
   },
   notesContainer: {
     marginTop: Spacing.md,
     padding: Spacing.md,
-    backgroundColor: Colors.dark.backgroundSecondary,
     borderRadius: BorderRadius.sm,
   },
   notesLabel: {
     fontSize: 12,
     fontWeight: "600",
-    color: Colors.dark.textSecondary,
     marginBottom: 4,
   },
   notesText: {
     fontSize: 14,
-    color: Colors.dark.text,
     lineHeight: 20,
   },
   actionsRow: {
     flexDirection: "row",
     borderTopWidth: 1,
-    borderTopColor: Colors.dark.border,
   },
   declineButton: {
     flex: 1,
@@ -350,12 +411,10 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     gap: Spacing.sm,
     borderRightWidth: 1,
-    borderRightColor: Colors.dark.border,
   },
   declineText: {
     fontSize: 15,
     fontWeight: "600",
-    color: Colors.dark.error,
   },
   acceptButton: {
     flex: 1,
@@ -364,12 +423,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: Spacing.md,
     gap: Spacing.sm,
-    backgroundColor: Colors.dark.success,
   },
   acceptText: {
     fontSize: 15,
     fontWeight: "600",
-    color: Colors.dark.buttonText,
   },
   emptyContainer: {
     flex: 1,
@@ -381,13 +438,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
     marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
   },
   emptyMessage: {
     fontSize: 15,
-    color: Colors.dark.textSecondary,
     textAlign: "center",
   },
 });

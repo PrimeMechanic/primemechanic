@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Pressable, Platform } from "react-native";
+import { StyleSheet, Pressable, Platform, ViewStyle } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
@@ -8,7 +8,8 @@ import Animated, {
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-import { Colors, Shadows } from "@/constants/theme";
+import { Shadows } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 interface FloatingActionButtonProps {
   onPress: () => void;
@@ -18,6 +19,7 @@ interface FloatingActionButtonProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function FloatingActionButton({ onPress, bottom }: FloatingActionButtonProps) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -37,14 +39,20 @@ export function FloatingActionButton({ onPress, bottom }: FloatingActionButtonPr
     onPress();
   };
 
+  const shadowStyle: ViewStyle = Platform.select({
+    ios: Shadows.medium as ViewStyle,
+    android: { elevation: 8 },
+    default: {},
+  }) || {};
+
   return (
     <AnimatedPressable
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, { bottom }, animatedStyle]}
+      style={[styles.container, { bottom, backgroundColor: colors.primary }, shadowStyle, animatedStyle]}
     >
-      <Feather name="plus" size={28} color={Colors.dark.buttonText} />
+      <Feather name="plus" size={28} color={colors.buttonText} />
     </AnimatedPressable>
   );
 }
@@ -56,12 +64,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: Colors.dark.primary,
     alignItems: "center",
     justifyContent: "center",
-    ...Platform.select({
-      ios: Shadows.medium,
-      android: { elevation: 8 },
-    }),
   },
 });

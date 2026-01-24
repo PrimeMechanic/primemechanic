@@ -2,13 +2,16 @@ import React from "react";
 import { View, StyleSheet, Image } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing, Colors } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 interface HeaderTitleProps {
   title: string;
 }
 
 export function HeaderTitle({ title }: HeaderTitleProps) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
       <Image
@@ -16,7 +19,7 @@ export function HeaderTitle({ title }: HeaderTitleProps) {
         style={styles.icon}
         resizeMode="contain"
       />
-      <ThemedText style={styles.title}>{title}</ThemedText>
+      <ThemedText style={[styles.title, { color: colors.primary }]}>{title}</ThemedText>
     </View>
   );
 }
@@ -37,6 +40,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.primary,
   },
 });

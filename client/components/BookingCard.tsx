@@ -9,7 +9,8 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { Booking } from "@/types";
 
 interface BookingCardProps {
@@ -19,13 +20,6 @@ interface BookingCardProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const statusColors: Record<string, { bg: string; text: string }> = {
-  upcoming: { bg: "rgba(0, 212, 255, 0.1)", text: Colors.dark.accent },
-  in_progress: { bg: "rgba(245, 158, 11, 0.1)", text: Colors.dark.warning },
-  completed: { bg: "rgba(34, 197, 94, 0.1)", text: Colors.dark.success },
-  cancelled: { bg: "rgba(239, 68, 68, 0.1)", text: Colors.dark.error },
-};
-
 const statusLabels: Record<string, string> = {
   upcoming: "Upcoming",
   in_progress: "In Progress",
@@ -34,6 +28,14 @@ const statusLabels: Record<string, string> = {
 };
 
 export function BookingCard({ booking, onPress }: BookingCardProps) {
+  const { colors } = useTheme();
+
+  const statusColors: Record<string, { bg: string; text: string }> = {
+    upcoming: { bg: "rgba(0, 212, 255, 0.1)", text: colors.accent },
+    in_progress: { bg: "rgba(245, 158, 11, 0.1)", text: colors.warning },
+    completed: { bg: "rgba(34, 197, 94, 0.1)", text: colors.success },
+    cancelled: { bg: "rgba(239, 68, 68, 0.1)", text: colors.error },
+  };
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -69,7 +71,7 @@ export function BookingCard({ booking, onPress }: BookingCardProps) {
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, animatedStyle]}
+      style={[styles.container, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }, animatedStyle]}
     >
       <View style={styles.header}>
         <View style={styles.serviceInfo}>
@@ -77,14 +79,14 @@ export function BookingCard({ booking, onPress }: BookingCardProps) {
             <Feather
               name={booking.service.icon as any}
               size={20}
-              color={Colors.dark.accent}
+              color={colors.accent}
             />
           </View>
           <View>
-            <ThemedText style={styles.serviceName}>
+            <ThemedText style={[styles.serviceName, { color: colors.text }]}>
               {booking.service.name}
             </ThemedText>
-            <ThemedText style={styles.vehicleText}>
+            <ThemedText style={[styles.vehicleText, { color: colors.textSecondary }]}>
               {booking.vehicle.year} {booking.vehicle.make} {booking.vehicle.model}
             </ThemedText>
           </View>
@@ -96,37 +98,37 @@ export function BookingCard({ booking, onPress }: BookingCardProps) {
         </View>
       </View>
 
-      <View style={styles.divider} />
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
       <View style={styles.details}>
         <View style={styles.mechanicRow}>
           <Image source={booking.mechanic.avatar} style={styles.mechanicAvatar} />
-          <ThemedText style={styles.mechanicName}>
+          <ThemedText style={[styles.mechanicName, { color: colors.text }]}>
             {booking.mechanic.name}
           </ThemedText>
         </View>
         <View style={styles.dateTimeRow}>
           <View style={styles.detailItem}>
-            <Feather name="calendar" size={14} color={Colors.dark.textSecondary} />
-            <ThemedText style={styles.detailText}>
+            <Feather name="calendar" size={14} color={colors.textSecondary} />
+            <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
               {formatDate(booking.date)}
             </ThemedText>
           </View>
           <View style={styles.detailItem}>
-            <Feather name="clock" size={14} color={Colors.dark.textSecondary} />
-            <ThemedText style={styles.detailText}>{booking.time}</ThemedText>
+            <Feather name="clock" size={14} color={colors.textSecondary} />
+            <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>{booking.time}</ThemedText>
           </View>
         </View>
       </View>
 
       <View style={styles.footer}>
         <View style={styles.locationRow}>
-          <Feather name="map-pin" size={14} color={Colors.dark.textSecondary} />
-          <ThemedText style={styles.locationText} numberOfLines={1}>
+          <Feather name="map-pin" size={14} color={colors.textSecondary} />
+          <ThemedText style={[styles.locationText, { color: colors.textSecondary }]} numberOfLines={1}>
             {booking.location}
           </ThemedText>
         </View>
-        <ThemedText style={styles.priceText}>${booking.totalPrice}</ThemedText>
+        <ThemedText style={[styles.priceText, { color: colors.primary }]}>${booking.totalPrice}</ThemedText>
       </View>
     </AnimatedPressable>
   );
@@ -134,10 +136,8 @@ export function BookingCard({ booking, onPress }: BookingCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
     padding: Spacing.lg,
   },
   header: {
@@ -162,11 +162,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
   },
   vehicleText: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
     marginTop: 2,
   },
   statusBadge: {
@@ -180,7 +178,6 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.dark.border,
     marginVertical: Spacing.md,
   },
   details: {
@@ -198,7 +195,6 @@ const styles = StyleSheet.create({
   },
   mechanicName: {
     fontSize: 14,
-    color: Colors.dark.text,
   },
   dateTimeRow: {
     flexDirection: "row",
@@ -211,7 +207,6 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
   },
   footer: {
     flexDirection: "row",
@@ -228,13 +223,11 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
     flex: 1,
   },
   priceText: {
     fontSize: 18,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.primary,
   },
 });

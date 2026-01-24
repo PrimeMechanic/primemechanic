@@ -9,8 +9,7 @@ import JobsScreen from "@/screens/mechanic/JobsScreen";
 import EarningsScreen from "@/screens/mechanic/EarningsScreen";
 import MechanicProfileEditScreen from "@/screens/mechanic/MechanicProfileEditScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
-import { useScreenOptions } from "@/hooks/useScreenOptions";
-import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 export type MechanicTabParamList = {
   DashboardTab: undefined;
@@ -22,24 +21,34 @@ export type MechanicTabParamList = {
 const Tab = createBottomTabNavigator<MechanicTabParamList>();
 
 export default function MechanicTabNavigator() {
-  const screenOptions = useScreenOptions();
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
       initialRouteName="DashboardTab"
       screenOptions={{
-        ...screenOptions,
-        tabBarActiveTintColor: Colors.dark.accent,
-        tabBarInactiveTintColor: Colors.dark.tabIconDefault,
+        headerStyle: {
+          backgroundColor: "transparent",
+        },
+        headerTintColor: colors.text,
+        headerTitleStyle: {
+          fontFamily: "Montserrat_600SemiBold",
+          fontSize: 18,
+          color: colors.text,
+        },
+        headerShadowVisible: false,
+        headerTransparent: true,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
             ios: "rgba(255, 255, 255, 0.95)",
-            android: Colors.dark.backgroundRoot,
-            web: Colors.dark.backgroundRoot,
+            android: colors.backgroundRoot,
+            web: colors.backgroundRoot,
           }),
           borderTopWidth: 1,
-          borderTopColor: Colors.dark.border,
+          borderTopColor: colors.border,
           elevation: 0,
         },
         tabBarBackground: () =>
@@ -74,7 +83,7 @@ export default function MechanicTabNavigator() {
           ),
           tabBarBadge: 2,
           tabBarBadgeStyle: {
-            backgroundColor: Colors.dark.accent,
+            backgroundColor: colors.accent,
             fontSize: 10,
           },
         }}

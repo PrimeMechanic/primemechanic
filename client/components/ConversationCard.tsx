@@ -8,7 +8,8 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { Conversation } from "@/types";
 
 interface ConversationCardProps {
@@ -19,6 +20,7 @@ interface ConversationCardProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function ConversationCard({ conversation, onPress }: ConversationCardProps) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -43,20 +45,29 @@ export function ConversationCard({ conversation, onPress }: ConversationCardProp
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, animatedStyle]}
+      style={[
+        styles.container,
+        animatedStyle,
+        { backgroundColor: colors.backgroundRoot, borderColor: colors.border },
+      ]}
     >
       <View style={styles.avatarContainer}>
         <Image source={conversation.mechanic.avatar} style={styles.avatar} />
         {conversation.mechanic.isAvailable ? (
-          <View style={styles.onlineIndicator} />
+          <View
+            style={[
+              styles.onlineIndicator,
+              { backgroundColor: colors.success, borderColor: colors.backgroundRoot },
+            ]}
+          />
         ) : null}
       </View>
       <View style={styles.content}>
         <View style={styles.header}>
-          <ThemedText style={styles.name}>
+          <ThemedText style={[styles.name, { color: colors.text }]}>
             {conversation.mechanic.name}
           </ThemedText>
-          <ThemedText style={styles.time}>
+          <ThemedText style={[styles.time, { color: colors.textSecondary }]}>
             {conversation.lastMessageTime}
           </ThemedText>
         </View>
@@ -64,15 +75,19 @@ export function ConversationCard({ conversation, onPress }: ConversationCardProp
           <ThemedText
             style={[
               styles.message,
-              conversation.unreadCount > 0 && styles.unreadMessage,
+              { color: colors.textSecondary },
+              conversation.unreadCount > 0 && [
+                styles.unreadMessage,
+                { color: colors.text },
+              ],
             ]}
             numberOfLines={1}
           >
             {conversation.lastMessage}
           </ThemedText>
           {conversation.unreadCount > 0 ? (
-            <View style={styles.unreadBadge}>
-              <ThemedText style={styles.unreadText}>
+            <View style={[styles.unreadBadge, { backgroundColor: colors.accent }]}>
+              <ThemedText style={[styles.unreadText, { color: colors.buttonText }]}>
                 {conversation.unreadCount}
               </ThemedText>
             </View>
@@ -88,10 +103,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   avatarContainer: {
     position: "relative",
@@ -109,9 +122,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: Colors.dark.success,
     borderWidth: 2,
-    borderColor: Colors.dark.backgroundRoot,
   },
   content: {
     flex: 1,
@@ -126,11 +137,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
   },
   time: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
   },
   messageRow: {
     flexDirection: "row",
@@ -139,16 +148,13 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
     flex: 1,
     marginRight: Spacing.sm,
   },
   unreadMessage: {
-    color: Colors.dark.text,
     fontWeight: "500",
   },
   unreadBadge: {
-    backgroundColor: Colors.dark.accent,
     minWidth: 20,
     height: 20,
     borderRadius: 10,
@@ -159,6 +165,5 @@ const styles = StyleSheet.create({
   unreadText: {
     fontSize: 11,
     fontWeight: "700",
-    color: Colors.dark.buttonText,
   },
 });

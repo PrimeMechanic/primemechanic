@@ -9,8 +9,7 @@ import BookingsScreen from "@/screens/BookingsScreen";
 import MessagesScreen from "@/screens/MessagesScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
-import { useScreenOptions } from "@/hooks/useScreenOptions";
-import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 export type MainTabParamList = {
   BrowseTab: undefined;
@@ -22,24 +21,34 @@ export type MainTabParamList = {
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
-  const screenOptions = useScreenOptions();
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
       initialRouteName="BrowseTab"
       screenOptions={{
-        ...screenOptions,
-        tabBarActiveTintColor: Colors.dark.accent,
-        tabBarInactiveTintColor: Colors.dark.tabIconDefault,
+        headerStyle: {
+          backgroundColor: "transparent",
+        },
+        headerTintColor: colors.text,
+        headerTitleStyle: {
+          fontFamily: "Montserrat_600SemiBold",
+          fontSize: 18,
+          color: colors.text,
+        },
+        headerShadowVisible: false,
+        headerTransparent: true,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
             ios: "rgba(255, 255, 255, 0.95)",
-            android: Colors.dark.backgroundRoot,
-            web: Colors.dark.backgroundRoot,
+            android: colors.backgroundRoot,
+            web: colors.backgroundRoot,
           }),
           borderTopWidth: 1,
-          borderTopColor: Colors.dark.border,
+          borderTopColor: colors.border,
           elevation: 0,
         },
         tabBarBackground: () =>
@@ -85,7 +94,7 @@ export default function MainTabNavigator() {
           ),
           tabBarBadge: 1,
           tabBarBadgeStyle: {
-            backgroundColor: Colors.dark.accent,
+            backgroundColor: colors.accent,
             fontSize: 10,
           },
         }}

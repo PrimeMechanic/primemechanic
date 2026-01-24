@@ -9,7 +9,8 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { Mechanic } from "@/types";
 
 interface MechanicCardProps {
@@ -20,6 +21,7 @@ interface MechanicCardProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function MechanicCard({ mechanic, onPress }: MechanicCardProps) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -44,38 +46,55 @@ export function MechanicCard({ mechanic, onPress }: MechanicCardProps) {
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, animatedStyle]}
+      style={[
+        styles.container,
+        animatedStyle,
+        { backgroundColor: colors.backgroundRoot, borderColor: colors.border },
+      ]}
     >
       <Image source={mechanic.avatar} style={styles.avatar} />
       <View style={styles.content}>
         <View style={styles.header}>
-          <ThemedText style={styles.name}>{mechanic.name}</ThemedText>
+          <ThemedText style={[styles.name, { color: colors.text }]}>{mechanic.name}</ThemedText>
           {mechanic.isAvailable ? (
-            <View style={styles.availableBadge}>
-              <View style={styles.availableDot} />
-              <ThemedText style={styles.availableText}>Available</ThemedText>
+            <View
+              style={[
+                styles.availableBadge,
+                { backgroundColor: `rgba(${colors.success === "#22C55E" ? "34, 197, 94" : "34, 197, 94"}, 0.1)` },
+              ]}
+            >
+              <View style={[styles.availableDot, { backgroundColor: colors.success }]} />
+              <ThemedText style={[styles.availableText, { color: colors.success }]}>
+                Available
+              </ThemedText>
             </View>
           ) : null}
         </View>
-        <ThemedText style={styles.specialty}>{mechanic.specialty}</ThemedText>
+        <ThemedText style={[styles.specialty, { color: colors.textSecondary }]}>
+          {mechanic.specialty}
+        </ThemedText>
         <View style={styles.stats}>
           <View style={styles.statItem}>
-            <Feather name="star" size={14} color={Colors.dark.warning} />
-            <ThemedText style={styles.statText}>
+            <Feather name="star" size={14} color={colors.warning} />
+            <ThemedText style={[styles.statText, { color: colors.textSecondary }]}>
               {mechanic.rating} ({mechanic.reviewCount})
             </ThemedText>
           </View>
           <View style={styles.statItem}>
-            <Feather name="map-pin" size={14} color={Colors.dark.textSecondary} />
-            <ThemedText style={styles.statText}>{mechanic.distance}</ThemedText>
+            <Feather name="map-pin" size={14} color={colors.textSecondary} />
+            <ThemedText style={[styles.statText, { color: colors.textSecondary }]}>
+              {mechanic.distance}
+            </ThemedText>
           </View>
           <View style={styles.statItem}>
-            <Feather name="dollar-sign" size={14} color={Colors.dark.success} />
-            <ThemedText style={styles.statText}>${mechanic.hourlyRate}/hr</ThemedText>
+            <Feather name="dollar-sign" size={14} color={colors.success} />
+            <ThemedText style={[styles.statText, { color: colors.textSecondary }]}>
+              ${mechanic.hourlyRate}/hr
+            </ThemedText>
           </View>
         </View>
       </View>
-      <Feather name="chevron-right" size={20} color={Colors.dark.textSecondary} />
+      <Feather name="chevron-right" size={20} color={colors.textSecondary} />
     </AnimatedPressable>
   );
 }
@@ -85,10 +104,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   avatar: {
     width: 60,
@@ -108,13 +125,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
     marginRight: Spacing.sm,
   },
   availableBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(34, 197, 94, 0.1)",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
@@ -123,17 +138,14 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Colors.dark.success,
     marginRight: 4,
   },
   availableText: {
     fontSize: 11,
-    color: Colors.dark.success,
     fontWeight: "500",
   },
   specialty: {
     fontSize: 14,
-    color: Colors.dark.textSecondary,
     marginBottom: 8,
   },
   stats: {
@@ -147,6 +159,5 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
   },
 });

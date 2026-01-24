@@ -11,7 +11,7 @@ import BookingDetailScreen from "@/screens/BookingDetailScreen";
 import ChatScreen from "@/screens/ChatScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useUser } from "@/context/UserContext";
-import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { conversations, mechanics } from "@/data/mockData";
 
 export type RootStackParamList = {
@@ -28,6 +28,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
   const { role } = useUser();
+  const { colors } = useTheme();
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
@@ -56,7 +57,7 @@ export default function RootStackNavigator() {
               pressColor="transparent"
               pressOpacity={0.7}
             >
-              <Feather name="x" size={24} color={Colors.dark.text} />
+              <Feather name="x" size={24} color={colors.text} />
             </HeaderButton>
           ),
         })}

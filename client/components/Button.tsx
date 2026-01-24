@@ -8,7 +8,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { BorderRadius, Spacing, Colors } from "@/constants/theme";
+import { BorderRadius, Spacing } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 
 interface ButtonProps {
   onPress?: () => void;
@@ -35,6 +36,7 @@ export function Button({
   disabled = false,
   variant = "primary",
 }: ButtonProps) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -54,14 +56,14 @@ export function Button({
   };
 
   const getBackgroundColor = () => {
-    if (variant === "accent") return Colors.dark.accent;
-    if (variant === "secondary") return Colors.dark.backgroundSecondary;
-    return Colors.dark.primary;
+    if (variant === "accent") return colors.accent;
+    if (variant === "secondary") return colors.backgroundSecondary;
+    return colors.primary;
   };
 
   const getTextColor = () => {
-    if (variant === "secondary") return Colors.dark.text;
-    return Colors.dark.buttonText;
+    if (variant === "secondary") return colors.text;
+    return colors.buttonText;
   };
 
   return (

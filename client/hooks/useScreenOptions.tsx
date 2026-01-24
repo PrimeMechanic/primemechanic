@@ -1,6 +1,5 @@
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
-import { Colors } from "@/constants/theme";
+import { useTheme } from "../context/ThemeContext";
 
 interface ScreenOptionsConfig {
   transparent?: boolean;
@@ -8,18 +7,19 @@ interface ScreenOptionsConfig {
 
 export function useScreenOptions(
   config: ScreenOptionsConfig = {}
-): NativeStackNavigationOptions | BottomTabNavigationOptions {
+): NativeStackNavigationOptions {
   const { transparent = true } = config;
+  const { colors } = useTheme();
 
   return {
     headerStyle: {
-      backgroundColor: transparent ? "transparent" : Colors.dark.backgroundRoot,
+      backgroundColor: transparent ? "transparent" : colors.backgroundRoot,
     },
-    headerTintColor: Colors.dark.text,
+    headerTintColor: colors.text,
     headerTitleStyle: {
       fontFamily: "Montserrat_600SemiBold",
       fontSize: 18,
-      color: Colors.dark.text,
+      color: colors.text,
     },
     headerShadowVisible: !transparent,
     headerTransparent: transparent,

@@ -9,7 +9,8 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { Service } from "@/types";
 
 interface ServiceCardProps {
@@ -20,6 +21,7 @@ interface ServiceCardProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function ServiceCard({ service, onPress }: ServiceCardProps) {
+  const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -44,17 +46,19 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, animatedStyle]}
+      style={[
+        styles.container,
+        animatedStyle,
+        { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
+      ]}
     >
-      <View style={styles.iconContainer}>
-        <Feather
-          name={service.icon as any}
-          size={24}
-          color={Colors.dark.accent}
-        />
+      <View style={[styles.iconContainer, { backgroundColor: `rgba(${colors.accent === "#00D4FF" ? "0, 212, 255" : "0, 212, 255"}, 0.1)` }]}>
+        <Feather name={service.icon as any} size={24} color={colors.accent} />
       </View>
-      <ThemedText style={styles.name}>{service.name}</ThemedText>
-      <ThemedText style={styles.price}>${service.price}</ThemedText>
+      <ThemedText style={[styles.name, { color: colors.text }]}>{service.name}</ThemedText>
+      <ThemedText style={[styles.price, { color: colors.textSecondary }]}>
+        ${service.price}
+      </ThemedText>
     </AnimatedPressable>
   );
 }
@@ -65,16 +69,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.sm,
-    backgroundColor: Colors.dark.backgroundDefault,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   iconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: Spacing.sm,
@@ -82,12 +83,10 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 13,
     fontWeight: "600",
-    color: Colors.dark.text,
     textAlign: "center",
     marginBottom: 4,
   },
   price: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
   },
 });

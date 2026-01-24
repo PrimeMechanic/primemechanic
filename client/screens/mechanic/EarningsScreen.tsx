@@ -7,6 +7,7 @@ import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { SegmentedControl } from "@/components/SegmentedControl";
+import { useTheme } from "@/context/ThemeContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 import { earningsData, completedJobs } from "@/data/mechanicData";
 
@@ -19,21 +20,23 @@ interface EarningsCardProps {
 }
 
 function EarningsCard({ title, amount, subtitle, icon, color }: EarningsCardProps) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.earningsCard}>
+    <View style={[styles.earningsCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
       <View style={[styles.earningsIconContainer, { backgroundColor: `${color}15` }]}>
         <Feather name={icon as any} size={20} color={color} />
       </View>
       <View style={styles.earningsContent}>
-        <ThemedText style={styles.earningsTitle}>{title}</ThemedText>
-        <ThemedText style={styles.earningsAmount}>${amount}</ThemedText>
+        <ThemedText style={[styles.earningsTitle, { color: colors.textSecondary }]}>{title}</ThemedText>
+        <ThemedText style={[styles.earningsAmount, { color: colors.text }]}>${amount}</ThemedText>
       </View>
-      <ThemedText style={styles.earningsSubtitle}>{subtitle}</ThemedText>
+      <ThemedText style={[styles.earningsSubtitle, { color: colors.textSecondary }]}>{subtitle}</ThemedText>
     </View>
   );
 }
 
 export default function EarningsScreen() {
+  const { colors } = useTheme();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const [selectedPeriod, setSelectedPeriod] = useState(1);
@@ -58,7 +61,7 @@ export default function EarningsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.backgroundDefault }]}
       contentContainerStyle={{
         paddingTop: headerHeight + Spacing.lg,
         paddingBottom: tabBarHeight + Spacing["3xl"],
@@ -74,23 +77,23 @@ export default function EarningsScreen() {
       </View>
 
       <View style={styles.summarySection}>
-        <View style={styles.totalCard}>
-          <ThemedText style={styles.totalLabel}>
+        <View style={[styles.totalCard, { backgroundColor: colors.primary }]}>
+          <ThemedText style={[styles.totalLabel, { color: "rgba(255, 255, 255, 0.7)" }]}>
             {selectedPeriod === 0 ? "Today's" : selectedPeriod === 1 ? "This Week's" : "This Month's"} Earnings
           </ThemedText>
-          <ThemedText style={styles.totalAmount}>
+          <ThemedText style={[styles.totalAmount, { color: colors.buttonText }]}>
             ${selectedPeriod === 0 ? earningsData.today.toLocaleString() : selectedPeriod === 1 ? earningsData.thisWeek.toLocaleString() : earningsData.thisMonth.toLocaleString()}
           </ThemedText>
           <View style={styles.totalStats}>
             <View style={styles.totalStatItem}>
-              <Feather name="briefcase" size={16} color={Colors.dark.accent} />
-              <ThemedText style={styles.totalStatText}>
+              <Feather name="briefcase" size={16} color={colors.accent} />
+              <ThemedText style={[styles.totalStatText, { color: "rgba(255, 255, 255, 0.8)" }]}>
                 {selectedPeriod === 0 ? "2" : selectedPeriod === 1 ? "8" : "32"} jobs
               </ThemedText>
             </View>
             <View style={styles.totalStatItem}>
-              <Feather name="trending-up" size={16} color={Colors.dark.success} />
-              <ThemedText style={[styles.totalStatText, { color: Colors.dark.success }]}>
+              <Feather name="trending-up" size={16} color={colors.success} />
+              <ThemedText style={[styles.totalStatText, { color: colors.success }]}>
                 +12% vs last {selectedPeriod === 0 ? "day" : selectedPeriod === 1 ? "week" : "month"}
               </ThemedText>
             </View>
@@ -100,8 +103,8 @@ export default function EarningsScreen() {
 
       {selectedPeriod === 1 ? (
         <View style={styles.chartSection}>
-          <ThemedText style={styles.chartTitle}>Weekly Overview</ThemedText>
-          <View style={styles.chartContainer}>
+          <ThemedText style={[styles.chartTitle, { color: colors.text }]}>Weekly Overview</ThemedText>
+          <View style={[styles.chartContainer, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
             {weeklyData.map((item, index) => (
               <View key={item.day} style={styles.chartBar}>
                 <View style={styles.barContainer}>
@@ -110,14 +113,14 @@ export default function EarningsScreen() {
                       styles.bar,
                       {
                         height: item.height || 4,
-                        backgroundColor: item.amount > 0 ? Colors.dark.accent : Colors.dark.border,
+                        backgroundColor: item.amount > 0 ? colors.accent : colors.border,
                       },
                     ]}
                   />
                 </View>
-                <ThemedText style={styles.barLabel}>{item.day}</ThemedText>
+                <ThemedText style={[styles.barLabel, { color: colors.textSecondary }]}>{item.day}</ThemedText>
                 {item.amount > 0 ? (
-                  <ThemedText style={styles.barAmount}>${item.amount}</ThemedText>
+                  <ThemedText style={[styles.barAmount, { color: colors.accent }]}>${item.amount}</ThemedText>
                 ) : null}
               </View>
             ))}
@@ -131,45 +134,45 @@ export default function EarningsScreen() {
           amount={earningsData.thisWeek - earningsData.pending}
           subtitle="Ready to withdraw"
           icon="credit-card"
-          color={Colors.dark.success}
+          color={colors.success}
         />
         <EarningsCard
           title="Pending"
           amount={earningsData.pending}
           subtitle="Processing (1-2 days)"
           icon="clock"
-          color={Colors.dark.warning}
+          color={colors.warning}
         />
       </View>
 
       <View style={styles.transactionsSection}>
         <View style={styles.sectionHeader}>
-          <ThemedText style={styles.sectionTitle}>Recent Transactions</ThemedText>
+          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Recent Transactions</ThemedText>
           <Pressable>
-            <ThemedText style={styles.seeAllText}>See All</ThemedText>
+            <ThemedText style={[styles.seeAllText, { color: colors.accent }]}>See All</ThemedText>
           </Pressable>
         </View>
-        <View style={styles.transactionsList}>
+        <View style={[styles.transactionsList, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
           {completedJobs.slice(0, 5).map((job) => (
-            <View key={job.id} style={styles.transactionItem}>
+            <View key={job.id} style={[styles.transactionItem, { borderBottomColor: colors.border }]}>
               <View style={styles.transactionLeft}>
-                <View style={styles.transactionIconContainer}>
-                  <Feather name={job.service.icon as any} size={18} color={Colors.dark.accent} />
+                <View style={[styles.transactionIconContainer, { backgroundColor: `${colors.accent}26` }]}>
+                  <Feather name={job.service.icon as any} size={18} color={colors.accent} />
                 </View>
                 <View>
-                  <ThemedText style={styles.transactionService}>
+                  <ThemedText style={[styles.transactionService, { color: colors.text }]}>
                     {job.service.name}
                   </ThemedText>
-                  <ThemedText style={styles.transactionCustomer}>
+                  <ThemedText style={[styles.transactionCustomer, { color: colors.textSecondary }]}>
                     {job.customer.name}
                   </ThemedText>
                 </View>
               </View>
               <View style={styles.transactionRight}>
-                <ThemedText style={styles.transactionAmount}>
+                <ThemedText style={[styles.transactionAmount, { color: colors.success }]}>
                   +${job.totalPrice}
                 </ThemedText>
-                <ThemedText style={styles.transactionDate}>
+                <ThemedText style={[styles.transactionDate, { color: colors.textSecondary }]}>
                   {formatDate(job.date)}
                 </ThemedText>
               </View>
@@ -178,9 +181,9 @@ export default function EarningsScreen() {
         </View>
       </View>
 
-      <Pressable style={styles.withdrawButton}>
-        <Feather name="credit-card" size={20} color={Colors.dark.buttonText} />
-        <ThemedText style={styles.withdrawText}>Withdraw Funds</ThemedText>
+      <Pressable style={[styles.withdrawButton, { backgroundColor: colors.primary }]}>
+        <Feather name="credit-card" size={20} color={colors.buttonText} />
+        <ThemedText style={[styles.withdrawText, { color: colors.buttonText }]}>Withdraw Funds</ThemedText>
       </Pressable>
     </ScrollView>
   );
@@ -189,7 +192,6 @@ export default function EarningsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.dark.backgroundDefault,
   },
   periodSelector: {
     paddingHorizontal: Spacing.lg,
@@ -200,7 +202,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   totalCard: {
-    backgroundColor: Colors.dark.primary,
     borderRadius: BorderRadius.lg,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.lg,
@@ -209,7 +210,6 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.7)",
     marginBottom: Spacing.sm,
   },
   totalAmount: {
@@ -217,7 +217,6 @@ const styles = StyleSheet.create({
     lineHeight: 40,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.buttonText,
     marginBottom: Spacing.sm,
   },
   totalStats: {
@@ -231,7 +230,6 @@ const styles = StyleSheet.create({
   },
   totalStatText: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.8)",
   },
   chartSection: {
     paddingHorizontal: Spacing.lg,
@@ -241,17 +239,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
     marginBottom: Spacing.md,
   },
   chartContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   chartBar: {
     flex: 1,
@@ -268,11 +263,9 @@ const styles = StyleSheet.create({
   },
   barLabel: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
   },
   barAmount: {
     fontSize: 10,
-    color: Colors.dark.accent,
     marginTop: 2,
   },
   cardsSection: {
@@ -284,11 +277,9 @@ const styles = StyleSheet.create({
   earningsCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
   },
   earningsIconContainer: {
     width: 40,
@@ -303,17 +294,14 @@ const styles = StyleSheet.create({
   },
   earningsTitle: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
   },
   earningsAmount: {
     fontSize: 20,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
-    color: Colors.dark.text,
   },
   earningsSubtitle: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
   },
   transactionsSection: {
     paddingHorizontal: Spacing.lg,
@@ -329,18 +317,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    color: Colors.dark.text,
   },
   seeAllText: {
     fontSize: 14,
-    color: Colors.dark.accent,
     fontWeight: "500",
   },
   transactionsList: {
-    backgroundColor: Colors.dark.backgroundRoot,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
     overflow: "hidden",
   },
   transactionItem: {
@@ -349,7 +333,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border,
   },
   transactionLeft: {
     flexDirection: "row",
@@ -359,7 +342,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(0, 212, 255, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -367,11 +349,9 @@ const styles = StyleSheet.create({
   transactionService: {
     fontSize: 15,
     fontWeight: "500",
-    color: Colors.dark.text,
   },
   transactionCustomer: {
     fontSize: 13,
-    color: Colors.dark.textSecondary,
     marginTop: 2,
   },
   transactionRight: {
@@ -380,18 +360,15 @@ const styles = StyleSheet.create({
   transactionAmount: {
     fontSize: 16,
     fontWeight: "600",
-    color: Colors.dark.success,
   },
   transactionDate: {
     fontSize: 12,
-    color: Colors.dark.textSecondary,
     marginTop: 2,
   },
   withdrawButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.dark.primary,
     marginHorizontal: Spacing.lg,
     paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.full,
@@ -400,6 +377,5 @@ const styles = StyleSheet.create({
   withdrawText: {
     fontSize: 16,
     fontWeight: "600",
-    color: Colors.dark.buttonText,
   },
 });
