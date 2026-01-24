@@ -21,7 +21,7 @@ export type MechanicTabParamList = {
 const Tab = createBottomTabNavigator<MechanicTabParamList>();
 
 export default function MechanicTabNavigator() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   return (
     <Tab.Navigator
@@ -43,7 +43,7 @@ export default function MechanicTabNavigator() {
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
-            ios: "rgba(255, 255, 255, 0.95)",
+            ios: isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)",
             android: colors.backgroundRoot,
             web: colors.backgroundRoot,
           }),
@@ -55,7 +55,7 @@ export default function MechanicTabNavigator() {
           Platform.OS === "ios" ? (
             <BlurView
               intensity={100}
-              tint="light"
+              tint={isDark ? "dark" : "light"}
               style={StyleSheet.absoluteFill}
             />
           ) : null,
