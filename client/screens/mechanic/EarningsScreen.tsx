@@ -202,14 +202,15 @@ const styles = StyleSheet.create({
   totalCard: {
     backgroundColor: Colors.dark.primary,
     borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
     alignItems: "center",
   },
   totalLabel: {
     fontSize: 14,
     color: "rgba(255, 255, 255, 0.7)",
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
   },
   totalAmount: {
     fontSize: 28,
