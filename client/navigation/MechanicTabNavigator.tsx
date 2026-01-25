@@ -43,7 +43,7 @@ export default function MechanicTabNavigator() {
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
-            ios: "rgba(18, 18, 18, 0.95)",
+            ios: "rgba(17, 17, 17, 0.95)",
             android: colors.backgroundRoot,
             web: colors.backgroundRoot,
           }),
