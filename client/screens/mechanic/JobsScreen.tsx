@@ -7,7 +7,6 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -182,7 +181,6 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
 
 export default function JobsScreen() {
   const { colors } = useTheme();
-  const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -256,7 +254,7 @@ export default function JobsScreen() {
 
   return (
     <View style={[styles.container, dynamicScreenStyles.container]}>
-      <View style={[styles.header, dynamicScreenStyles.header, { paddingTop: headerHeight + Spacing.md }]}>
+      <View style={[styles.header, dynamicScreenStyles.header]}>
         <SegmentedControl
           segments={["Requests", "Active", "History"]}
           selectedIndex={selectedIndex}
@@ -293,6 +291,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
     paddingBottom: Spacing.md,
   },
   listContent: {
