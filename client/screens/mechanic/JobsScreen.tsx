@@ -53,11 +53,11 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
 
   const dynamicStyles = StyleSheet.create({
     jobCard: {
-      backgroundColor: colors.backgroundRoot,
+      backgroundColor: colors.backgroundDefault,
       borderColor: colors.border,
     },
     jobCardPressed: {
-      backgroundColor: colors.backgroundSecondary,
+      backgroundColor: colors.backgroundTertiary,
     },
     jobHeader: {
       borderBottomColor: colors.border,
@@ -72,7 +72,7 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
       color: colors.text,
     },
     serviceIconContainer: {
-      backgroundColor: `rgba(0, 212, 255, 0.1)`,
+      backgroundColor: `rgba(15, 169, 88, 0.15)`,
     },
     serviceName: {
       color: colors.text,
@@ -83,8 +83,11 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
     detailItem: {
       color: colors.textSecondary,
     },
+    detailText: {
+      color: colors.textSecondary,
+    },
     notesContainer: {
-      backgroundColor: colors.backgroundSecondary,
+      backgroundColor: colors.backgroundTertiary,
     },
     notesLabel: {
       color: colors.textSecondary,
@@ -143,13 +146,13 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
         <View style={styles.detailsGrid}>
           <View style={styles.detailItem}>
             <Feather name="calendar" size={14} color={colors.textSecondary} />
-            <ThemedText style={styles.detailText}>
+            <ThemedText style={[styles.detailText, dynamicStyles.detailText]}>
               {formatDate(job.date)} at {job.time}
             </ThemedText>
           </View>
           <View style={styles.detailItem}>
             <Feather name="map-pin" size={14} color={colors.textSecondary} />
-            <ThemedText style={styles.detailText} numberOfLines={1}>
+            <ThemedText style={[styles.detailText, dynamicStyles.detailText]} numberOfLines={1}>
               {job.location}
             </ThemedText>
           </View>
