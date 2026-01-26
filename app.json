@@ -14,7 +14,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#111111",
+        "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/logo.png"
       },
       "edgeToEdgeEnabled": true,
@@ -32,9 +32,9 @@
           "image": "./assets/images/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#111111",
+          "backgroundColor": "#000000",
           "dark": {
-            "backgroundColor": "#111111"
+            "backgroundColor": "#000000"
           }
         }
       ],
