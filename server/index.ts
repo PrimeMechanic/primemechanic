@@ -1,6 +1,9 @@
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
+import { runMigrations } from 'stripe-replit-sync';
+import { getStripeSync } from "./stripeClient";
+import { WebhookHandlers } from "./webhookHandlers";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -225,12 +228,73 @@ function setupErrorHandler(app: express.Application) {
   });
 }
 
+async function initStripe() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    log('DATABASE_URL not set, skipping Stripe initialization');
+    return;
+  }
+
+  try {
+    log('Initializing Stripe schema...');
+    await runMigrations({ databaseUrl, schema: 'stripe' });
+    log('Stripe schema ready');
+
+    const stripeSync = await getStripeSync();
+
+    log('Setting up managed webhook...');
+    const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0] || process.env.REPLIT_DEV_DOMAIN}`;
+    try {
+      const result = await stripeSync.findOrCreateManagedWebhook(
+        `${webhookBaseUrl}/api/stripe/webhook`
+      );
+      if (result?.webhook?.url) {
+        log(`Webhook configured: ${result.webhook.url}`);
+      } else {
+        log('Webhook setup pending (manual configuration may be required)');
+      }
+    } catch (webhookError: any) {
+      log('Webhook setup skipped:', webhookError.message);
+    }
+
+    stripeSync.syncBackfill()
+      .then(() => log('Stripe data synced'))
+      .catch((err: any) => log('Error syncing Stripe data:', err.message));
+  } catch (error: any) {
+    log('Failed to initialize Stripe:', error.message);
+  }
+}
+
 (async () => {
   setupCors(app);
+
+  // Register Stripe webhook BEFORE express.json()
+  app.post(
+    '/api/stripe/webhook',
+    express.raw({ type: 'application/json' }),
+    async (req, res) => {
+      const signature = req.headers['stripe-signature'];
+      if (!signature) {
+        return res.status(400).json({ error: 'Missing signature' });
+      }
+
+      try {
+        const sig = Array.isArray(signature) ? signature[0] : signature;
+        await WebhookHandlers.processWebhook(req.body as Buffer, sig);
+        res.status(200).json({ received: true });
+      } catch (error: any) {
+        log('Webhook error:', error.message);
+        res.status(400).json({ error: 'Webhook processing error' });
+      }
+    }
+  );
+
   setupBodyParsing(app);
   setupRequestLogging(app);
 
   configureExpoAndLanding(app);
+
+  await initStripe();
 
   const server = await registerRoutes(app);
 

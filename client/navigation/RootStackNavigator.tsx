@@ -11,6 +11,7 @@ import BookingDetailScreen from "@/screens/BookingDetailScreen";
 import ChatScreen from "@/screens/ChatScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
+import DemoScreen from "@/screens/DemoScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useUser } from "@/context/UserContext";
 import { useAuth } from "@/context/AuthContext";
@@ -34,14 +35,6 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function DemoScreen() {
-  const { setRole } = useUser();
-  React.useEffect(() => {
-    setRole("customer");
-  }, []);
-  return null;
-}
-
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
   const { role, setRole } = useUser();
@@ -49,6 +42,11 @@ export default function RootStackNavigator() {
   const { colors } = useTheme();
 
   const [isDemo, setIsDemo] = React.useState(false);
+
+  const handleEnterDemo = React.useCallback(() => {
+    setIsDemo(true);
+    setRole("customer");
+  }, [setRole]);
 
   if (isLoading) {
     return null;
@@ -59,17 +57,8 @@ export default function RootStackNavigator() {
       <Stack.Navigator screenOptions={{ ...screenOptions, headerShown: false }}>
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen 
-          name="Demo" 
-          options={{ headerShown: false }}
-        >
-          {() => {
-            React.useEffect(() => {
-              setIsDemo(true);
-              setRole("customer");
-            }, []);
-            return null;
-          }}
+        <Stack.Screen name="Demo" options={{ headerShown: false }}>
+          {(props) => <DemoScreen {...props} onEnterDemo={handleEnterDemo} />}
         </Stack.Screen>
       </Stack.Navigator>
     );
