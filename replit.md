@@ -8,6 +8,24 @@ The platform operates on a 20% commission model per completed job, similar to Ub
 
 ## Recent Changes
 
+### January 26, 2025
+- **Authentication System Implemented**:
+  - SignInScreen and SignUpScreen with email/password authentication
+  - AuthContext for managing user session state with AsyncStorage persistence
+  - bcryptjs password hashing (10 rounds)
+  - API routes: `POST /api/auth/signup`, `POST /api/auth/signin`
+  - Demo mode access for testing without registration
+- **Stripe Payment Integration**:
+  - stripe-replit-sync for webhook management and database sync
+  - Stripe schema automatically created via runMigrations
+  - Webhook route registered BEFORE express.json() middleware
+  - 20% platform commission model on bookings
+  - Server files: stripeClient.ts, webhookHandlers.ts
+- **Database Schema Updated**:
+  - Added passwordHash field to users table
+  - Added stripeCustomerId and stripeSubscriptionId fields
+  - Schema supports both auth and payment tracking
+
 ### January 24, 2025
 - Built complete MVP with Browse, Bookings, Messages, and Profile screens
 - Implemented mechanic marketplace with service cards and mechanic profiles
@@ -136,15 +154,22 @@ Three distinct user roles with different capabilities:
 ### Reviews
 - `POST /api/reviews` - Submit review
 
+### Authentication
+- `POST /api/auth/signup` - Create new user account
+- `POST /api/auth/signin` - Sign in with email/password
+
+### Stripe Webhook
+- `POST /api/stripe/webhook` - Stripe webhook handler (raw body required)
+
 ## External Dependencies
 
 ### Database
 - **PostgreSQL**: Primary database (configured via `DATABASE_URL` environment variable)
 - **Drizzle ORM**: Type-safe database queries and migrations
 
-### Third-Party Services (Planned for Future)
-- **Stripe Connect**: Marketplace split payments with Express accounts
-- **Clerk Authentication**: User authentication
+### Third-Party Services (Active)
+- **Stripe**: Marketplace payments with 20% platform commission via stripe-replit-sync
+- **Email/Password Authentication**: Built-in auth with bcryptjs password hashing
 
 ### Key NPM Packages
 - **expo**: Core Expo SDK for React Native
