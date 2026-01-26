@@ -83,19 +83,19 @@ export class MemStorage implements IStorage {
     services.forEach(s => this.services.set(s.id, s));
     
     const mechanicUsers: User[] = [
-      { id: "m1", email: "marcus@mechanix.com", name: "Marcus Johnson", phone: "555-0101", role: "mechanic", avatarUrl: null, createdAt: new Date(), updatedAt: new Date() },
-      { id: "m2", email: "sarah@mechanix.com", name: "Sarah Chen", phone: "555-0102", role: "mechanic", avatarUrl: null, createdAt: new Date(), updatedAt: new Date() },
-      { id: "m3", email: "david@mechanix.com", name: "David Rodriguez", phone: "555-0103", role: "mechanic", avatarUrl: null, createdAt: new Date(), updatedAt: new Date() },
-      { id: "m4", email: "emily@mechanix.com", name: "Emily Watson", phone: "555-0104", role: "mechanic", avatarUrl: null, createdAt: new Date(), updatedAt: new Date() },
+      { id: "m1", email: "marcus@mechanix.com", passwordHash: null, name: "Marcus Johnson", phone: "555-0101", role: "mechanic", avatarUrl: null, stripeCustomerId: null, createdAt: new Date(), updatedAt: new Date() },
+      { id: "m2", email: "sarah@mechanix.com", passwordHash: null, name: "Sarah Chen", phone: "555-0102", role: "mechanic", avatarUrl: null, stripeCustomerId: null, createdAt: new Date(), updatedAt: new Date() },
+      { id: "m3", email: "david@mechanix.com", passwordHash: null, name: "David Rodriguez", phone: "555-0103", role: "mechanic", avatarUrl: null, stripeCustomerId: null, createdAt: new Date(), updatedAt: new Date() },
+      { id: "m4", email: "emily@mechanix.com", passwordHash: null, name: "Emily Watson", phone: "555-0104", role: "mechanic", avatarUrl: null, stripeCustomerId: null, createdAt: new Date(), updatedAt: new Date() },
     ];
     
     mechanicUsers.forEach(u => this.users.set(u.id, u));
     
     const mechanicProfiles: MechanicProfile[] = [
-      { id: 1, userId: "m1", specialty: "German Vehicles", bio: "ASE certified with 10+ years experience", hourlyRate: "85.00", rating: "4.90", reviewCount: 127, completedJobs: 342, isVerified: true, isAvailable: true, latitude: null, longitude: null, serviceRadius: 10, createdAt: new Date(), updatedAt: new Date() },
-      { id: 2, userId: "m2", specialty: "Japanese Imports", bio: "Specialized in Toyota and Honda repairs", hourlyRate: "75.00", rating: "4.80", reviewCount: 89, completedJobs: 256, isVerified: true, isAvailable: true, latitude: null, longitude: null, serviceRadius: 10, createdAt: new Date(), updatedAt: new Date() },
-      { id: 3, userId: "m3", specialty: "Domestic Vehicles", bio: "Ford and Chevy specialist", hourlyRate: "70.00", rating: "4.70", reviewCount: 156, completedJobs: 489, isVerified: true, isAvailable: false, latitude: null, longitude: null, serviceRadius: 10, createdAt: new Date(), updatedAt: new Date() },
-      { id: 4, userId: "m4", specialty: "Electric Vehicles", bio: "Tesla and EV certified technician", hourlyRate: "95.00", rating: "5.00", reviewCount: 43, completedJobs: 87, isVerified: true, isAvailable: true, latitude: null, longitude: null, serviceRadius: 10, createdAt: new Date(), updatedAt: new Date() },
+      { id: 1, userId: "m1", specialty: "German Vehicles", bio: "ASE certified with 10+ years experience", hourlyRate: "85.00", rating: "4.90", reviewCount: 127, completedJobs: 342, isVerified: true, isAvailable: true, latitude: null, longitude: null, serviceRadius: 10, stripeConnectId: null, stripeConnectOnboarded: false, createdAt: new Date(), updatedAt: new Date() },
+      { id: 2, userId: "m2", specialty: "Japanese Imports", bio: "Specialized in Toyota and Honda repairs", hourlyRate: "75.00", rating: "4.80", reviewCount: 89, completedJobs: 256, isVerified: true, isAvailable: true, latitude: null, longitude: null, serviceRadius: 10, stripeConnectId: null, stripeConnectOnboarded: false, createdAt: new Date(), updatedAt: new Date() },
+      { id: 3, userId: "m3", specialty: "Domestic Vehicles", bio: "Ford and Chevy specialist", hourlyRate: "70.00", rating: "4.70", reviewCount: 156, completedJobs: 489, isVerified: true, isAvailable: false, latitude: null, longitude: null, serviceRadius: 10, stripeConnectId: null, stripeConnectOnboarded: false, createdAt: new Date(), updatedAt: new Date() },
+      { id: 4, userId: "m4", specialty: "Electric Vehicles", bio: "Tesla and EV certified technician", hourlyRate: "95.00", rating: "5.00", reviewCount: 43, completedJobs: 87, isVerified: true, isAvailable: true, latitude: null, longitude: null, serviceRadius: 10, stripeConnectId: null, stripeConnectOnboarded: false, createdAt: new Date(), updatedAt: new Date() },
     ];
     
     mechanicProfiles.forEach(m => {
@@ -103,7 +103,7 @@ export class MemStorage implements IStorage {
       this.mechanicIdCounter = Math.max(this.mechanicIdCounter, m.id + 1);
     });
     
-    const demoUser: User = { id: "demo", email: "alex@example.com", name: "Alex Thompson", phone: "555-1234", role: "customer", avatarUrl: null, createdAt: new Date(), updatedAt: new Date() };
+    const demoUser: User = { id: "demo", email: "alex@example.com", passwordHash: null, name: "Alex Thompson", phone: "555-1234", role: "customer", avatarUrl: null, stripeCustomerId: null, createdAt: new Date(), updatedAt: new Date() };
     this.users.set(demoUser.id, demoUser);
     
     const demoVehicle: Vehicle = { id: 1, userId: "demo", make: "Honda", model: "Accord", year: 2021, licensePlate: "ABC 1234", vin: null, createdAt: new Date() };
@@ -111,9 +111,9 @@ export class MemStorage implements IStorage {
     this.vehicleIdCounter = 2;
     
     const demoBookings: Booking[] = [
-      { id: 1, customerId: "demo", mechanicId: 1, vehicleId: 1, serviceId: 1, status: "upcoming", scheduledDate: new Date("2025-01-25T10:00:00"), location: "123 Main St, Apt 4B", latitude: null, longitude: null, notes: null, totalPrice: "75.00", platformFee: "15.00", mechanicPayout: "60.00", createdAt: new Date(), updatedAt: new Date(), completedAt: null },
-      { id: 2, customerId: "demo", mechanicId: 2, vehicleId: 1, serviceId: 2, status: "completed", scheduledDate: new Date("2025-01-20T14:00:00"), location: "456 Oak Ave", latitude: null, longitude: null, notes: null, totalPrice: "250.00", platformFee: "50.00", mechanicPayout: "200.00", createdAt: new Date(), updatedAt: new Date(), completedAt: new Date("2025-01-20T16:30:00") },
-      { id: 3, customerId: "demo", mechanicId: 3, vehicleId: 1, serviceId: 3, status: "completed", scheduledDate: new Date("2025-01-18T09:00:00"), location: "789 Elm St", latitude: null, longitude: null, notes: null, totalPrice: "100.00", platformFee: "20.00", mechanicPayout: "80.00", createdAt: new Date(), updatedAt: new Date(), completedAt: new Date("2025-01-18T10:00:00") },
+      { id: 1, customerId: "demo", mechanicId: 1, vehicleId: 1, serviceId: 1, status: "upcoming", scheduledDate: new Date("2025-01-25T10:00:00"), location: "123 Main St, Apt 4B", latitude: null, longitude: null, notes: null, totalPrice: "75.00", platformFee: "15.00", mechanicPayout: "60.00", stripePaymentIntentId: null, stripeTransferId: null, paymentStatus: "pending", createdAt: new Date(), updatedAt: new Date(), completedAt: null },
+      { id: 2, customerId: "demo", mechanicId: 2, vehicleId: 1, serviceId: 2, status: "completed", scheduledDate: new Date("2025-01-20T14:00:00"), location: "456 Oak Ave", latitude: null, longitude: null, notes: null, totalPrice: "250.00", platformFee: "50.00", mechanicPayout: "200.00", stripePaymentIntentId: null, stripeTransferId: null, paymentStatus: "paid", createdAt: new Date(), updatedAt: new Date(), completedAt: new Date("2025-01-20T16:30:00") },
+      { id: 3, customerId: "demo", mechanicId: 3, vehicleId: 1, serviceId: 3, status: "completed", scheduledDate: new Date("2025-01-18T09:00:00"), location: "789 Elm St", latitude: null, longitude: null, notes: null, totalPrice: "100.00", platformFee: "20.00", mechanicPayout: "80.00", stripePaymentIntentId: null, stripeTransferId: null, paymentStatus: "paid", createdAt: new Date(), updatedAt: new Date(), completedAt: new Date("2025-01-18T10:00:00") },
     ];
     
     demoBookings.forEach(b => {
@@ -150,9 +150,11 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id,
+      passwordHash: (insertUser as any).passwordHash || null,
       phone: insertUser.phone || null,
       role: insertUser.role || "customer",
       avatarUrl: insertUser.avatarUrl || null,
+      stripeCustomerId: null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -219,6 +221,9 @@ export class MemStorage implements IStorage {
       notes: booking.notes || null,
       platformFee,
       mechanicPayout,
+      stripePaymentIntentId: null,
+      stripeTransferId: null,
+      paymentStatus: "pending",
       createdAt: new Date(),
       updatedAt: new Date(),
       completedAt: null

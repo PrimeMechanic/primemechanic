@@ -1,8 +1,113 @@
 import type { Express } from "express";
 import { createServer, type Server } from "node:http";
+import bcrypt from "bcryptjs";
 import { storage } from "./storage";
+import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth routes
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, name, phone, role } = req.body;
+      
+      if (!email || !password || !name) {
+        return res.status(400).json({ error: "Email, password, and name are required" });
+      }
+      
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+      
+      const passwordHash = await bcrypt.hash(password, 10);
+      const user = await storage.createUser({
+        email,
+        name,
+        phone: phone || null,
+        role: role || "customer",
+        avatarUrl: null,
+        passwordHash,
+      } as any);
+      
+      const { passwordHash: _, ...userWithoutPassword } = user as any;
+      res.status(201).json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ error: "Failed to create account" });
+    }
+  });
+
+  app.post("/api/auth/signin", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      const userWithPassword = user as any;
+      if (!userWithPassword.passwordHash) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      const isValid = await bcrypt.compare(password, userWithPassword.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      const { passwordHash: _, ...userWithoutPassword } = userWithPassword;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Signin error:", error);
+      res.status(500).json({ error: "Failed to sign in" });
+    }
+  });
+
+  // Stripe routes
+  app.get("/api/stripe/publishable-key", async (req, res) => {
+    try {
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (error) {
+      console.error("Stripe key error:", error);
+      res.status(500).json({ error: "Failed to get Stripe key" });
+    }
+  });
+
+  app.post("/api/payments/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, bookingId, customerId } = req.body;
+      
+      if (!amount || !bookingId) {
+        return res.status(400).json({ error: "Amount and bookingId are required" });
+      }
+      
+      const stripe = await getUncachableStripeClient();
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100),
+        currency: "usd",
+        metadata: {
+          bookingId: bookingId.toString(),
+          customerId: customerId || "",
+        },
+      });
+      
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id 
+      });
+    } catch (error) {
+      console.error("Payment intent error:", error);
+      res.status(500).json({ error: "Failed to create payment" });
+    }
+  });
+
   app.get("/api/services", async (req, res) => {
     try {
       const services = await storage.getServices();
