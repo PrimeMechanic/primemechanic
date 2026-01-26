@@ -9,10 +9,19 @@ import BookServiceScreen from "@/screens/BookServiceScreen";
 import MechanicProfileScreen from "@/screens/MechanicProfileScreen";
 import BookingDetailScreen from "@/screens/BookingDetailScreen";
 import ChatScreen from "@/screens/ChatScreen";
+import SignInScreen from "@/screens/SignInScreen";
+import SignUpScreen from "@/screens/SignUpScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useUser } from "@/context/UserContext";
+import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { conversations, mechanics } from "@/data/mockData";
+
+export type AuthStackParamList = {
+  SignIn: undefined;
+  SignUp: undefined;
+  Demo: undefined;
+};
 
 export type RootStackParamList = {
   Main: undefined;
@@ -21,18 +30,56 @@ export type RootStackParamList = {
   MechanicProfile: { mechanicId: string };
   BookingDetail: { bookingId: string };
   Chat: { conversationId: string; mechanicId?: string };
-};
+} & AuthStackParamList;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+function DemoScreen() {
+  const { setRole } = useUser();
+  React.useEffect(() => {
+    setRole("customer");
+  }, []);
+  return null;
+}
+
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
-  const { role } = useUser();
+  const { role, setRole } = useUser();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const { colors } = useTheme();
+
+  const [isDemo, setIsDemo] = React.useState(false);
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (!isAuthenticated && !isDemo) {
+    return (
+      <Stack.Navigator screenOptions={{ ...screenOptions, headerShown: false }}>
+        <Stack.Screen name="SignIn" component={SignInScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen 
+          name="Demo" 
+          options={{ headerShown: false }}
+        >
+          {() => {
+            React.useEffect(() => {
+              setIsDemo(true);
+              setRole("customer");
+            }, []);
+            return null;
+          }}
+        </Stack.Screen>
+      </Stack.Navigator>
+    );
+  }
+
+  const currentRole = user?.role === "mechanic" ? "mechanic" : role;
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
-      {role === "customer" ? (
+      {currentRole === "customer" ? (
         <Stack.Screen
           name="Main"
           component={MainTabNavigator}

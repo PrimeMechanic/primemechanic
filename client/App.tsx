@@ -21,6 +21,7 @@ import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { UserProvider } from "@/context/UserContext";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -61,11 +62,13 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <UserProvider>
-            <SafeAreaProvider>
-              <AppContent />
-            </SafeAreaProvider>
-          </UserProvider>
+          <AuthProvider>
+            <UserProvider>
+              <SafeAreaProvider>
+                <AppContent />
+              </SafeAreaProvider>
+            </UserProvider>
+          </AuthProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
