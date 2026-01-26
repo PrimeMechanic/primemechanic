@@ -53,9 +53,9 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
       ]}
     >
       <View style={[styles.iconContainer, { backgroundColor: colors.backgroundSecondary }]}>
-        <Feather name={service.icon as any} size={24} color={colors.text} />
+        <Feather name={service.icon as any} size={24} color={colors.primary} />
       </View>
-      <ThemedText style={[styles.name, { color: colors.text }]}>{service.name}</ThemedText>
+      <ThemedText style={[styles.name, { color: colors.primary }]}>{service.name}</ThemedText>
       <ThemedText style={[styles.price, { color: colors.text }]}>
         ${service.price}
       </ThemedText>
