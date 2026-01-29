@@ -3,7 +3,7 @@ import { StyleSheet, View, FlatList } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/ThemedText";
 import { SegmentedControl } from "@/components/SegmentedControl";
@@ -20,7 +20,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function BookingsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const tabBarHeight = useBottomTabBarHeight();
-  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -63,8 +62,8 @@ export default function BookingsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.lg }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.backgroundRoot }]} edges={["top"]}>
+      <View style={[styles.header, { paddingTop: Spacing.lg }]}>
         <ThemedText style={[styles.screenTitle, { color: colors.text }]}>My Bookings</ThemedText>
         <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SegmentedControl
@@ -85,11 +84,11 @@ export default function BookingsScreen() {
           { paddingBottom: tabBarHeight + Spacing.xl },
           displayedBookings.length === 0 && styles.emptyContainer,
         ]}
-        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        scrollIndicatorInsets={{ bottom: 0 }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={renderEmptyState}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

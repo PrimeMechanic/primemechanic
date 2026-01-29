@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
@@ -33,7 +33,6 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export default function SignInScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const { signIn } = useAuth();
-  const insets = useSafeAreaInsets();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -66,7 +65,7 @@ export default function SignInScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.backgroundRoot }]} edges={["top"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -74,7 +73,7 @@ export default function SignInScreen({ navigation }: Props) {
         <ScrollView 
           contentContainerStyle={[
             styles.scrollContent, 
-            { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }
+            { paddingTop: Spacing.xl, paddingBottom: Spacing.xl }
           ]}
           showsVerticalScrollIndicator={false}
         >
@@ -189,7 +188,7 @@ export default function SignInScreen({ navigation }: Props) {
           </ThemedText>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 }
 

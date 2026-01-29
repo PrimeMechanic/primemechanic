@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -153,7 +153,6 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
 export default function JobsScreen() {
   const { colors } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
-  const insets = useSafeAreaInsets();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const pendingJobs = jobRequests.filter((j) => j.status === "pending");
@@ -213,8 +212,8 @@ export default function JobsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.lg }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.backgroundRoot }]} edges={["top"]}>
+      <View style={[styles.header, { paddingTop: Spacing.lg }]}>
         <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Jobs</ThemedText>
         <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SegmentedControl
@@ -240,11 +239,11 @@ export default function JobsScreen() {
           { paddingBottom: tabBarHeight + Spacing.xl },
           displayedJobs.length === 0 && styles.emptyListContent,
         ]}
-        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        scrollIndicatorInsets={{ bottom: 0 }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={renderEmptyState}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

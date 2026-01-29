@@ -3,7 +3,7 @@ import { StyleSheet, View, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -22,7 +22,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function BrowseScreen() {
   const navigation = useNavigation<NavigationProp>();
   const tabBarHeight = useBottomTabBarHeight();
-  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -45,11 +44,11 @@ export default function BrowseScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.backgroundRoot }]} edges={["top"]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
-          paddingTop: insets.top + Spacing.lg,
+          paddingTop: Spacing.lg,
           paddingBottom: tabBarHeight + Spacing["5xl"],
         }}
         showsVerticalScrollIndicator={false}
@@ -131,7 +130,7 @@ export default function BrowseScreen() {
         onPress={handleBookNow}
         bottom={tabBarHeight + Spacing.lg}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

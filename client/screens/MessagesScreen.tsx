@@ -3,7 +3,7 @@ import { StyleSheet, View, FlatList } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -19,7 +19,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function MessagesScreen() {
   const navigation = useNavigation<NavigationProp>();
   const tabBarHeight = useBottomTabBarHeight();
-  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
 
   const handleConversationPress = (conversationId: string) => {
@@ -29,8 +28,8 @@ export default function MessagesScreen() {
   const unreadCount = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.lg }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.backgroundRoot }]} edges={["top"]}>
+      <View style={[styles.header, { paddingTop: Spacing.lg }]}>
         <View style={styles.titleRow}>
           <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Messages</ThemedText>
           {unreadCount > 0 ? (
@@ -62,7 +61,7 @@ export default function MessagesScreen() {
           { paddingBottom: tabBarHeight + Spacing.xl },
           conversations.length === 0 && styles.emptyContainer,
         ]}
-        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        scrollIndicatorInsets={{ bottom: 0 }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <EmptyState
@@ -72,7 +71,7 @@ export default function MessagesScreen() {
           />
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

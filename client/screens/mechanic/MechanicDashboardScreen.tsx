@@ -3,7 +3,7 @@ import { StyleSheet, View, ScrollView, Pressable, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -117,7 +117,6 @@ function ScheduleItem({
 export default function MechanicDashboardScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
   const pendingRequests = jobRequests.filter((j) => j.status === "pending").length;
@@ -127,14 +126,15 @@ export default function MechanicDashboardScreen() {
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
-      contentContainerStyle={{
-        paddingTop: insets.top + Spacing.lg,
-        paddingBottom: tabBarHeight + Spacing["3xl"],
-      }}
-      showsVerticalScrollIndicator={false}
-    >
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.backgroundRoot }]} edges={["top"]}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{
+          paddingTop: Spacing.lg,
+          paddingBottom: tabBarHeight + Spacing["3xl"],
+        }}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={styles.welcomeSection}>
         <View style={styles.welcomeRow}>
           <View>
@@ -262,11 +262,15 @@ export default function MechanicDashboardScreen() {
           </View>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
