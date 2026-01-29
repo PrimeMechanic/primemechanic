@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Image, Pressable, ScrollView, Switch } from "react-native";
+import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share, Alert, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -109,6 +109,30 @@ export default function ProfileScreen() {
     toggleTheme();
   };
 
+  const handleShareWithFriends = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await Share.share({
+        message: "Check out PrimeMechanic - the best app for finding mobile mechanics! Get your car fixed wherever you are. Download now!",
+        title: "Share PrimeMechanic",
+      });
+    } catch (error) {
+      console.log("Error sharing:", error);
+    }
+  };
+
+  const handleInviteMechanic = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await Share.share({
+        message: "Join PrimeMechanic as a mobile mechanic! Set your own schedule, grow your business, and earn more. Sign up today and start accepting jobs in your area!",
+        title: "Invite a Mechanic",
+      });
+    } catch (error) {
+      console.log("Error sharing:", error);
+    }
+  };
+
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundDefault }]}
@@ -174,6 +198,22 @@ export default function ProfileScreen() {
           <SettingsItem icon="credit-card" label="Payment Methods" onPress={() => {}} />
           <SettingsItem icon="map-pin" label="Saved Addresses" onPress={() => {}} />
           <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Spread the Word</ThemedText>
+        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+          <SettingsItem
+            icon="share-2"
+            label="Share with Friends"
+            onPress={handleShareWithFriends}
+          />
+          <SettingsItem
+            icon="user-plus"
+            label="Invite My Mechanic"
+            onPress={handleInviteMechanic}
+          />
         </View>
       </View>
 
