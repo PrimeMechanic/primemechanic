@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { SearchBar } from "@/components/SearchBar";
@@ -44,15 +45,24 @@ export default function BrowseScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
-          paddingBottom: tabBarHeight + Spacing["4xl"],
+          paddingBottom: tabBarHeight + Spacing["5xl"],
         }}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.welcomeContainer}>
+          <ThemedText style={[styles.welcomeText, { color: colors.textSecondary }]}>
+            Welcome back
+          </ThemedText>
+          <ThemedText style={[styles.headline, { color: colors.text }]}>
+            Find a Mechanic
+          </ThemedText>
+        </View>
+
         <View style={styles.searchContainer}>
           <SearchBar
             value={searchQuery}
@@ -62,7 +72,17 @@ export default function BrowseScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Services</ThemedText>
+          <View style={styles.sectionHeader}>
+            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+              Popular Services
+            </ThemedText>
+            <View style={[styles.seeAllButton, { backgroundColor: `${colors.primary}10` }]}>
+              <ThemedText style={[styles.seeAllText, { color: colors.primary }]}>
+                See All
+              </ThemedText>
+              <Feather name="chevron-right" size={14} color={colors.primary} />
+            </View>
+          </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -79,7 +99,14 @@ export default function BrowseScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Nearby Mechanics</ThemedText>
+          <View style={styles.sectionHeader}>
+            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+              Nearby Mechanics
+            </ThemedText>
+            <ThemedText style={[styles.countText, { color: colors.textSecondary }]}>
+              {filteredMechanics.length} available
+            </ThemedText>
+          </View>
           {filteredMechanics.length > 0 ? (
             <View style={styles.mechanicsGrid}>
               {filteredMechanics.map((mechanic) => (
@@ -115,26 +142,58 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  welcomeContainer: {
+    paddingHorizontal: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  welcomeText: {
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  headline: {
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
+  },
   searchContainer: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+    marginBottom: Spacing["2xl"],
   },
   section: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing["2xl"],
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
+  },
+  seeAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  seeAllText: {
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  countText: {
+    fontSize: 14,
   },
   servicesRow: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     gap: Spacing.md,
   },
   mechanicsGrid: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     gap: Spacing.md,
   },
 });

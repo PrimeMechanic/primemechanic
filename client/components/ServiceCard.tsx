@@ -7,9 +7,10 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
 import { Service } from "@/types";
 
@@ -29,11 +30,11 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95, { damping: 15 });
+    scale.value = withSpring(0.95, { damping: 20, stiffness: 200 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15 });
+    scale.value = withSpring(1, { damping: 20, stiffness: 200 });
   };
 
   const handlePress = () => {
@@ -49,15 +50,19 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
       style={[
         styles.container,
         animatedStyle,
-        { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
+        { backgroundColor: colors.backgroundDefault },
+        Shadows.small,
       ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: colors.backgroundSecondary }]}>
+      <LinearGradient
+        colors={[`${colors.primary}15`, `${colors.primary}05`]}
+        style={styles.iconContainer}
+      >
         <Feather name={service.icon as any} size={24} color={colors.primary} />
-      </View>
-      <ThemedText style={[styles.name, { color: colors.primary }]}>{service.name}</ThemedText>
-      <ThemedText style={[styles.price, { color: colors.text }]}>
-        ${service.price}
+      </LinearGradient>
+      <ThemedText style={[styles.name, { color: colors.text }]}>{service.name}</ThemedText>
+      <ThemedText style={[styles.price, { color: colors.primary }]}>
+        from ${service.price}
       </ThemedText>
     </AnimatedPressable>
   );
@@ -65,17 +70,16 @@ export function ServiceCard({ service, onPress }: ServiceCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: 100,
+    width: 110,
     alignItems: "center",
     paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: Spacing.sm,
@@ -83,6 +87,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 13,
     fontWeight: "600",
+    fontFamily: "Montserrat_600SemiBold",
     textAlign: "center",
     marginBottom: 4,
   },

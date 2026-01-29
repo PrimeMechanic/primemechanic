@@ -1,13 +1,13 @@
 import React from "react";
-import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share, Alert, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { currentUser } from "@/data/mockData";
 import { useUser } from "@/context/UserContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -50,23 +50,23 @@ function SettingsItem({
       style={({ pressed }) => [
         styles.settingsItem, 
         { borderBottomColor: colors.border },
-        pressed && !toggle && { backgroundColor: colors.backgroundSecondary }
+        pressed && !toggle && { backgroundColor: `${colors.primary}05` }
       ]}
       onPress={handlePress}
     >
       <View style={[
         styles.settingsIconContainer, 
-        { backgroundColor: danger ? "rgba(239, 68, 68, 0.1)" : highlight ? `${colors.primary}15` : `${colors.accent}15` }
+        { backgroundColor: danger ? `${colors.error}12` : highlight ? `${colors.primary}12` : `${colors.primary}08` }
       ]}>
         <Feather
           name={icon as any}
-          size={20}
-          color={danger ? colors.error : highlight ? colors.primary : colors.accent}
+          size={18}
+          color={danger ? colors.error : highlight ? colors.primary : colors.primary}
         />
       </View>
       <ThemedText style={[
         styles.settingsLabel, 
-        { color: danger ? colors.error : highlight ? colors.primary : colors.text }
+        { color: danger ? colors.error : colors.text }
       ]}>
         {label}
       </ThemedText>
@@ -80,11 +80,11 @@ function SettingsItem({
           <Switch
             value={toggleValue}
             onValueChange={onToggle}
-            trackColor={{ false: colors.border, true: colors.accent }}
+            trackColor={{ false: colors.border, true: colors.primary }}
             thumbColor="#FFFFFF"
           />
         ) : (
-          <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+          <Feather name="chevron-right" size={18} color={colors.textSecondary} />
         )}
       </View>
     </Pressable>
@@ -135,46 +135,57 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.backgroundDefault }]}
+      style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.xl,
-        paddingBottom: tabBarHeight + Spacing.xl,
+        paddingTop: headerHeight + Spacing.lg,
+        paddingBottom: tabBarHeight + Spacing["2xl"],
       }}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.profileSection}>
-        <Image source={currentUser.avatar} style={[styles.avatar, { borderColor: colors.accent }]} />
-        <ThemedText style={[styles.name, { color: colors.text }]}>{currentUser.name}</ThemedText>
-        <ThemedText style={[styles.email, { color: colors.textSecondary }]}>{currentUser.email}</ThemedText>
+      <View style={[styles.profileCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
+        <LinearGradient
+          colors={["#0FA958", "#0B3D2E"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.profileGradient}
+        >
+          <Image source={currentUser.avatar} style={styles.avatar} />
+        </LinearGradient>
+        <View style={styles.profileInfo}>
+          <ThemedText style={[styles.name, { color: colors.text }]}>{currentUser.name}</ThemedText>
+          <ThemedText style={[styles.email, { color: colors.textSecondary }]}>{currentUser.email}</ThemedText>
+        </View>
       </View>
 
       <View style={styles.section}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>My Vehicles</ThemedText>
-        <View style={[styles.vehicleCard, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
-          <View style={[styles.vehicleIconContainer, { backgroundColor: `${colors.accent}15` }]}>
-            <Feather name="truck" size={24} color={colors.accent} />
+        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>MY VEHICLES</ThemedText>
+        <View style={[styles.card, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
+          <View style={styles.vehicleRow}>
+            <View style={[styles.vehicleIconContainer, { backgroundColor: `${colors.primary}10` }]}>
+              <Feather name="truck" size={22} color={colors.primary} />
+            </View>
+            <View style={styles.vehicleInfo}>
+              <ThemedText style={[styles.vehicleName, { color: colors.text }]}>
+                {vehicle.year} {vehicle.make} {vehicle.model}
+              </ThemedText>
+              <ThemedText style={[styles.vehiclePlate, { color: colors.textSecondary }]}>
+                {vehicle.licensePlate}
+              </ThemedText>
+            </View>
+            <Pressable style={styles.editButton} hitSlop={8}>
+              <Feather name="edit-2" size={16} color={colors.textSecondary} />
+            </Pressable>
           </View>
-          <View style={styles.vehicleInfo}>
-            <ThemedText style={[styles.vehicleName, { color: colors.text }]}>
-              {vehicle.year} {vehicle.make} {vehicle.model}
-            </ThemedText>
-            <ThemedText style={[styles.vehiclePlate, { color: colors.textSecondary }]}>
-              {vehicle.licensePlate}
-            </ThemedText>
-          </View>
-          <Pressable style={styles.addButton}>
-            <Feather name="edit-2" size={18} color={colors.textSecondary} />
+          <Pressable style={[styles.addVehicleRow, { borderTopColor: colors.border }]}>
+            <Feather name="plus-circle" size={18} color={colors.primary} />
+            <ThemedText style={[styles.addVehicleText, { color: colors.primary }]}>Add Vehicle</ThemedText>
           </Pressable>
         </View>
-        <Pressable style={styles.addVehicleButton}>
-          <Feather name="plus" size={20} color={colors.accent} />
-          <ThemedText style={[styles.addVehicleText, { color: colors.accent }]}>Add Vehicle</ThemedText>
-        </Pressable>
       </View>
 
       <View style={styles.section}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Appearance</ThemedText>
-        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>APPEARANCE</ThemedText>
+        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SettingsItem
             icon={isDark ? "moon" : "sun"}
             label="Dark Mode"
@@ -186,8 +197,8 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Settings</ThemedText>
-        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>SETTINGS</ThemedText>
+        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SettingsItem
             icon="bell"
             label="Notifications"
@@ -202,8 +213,8 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Spread the Word</ThemedText>
-        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>SHARE</ThemedText>
+        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SettingsItem
             icon="share-2"
             label="Share with Friends"
@@ -218,8 +229,8 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Demo</ThemedText>
-        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>DEMO</ThemedText>
+        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SettingsItem
             icon="tool"
             label="Switch to Mechanic View"
@@ -230,8 +241,8 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>Account</ThemedText>
-        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
+        <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>ACCOUNT</ThemedText>
+        <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SettingsItem icon="log-out" label="Sign Out" onPress={() => {}} />
           <SettingsItem icon="trash-2" label="Delete Account" onPress={() => {}} danger />
         </View>
@@ -244,17 +255,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  profileSection: {
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
+  profileCard: {
+    marginHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.lg,
     marginBottom: Spacing["2xl"],
+    overflow: "hidden",
+  },
+  profileGradient: {
+    paddingTop: Spacing["3xl"],
+    paddingBottom: Spacing["4xl"],
+    alignItems: "center",
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: Spacing.md,
+    width: 88,
+    height: 88,
+    borderRadius: 28,
     borderWidth: 3,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  profileInfo: {
+    alignItems: "center",
+    paddingVertical: Spacing.lg,
+    marginTop: -Spacing.xl,
   },
   name: {
     fontSize: 22,
@@ -266,27 +288,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   section: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     marginBottom: Spacing.xl,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
-    textTransform: "uppercase",
     letterSpacing: 0.5,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
-  vehicleCard: {
+  card: {
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+  },
+  vehicleRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
-    borderWidth: 1,
   },
   vehicleIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -302,24 +325,23 @@ const styles = StyleSheet.create({
   vehiclePlate: {
     fontSize: 14,
   },
-  addButton: {
-    padding: Spacing.sm,
+  editButton: {
+    padding: Spacing.xs,
   },
-  addVehicleButton: {
+  addVehicleRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.md,
-    marginTop: Spacing.sm,
+    borderTopWidth: 1,
+    gap: Spacing.sm,
   },
   addVehicleText: {
     fontSize: 15,
     fontWeight: "600",
-    marginLeft: Spacing.sm,
   },
   settingsGroup: {
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderRadius: BorderRadius.md,
     overflow: "hidden",
   },
   settingsItem: {
@@ -330,9 +352,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   settingsIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -349,7 +371,7 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   badgeText: {
     fontSize: 11,

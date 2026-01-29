@@ -9,7 +9,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
 import { Mechanic } from "@/types";
 
@@ -29,11 +29,11 @@ export function MechanicCard({ mechanic, onPress }: MechanicCardProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.98, { damping: 15 });
+    scale.value = withSpring(0.98, { damping: 20, stiffness: 200 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15 });
+    scale.value = withSpring(1, { damping: 20, stiffness: 200 });
   };
 
   const handlePress = () => {
@@ -49,52 +49,53 @@ export function MechanicCard({ mechanic, onPress }: MechanicCardProps) {
       style={[
         styles.container,
         animatedStyle,
-        { backgroundColor: colors.backgroundRoot, borderColor: colors.border },
+        { backgroundColor: colors.backgroundDefault },
+        Shadows.small,
       ]}
     >
-      <Image source={mechanic.avatar} style={styles.avatar} />
+      <View style={styles.avatarContainer}>
+        <Image source={mechanic.avatar} style={styles.avatar} />
+        {mechanic.isAvailable ? (
+          <View style={[styles.onlineIndicator, { backgroundColor: colors.success, borderColor: colors.backgroundDefault }]} />
+        ) : null}
+      </View>
       <View style={styles.content}>
         <View style={styles.header}>
           <ThemedText style={[styles.name, { color: colors.text }]}>{mechanic.name}</ThemedText>
-          {mechanic.isAvailable ? (
-            <View
-              style={[
-                styles.availableBadge,
-                { backgroundColor: `rgba(${colors.success === "#22C55E" ? "34, 197, 94" : "34, 197, 94"}, 0.1)` },
-              ]}
-            >
-              <View style={[styles.availableDot, { backgroundColor: colors.success }]} />
-              <ThemedText style={[styles.availableText, { color: colors.success }]}>
-                Available
-              </ThemedText>
-            </View>
-          ) : null}
+          <View style={[styles.ratingBadge, { backgroundColor: `${colors.warning}15` }]}>
+            <Feather name="star" size={12} color={colors.warning} />
+            <ThemedText style={[styles.ratingText, { color: colors.warning }]}>
+              {mechanic.rating}
+            </ThemedText>
+          </View>
         </View>
         <ThemedText style={[styles.specialty, { color: colors.textSecondary }]}>
           {mechanic.specialty}
         </ThemedText>
         <View style={styles.stats}>
           <View style={styles.statItem}>
-            <Feather name="star" size={14} color={colors.warning} />
-            <ThemedText style={[styles.statText, { color: colors.textSecondary }]}>
-              {mechanic.rating} ({mechanic.reviewCount})
-            </ThemedText>
-          </View>
-          <View style={styles.statItem}>
-            <Feather name="map-pin" size={14} color={colors.textSecondary} />
+            <Feather name="map-pin" size={13} color={colors.textSecondary} />
             <ThemedText style={[styles.statText, { color: colors.textSecondary }]}>
               {mechanic.distance}
             </ThemedText>
           </View>
+          <View style={styles.divider} />
           <View style={styles.statItem}>
-            <Feather name="dollar-sign" size={14} color={colors.success} />
-            <ThemedText style={[styles.statText, { color: colors.textSecondary }]}>
+            <ThemedText style={[styles.priceText, { color: colors.primary }]}>
               ${mechanic.hourlyRate}/hr
+            </ThemedText>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.statItem}>
+            <ThemedText style={[styles.statText, { color: colors.textSecondary }]}>
+              {mechanic.reviewCount} reviews
             </ThemedText>
           </View>
         </View>
       </View>
-      <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+      <View style={[styles.chevronContainer, { backgroundColor: `${colors.primary}10` }]}>
+        <Feather name="chevron-right" size={18} color={colors.primary} />
+      </View>
     </AnimatedPressable>
   );
 }
@@ -104,14 +105,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+  },
+  avatarContainer: {
+    position: "relative",
+    marginRight: Spacing.md,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: Spacing.md,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+  },
+  onlineIndicator: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
   },
   content: {
     flex: 1,
@@ -127,22 +139,17 @@ const styles = StyleSheet.create({
     fontFamily: "Montserrat_600SemiBold",
     marginRight: Spacing.sm,
   },
-  availableBadge: {
+  ratingBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 10,
+    borderRadius: 6,
+    gap: 3,
   },
-  availableDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 4,
-  },
-  availableText: {
-    fontSize: 11,
-    fontWeight: "500",
+  ratingText: {
+    fontSize: 12,
+    fontWeight: "600",
   },
   specialty: {
     fontSize: 14,
@@ -150,7 +157,7 @@ const styles = StyleSheet.create({
   },
   stats: {
     flexDirection: "row",
-    gap: Spacing.md,
+    alignItems: "center",
   },
   statItem: {
     flexDirection: "row",
@@ -159,5 +166,23 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
+  },
+  priceText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  divider: {
+    width: 1,
+    height: 12,
+    backgroundColor: "#E3E7E5",
+    marginHorizontal: Spacing.sm,
+  },
+  chevronContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: Spacing.sm,
   },
 });
