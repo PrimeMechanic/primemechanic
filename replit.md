@@ -8,6 +8,20 @@ The platform operates on a 20% commission model per completed job, similar to Ub
 
 ## Recent Changes
 
+### January 29, 2025
+- **Premium UI Design Overhaul**:
+  - New Emerald Tech Green color theme (#0FA958 primary, #0B3D2E secondary)
+  - Card-based layouts with subtle shadows (shadowOpacity: 0.04-0.08)
+  - Button component with LinearGradient (#0FA958 to #0B8A47)
+  - Redesigned SignInScreen and SignUpScreen with modern card layouts
+  - Enhanced BrowseScreen with welcome header and premium styling
+  - Updated ProfileScreen with gradient header and improved settings UI
+  - New FloatingActionButton with gradient and rounded corners
+  - Premium ServiceCard and MechanicCard with improved visual hierarchy
+  - SearchBar with card-style shadow instead of border
+  - Updated Shadows, BorderRadius, and Spacing in theme constants
+  - Generated comprehensive design_guidelines.md for consistent styling
+
 ### January 26, 2025
 - **Authentication System Implemented**:
   - SignInScreen and SignUpScreen with email/password authentication
@@ -64,11 +78,13 @@ Preferred communication style: Simple, everyday language.
   - UserContext manages role switching between views
   - Floating action button for quick service booking (customer only)
 - **State Management**: TanStack React Query for server state management
-- **Styling**: Custom theme system with light/dark mode support, using design tokens (Colors, Spacing, Typography, BorderRadius)
+- **Styling**: Custom theme system with light/dark mode support, using design tokens (Colors, Spacing, Typography, BorderRadius, Shadows)
   - ThemeContext provides dynamic colors based on current theme (stored in AsyncStorage)
-  - Light mode: White background (#FFFFFF), Midnight Blue primary (#0D1B2A)
-  - Dark mode: Slate background (#0F172A), Electric Blue accent (#00D4FF)
-  - Secondary Text: Slate Gray (#64748B)
+  - Light mode: Off-white background (#F6F8F7), Emerald Tech Green primary (#0FA958)
+  - Dark mode: Slate background (#111111), Emerald Green accent (#0FA958)
+  - Secondary Text: Slate Gray (#6B6F73)
+  - Card-based layouts with subtle shadows for premium feel
+  - Button animations scale to 0.97 on press with gradient backgrounds
 - **Animation**: React Native Reanimated for smooth UI animations with haptic feedback via Expo Haptics
 - **Fonts**: Montserrat (Google Fonts) for professional automotive aesthetic
 
