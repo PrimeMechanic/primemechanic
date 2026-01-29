@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -90,6 +90,7 @@ function SettingsItem({
 
 export default function MechanicProfileEditScreen() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const { toggleRole } = useUser();
   const { isDark, toggleTheme } = useTheme();
@@ -117,14 +118,13 @@ export default function MechanicProfileEditScreen() {
   });
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.backgroundRoot }]} edges={["top"]}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={{
-          paddingTop: Spacing.lg,
-          paddingBottom: tabBarHeight + Spacing["3xl"],
-        }}
-        showsVerticalScrollIndicator={false}
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
+      contentContainerStyle={{
+        paddingTop: insets.top + Spacing.lg,
+        paddingBottom: tabBarHeight + Spacing["3xl"],
+      }}
+      showsVerticalScrollIndicator={false}
     >
       <View style={styles.profileSection}>
         <View style={[styles.profileCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
@@ -282,15 +282,11 @@ export default function MechanicProfileEditScreen() {
           <SettingsItem icon="trash-2" label="Delete Account" onPress={() => {}} danger />
         </View>
       </View>
-      </ScrollView>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   container: {
     flex: 1,
   },
