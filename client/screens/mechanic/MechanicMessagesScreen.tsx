@@ -7,16 +7,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ConversationCard } from "@/components/ConversationCard";
+import { CustomerConversationCard } from "@/components/CustomerConversationCard";
 import { EmptyState } from "@/components/EmptyState";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
-import { conversations } from "@/data/mockData";
+import { mechanicConversations } from "@/data/mechanicData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { useTheme } from "@/context/ThemeContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function MessagesScreen() {
+export default function MechanicMessagesScreen() {
   const navigation = useNavigation<NavigationProp>();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
@@ -26,7 +26,7 @@ export default function MessagesScreen() {
     navigation.navigate("Chat", { conversationId });
   };
 
-  const unreadCount = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
+  const unreadCount = mechanicConversations.reduce((acc, c) => acc + c.unreadCount, 0);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
@@ -39,20 +39,20 @@ export default function MessagesScreen() {
             </View>
           ) : null}
         </View>
-        {conversations.length > 0 ? (
+        {mechanicConversations.length > 0 ? (
           <View style={[styles.searchBar, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
             <Feather name="search" size={18} color={colors.textSecondary} />
             <ThemedText style={[styles.searchPlaceholder, { color: colors.textSecondary }]}>
-              Search conversations...
+              Search customers...
             </ThemedText>
           </View>
         ) : null}
       </View>
       <FlatList
-        data={conversations}
+        data={mechanicConversations}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ConversationCard
+          <CustomerConversationCard
             conversation={item}
             onPress={() => handleConversationPress(item.id)}
           />
@@ -60,15 +60,15 @@ export default function MessagesScreen() {
         contentContainerStyle={[
           styles.listContent,
           { paddingBottom: tabBarHeight + Spacing.xl },
-          conversations.length === 0 && styles.emptyContainer,
+          mechanicConversations.length === 0 && styles.emptyContainer,
         ]}
         scrollIndicatorInsets={{ bottom: insets.bottom }}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <EmptyState
-            image={require("../../assets/images/empty-messages.png")}
+            image={require("../../../assets/images/empty-messages.png")}
             title="No Messages Yet"
-            message="Start a conversation by booking a service with a mechanic."
+            message="Customer messages will appear here when you accept jobs."
           />
         }
       />

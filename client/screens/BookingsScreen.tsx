@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { StyleSheet, View, FlatList } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,7 +19,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function BookingsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -66,7 +64,7 @@ export default function BookingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md, backgroundColor: colors.backgroundRoot }]}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing.lg }]}>
         <ThemedText style={[styles.screenTitle, { color: colors.text }]}>My Bookings</ThemedText>
         <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SegmentedControl

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, ScrollView, Pressable } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -51,7 +51,7 @@ function EarningsCard({ title, amount, subtitle, icon, gradient, iconColor }: Ea
 
 export default function EarningsScreen() {
   const { colors } = useTheme();
-  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const [selectedPeriod, setSelectedPeriod] = useState(1);
 
@@ -86,7 +86,7 @@ export default function EarningsScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
+        paddingTop: insets.top + Spacing.lg,
         paddingBottom: tabBarHeight + Spacing["3xl"],
       }}
       showsVerticalScrollIndicator={false}

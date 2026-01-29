@@ -6,14 +6,15 @@ import { Platform, StyleSheet } from "react-native";
 
 import MechanicDashboardScreen from "@/screens/mechanic/MechanicDashboardScreen";
 import JobsScreen from "@/screens/mechanic/JobsScreen";
+import MechanicMessagesScreen from "@/screens/mechanic/MechanicMessagesScreen";
 import EarningsScreen from "@/screens/mechanic/EarningsScreen";
 import MechanicProfileEditScreen from "@/screens/mechanic/MechanicProfileEditScreen";
-import { HeaderTitle } from "@/components/HeaderTitle";
 import { useTheme } from "@/context/ThemeContext";
 
 export type MechanicTabParamList = {
   DashboardTab: undefined;
   JobsTab: undefined;
+  MessagesTab: undefined;
   EarningsTab: undefined;
   ProfileTab: undefined;
 };
@@ -65,8 +66,8 @@ export default function MechanicTabNavigator() {
         name="DashboardTab"
         component={MechanicDashboardScreen}
         options={{
-          title: "Dashboard",
-          headerTitle: () => <HeaderTitle title="PrimeMechanic" />,
+          title: "Home",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
@@ -77,7 +78,7 @@ export default function MechanicTabNavigator() {
         component={JobsScreen}
         options={{
           title: "Jobs",
-          headerTitle: "My Jobs",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="briefcase" size={size} color={color} />
           ),
@@ -89,11 +90,27 @@ export default function MechanicTabNavigator() {
         }}
       />
       <Tab.Screen
+        name="MessagesTab"
+        component={MechanicMessagesScreen}
+        options={{
+          title: "Messages",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="message-circle" size={size} color={color} />
+          ),
+          tabBarBadge: 1,
+          tabBarBadgeStyle: {
+            backgroundColor: colors.accent,
+            fontSize: 10,
+          },
+        }}
+      />
+      <Tab.Screen
         name="EarningsTab"
         component={EarningsScreen}
         options={{
           title: "Earnings",
-          headerTitle: "Earnings",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="dollar-sign" size={size} color={color} />
           ),
@@ -104,7 +121,7 @@ export default function MechanicTabNavigator() {
         component={MechanicProfileEditScreen}
         options={{
           title: "Profile",
-          headerTitle: "My Profile",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),

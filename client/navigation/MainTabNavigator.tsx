@@ -66,7 +66,7 @@ export default function MainTabNavigator() {
         component={BrowseScreen}
         options={{
           title: "Browse",
-          headerTitle: () => <HeaderTitle title="PrimeMechanic" />,
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="search" size={size} color={color} />
           ),
@@ -77,7 +77,7 @@ export default function MainTabNavigator() {
         component={BookingsScreen}
         options={{
           title: "Bookings",
-          headerTitle: "My Bookings",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="calendar" size={size} color={color} />
           ),
@@ -88,7 +88,7 @@ export default function MainTabNavigator() {
         component={MessagesScreen}
         options={{
           title: "Messages",
-          headerTitle: "Messages",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="message-circle" size={size} color={color} />
           ),
@@ -104,7 +104,7 @@ export default function MainTabNavigator() {
         component={ProfileScreen}
         options={{
           title: "Profile",
-          headerTitle: "Profile",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" size={size} color={color} />
           ),

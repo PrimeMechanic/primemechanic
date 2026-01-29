@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -22,7 +23,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
-import { Spacing, BorderRadius, Typography, Shadows } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import type { AuthStackParamList } from "@/navigation/RootStackNavigator";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "SignIn">;
@@ -70,7 +71,13 @@ export default function SignInScreen({ navigation }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
-        <View style={[styles.content, { paddingTop: insets.top + Spacing["4xl"] }]}>
+        <ScrollView 
+          contentContainerStyle={[
+            styles.scrollContent, 
+            { paddingTop: insets.top + Spacing["3xl"], paddingBottom: insets.bottom + Spacing.xl }
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.logoContainer}>
             <LinearGradient
               colors={["#0FA958", "#0B3D2E"]}
@@ -180,7 +187,7 @@ export default function SignInScreen({ navigation }: Props) {
           <ThemedText style={[styles.termsText, { color: colors.textSecondary }]}>
             By continuing, you agree to our Terms of Service and Privacy Policy
           </ThemedText>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
@@ -193,13 +200,13 @@ const styles = StyleSheet.create({
   keyboardView: {
     flex: 1,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.xl,
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: Spacing["3xl"],
+    marginBottom: Spacing["2xl"],
   },
   logoCircle: {
     width: 80,

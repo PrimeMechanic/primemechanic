@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share } from "react-native";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -92,8 +92,8 @@ function SettingsItem({
 }
 
 export default function ProfileScreen() {
-  const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
   const { toggleRole } = useUser();
   const { isDark, toggleTheme, colors } = useTheme();
 
@@ -137,7 +137,7 @@ export default function ProfileScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
+        paddingTop: insets.top + Spacing.lg,
         paddingBottom: tabBarHeight + Spacing["2xl"],
       }}
       showsVerticalScrollIndicator={false}
@@ -150,11 +150,9 @@ export default function ProfileScreen() {
           style={styles.profileGradient}
         >
           <Image source={currentUser.avatar} style={styles.avatar} />
+          <ThemedText style={styles.nameOnGradient}>{currentUser.name}</ThemedText>
+          <ThemedText style={styles.emailOnGradient}>{currentUser.email}</ThemedText>
         </LinearGradient>
-        <View style={styles.profileInfo}>
-          <ThemedText style={[styles.name, { color: colors.text }]}>{currentUser.name}</ThemedText>
-          <ThemedText style={[styles.email, { color: colors.textSecondary }]}>{currentUser.email}</ThemedText>
-        </View>
       </View>
 
       <View style={styles.section}>
@@ -257,13 +255,13 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     marginHorizontal: Spacing.xl,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.xl,
     marginBottom: Spacing["2xl"],
     overflow: "hidden",
   },
   profileGradient: {
-    paddingTop: Spacing["3xl"],
-    paddingBottom: Spacing["4xl"],
+    paddingTop: Spacing["2xl"],
+    paddingBottom: Spacing["2xl"],
     alignItems: "center",
   },
   avatar: {
@@ -272,20 +270,18 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 3,
     borderColor: "rgba(255,255,255,0.3)",
+    marginBottom: Spacing.md,
   },
-  profileInfo: {
-    alignItems: "center",
-    paddingVertical: Spacing.lg,
-    marginTop: -Spacing.xl,
-  },
-  name: {
+  nameOnGradient: {
     fontSize: 22,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
+    color: "#FFFFFF",
     marginBottom: 4,
   },
-  email: {
+  emailOnGradient: {
     fontSize: 15,
+    color: "rgba(255,255,255,0.8)",
   },
   section: {
     paddingHorizontal: Spacing.xl,

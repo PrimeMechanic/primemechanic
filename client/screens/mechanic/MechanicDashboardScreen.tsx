@@ -2,8 +2,8 @@ import React from "react";
 import { StyleSheet, View, ScrollView, Pressable, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -117,7 +117,7 @@ function ScheduleItem({
 export default function MechanicDashboardScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
-  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
 
   const pendingRequests = jobRequests.filter((j) => j.status === "pending").length;
@@ -130,7 +130,7 @@ export default function MechanicDashboardScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.lg,
+        paddingTop: insets.top + Spacing.lg,
         paddingBottom: tabBarHeight + Spacing["3xl"],
       }}
       showsVerticalScrollIndicator={false}
