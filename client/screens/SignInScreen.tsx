@@ -7,20 +7,27 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { Button } from "@/components/Button";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
-import { Spacing, BorderRadius, Typography } from "@/constants/theme";
+import { Spacing, BorderRadius, Typography, Shadows } from "@/constants/theme";
 import type { AuthStackParamList } from "@/navigation/RootStackNavigator";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "SignIn">;
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function SignInScreen({ navigation }: Props) {
   const { colors } = useTheme();
@@ -32,6 +39,12 @@ export default function SignInScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const demoScale = useSharedValue(1);
+
+  const demoAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: demoScale.value }],
+  }));
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
@@ -52,103 +65,124 @@ export default function SignInScreen({ navigation }: Props) {
   };
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"] }]}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
-        <View style={styles.logoContainer}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-            <Feather name="settings" size={48} color="#FFFFFF" />
+        <View style={[styles.content, { paddingTop: insets.top + Spacing["4xl"] }]}>
+          <View style={styles.logoContainer}>
+            <LinearGradient
+              colors={["#0FA958", "#0B3D2E"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.logoCircle}
+            >
+              <Feather name="tool" size={40} color="#FFFFFF" />
+            </LinearGradient>
+            <ThemedText style={[styles.appName, { color: colors.text }]}>
+              PrimeMechanic
+            </ThemedText>
+            <ThemedText style={[styles.tagline, { color: colors.textSecondary }]}>
+              Your trusted mobile mechanic
+            </ThemedText>
           </View>
-          <ThemedText style={styles.appName}>PrimeMechanic</ThemedText>
-          <ThemedText style={[styles.tagline, { color: colors.textSecondary }]}>
-            Your trusted mobile mechanic
-          </ThemedText>
-        </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>Email</ThemedText>
-            <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundDefault }]}>
-              <Feather name="mail" size={20} color={colors.textSecondary} style={styles.inputIcon} />
-              <TextInput
-                style={[styles.input, { color: colors.text }]}
-                placeholder="Enter your email"
-                placeholderTextColor={colors.textSecondary}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoCorrect={false}
-                testID="input-email"
-              />
+          <View style={[styles.formCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
+            <View style={styles.inputContainer}>
+              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>Email</ThemedText>
+              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundRoot }]}>
+                <Feather name="mail" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: colors.text }]}
+                  placeholder="Enter your email"
+                  placeholderTextColor={colors.textSecondary}
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  autoCorrect={false}
+                  testID="input-email"
+                />
+              </View>
             </View>
-          </View>
 
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>Password</ThemedText>
-            <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundDefault }]}>
-              <Feather name="lock" size={20} color={colors.textSecondary} style={styles.inputIcon} />
-              <TextInput
-                style={[styles.input, { color: colors.text }]}
-                placeholder="Enter your password"
-                placeholderTextColor={colors.textSecondary}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                testID="input-password"
-              />
-              <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
-                <Feather name={showPassword ? "eye" : "eye-off"} size={20} color={colors.textSecondary} />
+            <View style={styles.inputContainer}>
+              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>Password</ThemedText>
+              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundRoot }]}>
+                <Feather name="lock" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: colors.text }]}
+                  placeholder="Enter your password"
+                  placeholderTextColor={colors.textSecondary}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  testID="input-password"
+                />
+                <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
+                  <Feather name={showPassword ? "eye" : "eye-off"} size={20} color={colors.textSecondary} />
+                </Pressable>
+              </View>
+            </View>
+
+            {error ? (
+              <View style={[styles.errorContainer, { backgroundColor: colors.error + "15" }]}>
+                <Feather name="alert-circle" size={16} color={colors.error} />
+                <ThemedText style={[styles.errorText, { color: colors.error }]}>{error}</ThemedText>
+              </View>
+            ) : null}
+
+            <Button
+              onPress={handleSignIn}
+              disabled={loading}
+              size="large"
+              style={styles.signInButton}
+            >
+              {loading ? <ActivityIndicator color="#FFFFFF" /> : "Sign In"}
+            </Button>
+
+            <View style={styles.signupContainer}>
+              <ThemedText style={{ color: colors.textSecondary }}>
+                Don't have an account?{" "}
+              </ThemedText>
+              <Pressable onPress={() => navigation.navigate("SignUp")}>
+                <ThemedText style={[styles.link, { color: colors.primary }]}>Sign Up</ThemedText>
               </Pressable>
             </View>
           </View>
 
-          {error ? (
-            <View style={[styles.errorContainer, { backgroundColor: colors.error + "20" }]}>
-              <Feather name="alert-circle" size={16} color={colors.error} />
-              <ThemedText style={[styles.errorText, { color: colors.error }]}>{error}</ThemedText>
-            </View>
-          ) : null}
+          <View style={styles.dividerContainer}>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+            <ThemedText style={[styles.dividerText, { color: colors.textSecondary }]}>or</ThemedText>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+          </View>
 
-          <Pressable
-            style={[styles.button, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
-            onPress={handleSignIn}
-            disabled={loading}
-            testID="button-signin"
+          <AnimatedPressable
+            onPress={() => navigation.navigate("Demo")}
+            onPressIn={() => { demoScale.value = withSpring(0.97); }}
+            onPressOut={() => { demoScale.value = withSpring(1); }}
+            style={[
+              styles.demoButton,
+              { backgroundColor: colors.backgroundDefault, borderColor: colors.border },
+              Shadows.small,
+              demoAnimatedStyle,
+            ]}
           >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <ThemedText style={styles.buttonText}>Sign In</ThemedText>
-            )}
-          </Pressable>
-
-          <View style={styles.signupContainer}>
-            <ThemedText style={{ color: colors.textSecondary }}>
-              Don't have an account?{" "}
+            <Feather name="play-circle" size={20} color={colors.primary} />
+            <ThemedText style={[styles.demoText, { color: colors.text }]}>
+              Continue as Demo User
             </ThemedText>
-            <Pressable onPress={() => navigation.navigate("SignUp")}>
-              <ThemedText style={[styles.link, { color: colors.primary }]}>Sign Up</ThemedText>
-            </Pressable>
-          </View>
+          </AnimatedPressable>
 
-          <View style={styles.demoContainer}>
-            <Pressable 
-              onPress={() => navigation.navigate("Demo")}
-              style={[styles.demoButton, { borderColor: colors.border }]}
-            >
-              <ThemedText style={[styles.demoText, { color: colors.textSecondary }]}>
-                Continue as Demo User
-              </ThemedText>
-            </Pressable>
-          </View>
+          <ThemedText style={[styles.termsText, { color: colors.textSecondary }]}>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </ThemedText>
         </View>
       </KeyboardAvoidingView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -158,37 +192,46 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     flex: 1,
+  },
+  content: {
+    flex: 1,
     paddingHorizontal: Spacing.xl,
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: Spacing["4xl"],
+    marginBottom: Spacing["3xl"],
   },
   logoCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 80,
+    height: 80,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: Spacing.lg,
   },
   appName: {
-    ...Typography.h1,
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
     marginBottom: Spacing.xs,
   },
   tagline: {
-    ...Typography.body,
+    fontSize: 16,
   },
-  form: {
-    flex: 1,
+  formCard: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    marginBottom: Spacing.xl,
   },
   inputContainer: {
     marginBottom: Spacing.lg,
   },
   label: {
-    ...Typography.small,
-    marginBottom: Spacing.sm,
+    fontSize: 13,
     fontWeight: "600",
+    marginBottom: Spacing.sm,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   inputWrapper: {
     flexDirection: "row",
@@ -203,7 +246,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    ...Typography.body,
+    fontSize: 16,
     height: "100%",
   },
   eyeButton: {
@@ -218,22 +261,11 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   errorText: {
-    ...Typography.small,
+    fontSize: 14,
     flex: 1,
   },
-  button: {
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: Spacing.md,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    ...Typography.h4,
+  signInButton: {
+    marginTop: Spacing.sm,
   },
   signupContainer: {
     flexDirection: "row",
@@ -243,17 +275,37 @@ const styles = StyleSheet.create({
   link: {
     fontWeight: "600",
   },
-  demoContainer: {
-    marginTop: Spacing["3xl"],
+  dividerContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    marginBottom: Spacing.xl,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    paddingHorizontal: Spacing.lg,
+    fontSize: 14,
   },
   demoButton: {
-    paddingVertical: Spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderRadius: BorderRadius.sm,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
+    gap: Spacing.sm,
   },
   demoText: {
-    ...Typography.small,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  termsText: {
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: Spacing.xl,
+    lineHeight: 18,
   },
 });
