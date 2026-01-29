@@ -6,10 +6,11 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ThemedText } from "@/components/ThemedText";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { BookingCard } from "@/components/BookingCard";
 import { EmptyState } from "@/components/EmptyState";
-import { Spacing } from "@/constants/theme";
+import { Spacing, Shadows } from "@/constants/theme";
 import { bookings } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Booking } from "@/types";
@@ -64,13 +65,16 @@ export default function BookingsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <View style={[styles.header, { paddingTop: headerHeight + Spacing.md, backgroundColor: colors.backgroundRoot }]}>
-        <SegmentedControl
-          segments={["Upcoming", "Past"]}
-          selectedIndex={selectedIndex}
-          onIndexChange={setSelectedIndex}
-        />
+        <ThemedText style={[styles.screenTitle, { color: colors.text }]}>My Bookings</ThemedText>
+        <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
+          <SegmentedControl
+            segments={["Upcoming", "Past"]}
+            selectedIndex={selectedIndex}
+            onIndexChange={setSelectedIndex}
+          />
+        </View>
       </View>
       <FlatList
         data={displayedBookings}
@@ -96,11 +100,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.lg,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
+    marginBottom: Spacing.lg,
+  },
+  segmentContainer: {
+    borderRadius: 14,
+    padding: 4,
   },
   listContent: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.md,
   },
   emptyContainer: {

@@ -7,18 +7,26 @@ import {
   Image,
   Alert,
 } from "react-native";
+import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
 import { SegmentedControl } from "@/components/SegmentedControl";
-import { Button } from "@/components/Button";
 import { useTheme } from "@/context/ThemeContext";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { jobRequests, activeJobs, completedJobs } from "@/data/mechanicData";
 import { JobRequest } from "@/types";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface JobCardProps {
   job: JobRequest;
@@ -30,6 +38,11 @@ interface JobCardProps {
 
 function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProps) {
   const { colors } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -43,86 +56,27 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
   };
 
   const statusColors: Record<string, { bg: string; text: string }> = {
-    pending: { bg: `rgba(0, 212, 255, 0.1)`, text: colors.accent },
-    accepted: { bg: `rgba(34, 197, 94, 0.1)`, text: colors.success },
-    in_progress: { bg: `rgba(245, 158, 11, 0.1)`, text: colors.warning },
-    completed: { bg: `rgba(34, 197, 94, 0.1)`, text: colors.success },
+    pending: { bg: `${colors.primary}15`, text: colors.primary },
+    accepted: { bg: "rgba(34, 197, 94, 0.12)", text: colors.success },
+    in_progress: { bg: "rgba(245, 158, 11, 0.12)", text: colors.warning },
+    completed: { bg: "rgba(34, 197, 94, 0.12)", text: colors.success },
   };
 
   const statusStyle = statusColors[job.status] || statusColors.pending;
 
-  const dynamicStyles = StyleSheet.create({
-    jobCard: {
-      backgroundColor: colors.backgroundDefault,
-      borderColor: colors.border,
-    },
-    jobCardPressed: {
-      backgroundColor: colors.backgroundTertiary,
-    },
-    jobHeader: {
-      borderBottomColor: colors.border,
-    },
-    customerName: {
-      color: colors.text,
-    },
-    vehicleText: {
-      color: colors.textSecondary,
-    },
-    serviceRow: {
-      color: colors.text,
-    },
-    serviceIconContainer: {
-      backgroundColor: `rgba(15, 169, 88, 0.15)`,
-    },
-    serviceName: {
-      color: colors.text,
-    },
-    servicePrice: {
-      color: colors.primary,
-    },
-    detailItem: {
-      color: colors.textSecondary,
-    },
-    detailText: {
-      color: colors.textSecondary,
-    },
-    notesContainer: {
-      backgroundColor: colors.backgroundTertiary,
-    },
-    notesLabel: {
-      color: colors.textSecondary,
-    },
-    notesText: {
-      color: colors.text,
-    },
-    actionsRow: {
-      borderTopColor: colors.border,
-    },
-    declineButton: {
-      borderRightColor: colors.border,
-    },
-    declineText: {
-      color: colors.error,
-    },
-    acceptButton: {
-      backgroundColor: colors.success,
-    },
-    acceptText: {
-      color: colors.buttonText,
-    },
-  });
-
   return (
-    <Pressable
-      style={({ pressed }) => [styles.jobCard, dynamicStyles.jobCard, pressed && [styles.jobCardPressed, dynamicStyles.jobCardPressed]]}
+    <AnimatedPressable
       onPress={onPress}
+      onPressIn={() => { scale.value = withSpring(0.97, { damping: 20, stiffness: 200 }); }}
+      onPressOut={() => { scale.value = withSpring(1, { damping: 20, stiffness: 200 }); }}
+      style={[styles.jobCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium, animatedStyle]}
     >
-      <View style={[styles.jobHeader, dynamicStyles.jobHeader]}>
+      <View style={[styles.jobHeader, { borderBottomColor: colors.border }]}>
         <View style={styles.customerInfo}>
-          <Image source={job.customer.avatar} style={styles.customerAvatar} />
+          <Image source={job.customer.avatar} style={[styles.customerAvatar, { borderColor: colors.primary }]} />
           <View>
-            <ThemedText style={[styles.customerName, dynamicStyles.customerName]}>{job.customer.name}</ThemedText>
-            <ThemedText style={[styles.vehicleText, dynamicStyles.vehicleText]}>
+            <ThemedText style={[styles.customerName, { color: colors.text }]}>{job.customer.name}</ThemedText>
+            <ThemedText style={[styles.vehicleText, { color: colors.textSecondary }]}>
               {job.vehicle.year} {job.vehicle.make} {job.vehicle.model}
             </ThemedText>
           </View>
@@ -136,54 +90,70 @@ function JobCard({ job, showActions, onAccept, onDecline, onPress }: JobCardProp
 
       <View style={styles.jobDetails}>
         <View style={styles.serviceRow}>
-          <View style={[styles.serviceIconContainer, dynamicStyles.serviceIconContainer]}>
-            <Feather name={job.service.icon as any} size={18} color={colors.accent} />
-          </View>
-          <ThemedText style={[styles.serviceName, dynamicStyles.serviceName]}>{job.service.name}</ThemedText>
-          <ThemedText style={[styles.servicePrice, dynamicStyles.servicePrice]}>${job.totalPrice}</ThemedText>
+          <LinearGradient
+            colors={["#0FA958", "#0B8A47"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.serviceIconContainer}
+          >
+            <Feather name={job.service.icon as any} size={18} color="#FFFFFF" />
+          </LinearGradient>
+          <ThemedText style={[styles.serviceName, { color: colors.text }]}>{job.service.name}</ThemedText>
+          <ThemedText style={[styles.servicePrice, { color: colors.primary }]}>${job.totalPrice}</ThemedText>
         </View>
 
         <View style={styles.detailsGrid}>
-          <View style={styles.detailItem}>
+          <View style={[styles.detailItem, { backgroundColor: `${colors.textSecondary}08` }]}>
             <Feather name="calendar" size={14} color={colors.textSecondary} />
-            <ThemedText style={[styles.detailText, dynamicStyles.detailText]}>
+            <ThemedText style={[styles.detailText, { color: colors.textSecondary }]}>
               {formatDate(job.date)} at {job.time}
             </ThemedText>
           </View>
-          <View style={styles.detailItem}>
+          <View style={[styles.detailItem, { backgroundColor: `${colors.textSecondary}08` }]}>
             <Feather name="map-pin" size={14} color={colors.textSecondary} />
-            <ThemedText style={[styles.detailText, dynamicStyles.detailText]} numberOfLines={1}>
+            <ThemedText style={[styles.detailText, { color: colors.textSecondary }]} numberOfLines={1}>
               {job.location}
             </ThemedText>
           </View>
         </View>
 
         {job.notes ? (
-          <View style={[styles.notesContainer, dynamicStyles.notesContainer]}>
-            <ThemedText style={[styles.notesLabel, dynamicStyles.notesLabel]}>Notes:</ThemedText>
-            <ThemedText style={[styles.notesText, dynamicStyles.notesText]}>{job.notes}</ThemedText>
+          <View style={[styles.notesContainer, { backgroundColor: `${colors.textSecondary}08` }]}>
+            <ThemedText style={[styles.notesLabel, { color: colors.textSecondary }]}>Notes:</ThemedText>
+            <ThemedText style={[styles.notesText, { color: colors.text }]}>{job.notes}</ThemedText>
           </View>
         ) : null}
       </View>
 
       {showActions ? (
-        <View style={[styles.actionsRow, dynamicStyles.actionsRow]}>
-          <Pressable style={[styles.declineButton, dynamicStyles.declineButton]} onPress={onDecline}>
+        <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
+          <Pressable 
+            style={[styles.declineButton, { borderRightColor: colors.border }]} 
+            onPress={onDecline}
+          >
             <Feather name="x" size={18} color={colors.error} />
-            <ThemedText style={[styles.declineText, dynamicStyles.declineText]}>Decline</ThemedText>
+            <ThemedText style={[styles.declineText, { color: colors.error }]}>Decline</ThemedText>
           </Pressable>
-          <Pressable style={[styles.acceptButton, dynamicStyles.acceptButton]} onPress={onAccept}>
-            <Feather name="check" size={18} color={colors.buttonText} />
-            <ThemedText style={[styles.acceptText, dynamicStyles.acceptText]}>Accept</ThemedText>
+          <Pressable onPress={onAccept}>
+            <LinearGradient
+              colors={["#0FA958", "#0B8A47"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.acceptButton}
+            >
+              <Feather name="check" size={18} color="#FFFFFF" />
+              <ThemedText style={styles.acceptText}>Accept</ThemedText>
+            </LinearGradient>
           </Pressable>
         </View>
       ) : null}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
 export default function JobsScreen() {
   const { colors } = useTheme();
+  const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -224,45 +194,37 @@ export default function JobsScreen() {
 
   const displayedJobs = getDisplayedJobs();
 
-  const dynamicScreenStyles = StyleSheet.create({
-    container: {
-      backgroundColor: colors.backgroundDefault,
-    },
-    header: {
-      backgroundColor: colors.backgroundRoot,
-    },
-    emptyTitle: {
-      color: colors.text,
-    },
-    emptyMessage: {
-      color: colors.textSecondary,
-    },
-  });
-
   const renderEmptyState = () => {
     const emptyMessages = [
-      { title: "No Pending Requests", message: "New job requests will appear here." },
-      { title: "No Active Jobs", message: "Jobs you've accepted will appear here." },
-      { title: "No Past Jobs", message: "Completed jobs will appear here." },
+      { title: "No Pending Requests", message: "New job requests will appear here.", icon: "inbox" },
+      { title: "No Active Jobs", message: "Jobs you've accepted will appear here.", icon: "briefcase" },
+      { title: "No Past Jobs", message: "Completed jobs will appear here.", icon: "check-circle" },
     ];
+
+    const current = emptyMessages[selectedIndex];
 
     return (
       <View style={styles.emptyContainer}>
-        <Feather name="briefcase" size={48} color={colors.textSecondary} />
-        <ThemedText style={[styles.emptyTitle, dynamicScreenStyles.emptyTitle]}>{emptyMessages[selectedIndex].title}</ThemedText>
-        <ThemedText style={[styles.emptyMessage, dynamicScreenStyles.emptyMessage]}>{emptyMessages[selectedIndex].message}</ThemedText>
+        <View style={[styles.emptyIconContainer, { backgroundColor: `${colors.textSecondary}10` }]}>
+          <Feather name={current.icon as any} size={40} color={colors.textSecondary} />
+        </View>
+        <ThemedText style={[styles.emptyTitle, { color: colors.text }]}>{current.title}</ThemedText>
+        <ThemedText style={[styles.emptyMessage, { color: colors.textSecondary }]}>{current.message}</ThemedText>
       </View>
     );
   };
 
   return (
-    <View style={[styles.container, dynamicScreenStyles.container]}>
-      <View style={[styles.header, dynamicScreenStyles.header]}>
-        <SegmentedControl
-          segments={["Requests", "Active", "History"]}
-          selectedIndex={selectedIndex}
-          onIndexChange={setSelectedIndex}
-        />
+    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
+      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
+        <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Jobs</ThemedText>
+        <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
+          <SegmentedControl
+            segments={["Requests", "Active", "History"]}
+            selectedIndex={selectedIndex}
+            onIndexChange={setSelectedIndex}
+          />
+        </View>
       </View>
       <FlatList
         data={displayedJobs}
@@ -293,12 +255,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
-    paddingBottom: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.lg,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
+    marginBottom: Spacing.lg,
+  },
+  segmentContainer: {
+    borderRadius: 14,
+    padding: 4,
   },
   listContent: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.md,
   },
   emptyListContent: {
@@ -308,11 +279,8 @@ const styles = StyleSheet.create({
     height: Spacing.md,
   },
   jobCard: {
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderRadius: BorderRadius.xl,
     overflow: "hidden",
-  },
-  jobCardPressed: {
   },
   jobHeader: {
     flexDirection: "row",
@@ -326,10 +294,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   customerAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     marginRight: Spacing.md,
+    borderWidth: 2,
   },
   customerName: {
     fontSize: 16,
@@ -341,9 +310,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
   statusText: {
     fontSize: 12,
@@ -358,9 +327,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   serviceIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     marginRight: Spacing.md,
@@ -371,7 +340,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   servicePrice: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
   },
@@ -382,6 +351,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   detailText: {
     fontSize: 14,
@@ -424,11 +396,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing["3xl"],
     gap: Spacing.sm,
   },
   acceptText: {
     fontSize: 15,
     fontWeight: "600",
+    color: "#FFFFFF",
   },
   emptyContainer: {
     flex: 1,
@@ -436,11 +410,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: Spacing["2xl"],
   },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.lg,
+  },
   emptyTitle: {
     fontSize: 18,
     fontWeight: "600",
     fontFamily: "Montserrat_600SemiBold",
-    marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
   },
   emptyMessage: {

@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Pressable, View, Image } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -8,7 +9,7 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
 import { Conversation } from "@/types";
 
@@ -28,11 +29,11 @@ export function ConversationCard({ conversation, onPress }: ConversationCardProp
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.98, { damping: 15 });
+    scale.value = withSpring(0.97, { damping: 20, stiffness: 200 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15 });
+    scale.value = withSpring(1, { damping: 20, stiffness: 200 });
   };
 
   const handlePress = () => {
@@ -47,19 +48,15 @@ export function ConversationCard({ conversation, onPress }: ConversationCardProp
       onPressOut={handlePressOut}
       style={[
         styles.container,
+        { backgroundColor: colors.backgroundDefault },
+        Shadows.medium,
         animatedStyle,
-        { backgroundColor: colors.backgroundRoot, borderColor: colors.border },
       ]}
     >
       <View style={styles.avatarContainer}>
-        <Image source={conversation.mechanic.avatar} style={styles.avatar} />
+        <Image source={conversation.mechanic.avatar} style={[styles.avatar, { borderColor: colors.primary }]} />
         {conversation.mechanic.isAvailable ? (
-          <View
-            style={[
-              styles.onlineIndicator,
-              { backgroundColor: colors.success, borderColor: colors.backgroundRoot },
-            ]}
-          />
+          <View style={[styles.onlineIndicator, { backgroundColor: colors.success, borderColor: colors.backgroundDefault }]} />
         ) : null}
       </View>
       <View style={styles.content}>
@@ -76,23 +73,23 @@ export function ConversationCard({ conversation, onPress }: ConversationCardProp
             style={[
               styles.message,
               { color: colors.textSecondary },
-              conversation.unreadCount > 0 && [
-                styles.unreadMessage,
-                { color: colors.text },
-              ],
+              conversation.unreadCount > 0 && { color: colors.text, fontWeight: "500" },
             ]}
             numberOfLines={1}
           >
             {conversation.lastMessage}
           </ThemedText>
           {conversation.unreadCount > 0 ? (
-            <View style={[styles.unreadBadge, { backgroundColor: colors.accent }]}>
-              <ThemedText style={[styles.unreadText, { color: colors.buttonText }]}>
+            <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
+              <ThemedText style={styles.unreadText}>
                 {conversation.unreadCount}
               </ThemedText>
             </View>
           ) : null}
         </View>
+      </View>
+      <View style={[styles.chevronContainer, { backgroundColor: `${colors.primary}10` }]}>
+        <Feather name="chevron-right" size={16} color={colors.primary} />
       </View>
     </AnimatedPressable>
   );
@@ -103,25 +100,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderRadius: BorderRadius.xl,
   },
   avatarContainer: {
     position: "relative",
     marginRight: Spacing.md,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    borderWidth: 2,
   },
   onlineIndicator: {
     position: "absolute",
     bottom: 2,
     right: 2,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     borderWidth: 2,
   },
   content: {
@@ -151,19 +148,25 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: Spacing.sm,
   },
-  unreadMessage: {
-    fontWeight: "500",
-  },
   unreadBadge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
   },
   unreadText: {
-    fontSize: 11,
+    color: "#FFFFFF",
+    fontSize: 12,
     fontWeight: "700",
+  },
+  chevronContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: Spacing.sm,
   },
 });
