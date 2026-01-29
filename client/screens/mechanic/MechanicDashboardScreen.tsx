@@ -130,7 +130,7 @@ export default function MechanicDashboardScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
-        paddingTop: insets.top + Spacing["2xl"],
+        paddingTop: insets.top + Spacing.safeAreaTopOffset,
         paddingBottom: tabBarHeight + Spacing["3xl"],
       }}
       showsVerticalScrollIndicator={false}

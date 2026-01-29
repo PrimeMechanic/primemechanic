@@ -137,7 +137,7 @@ export default function ProfileScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
-        paddingTop: insets.top + Spacing["2xl"],
+        paddingTop: insets.top + Spacing.safeAreaTopOffset,
         paddingBottom: tabBarHeight + Spacing["2xl"],
       }}
       showsVerticalScrollIndicator={false}

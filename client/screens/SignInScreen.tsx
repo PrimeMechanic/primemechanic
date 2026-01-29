@@ -74,7 +74,7 @@ export default function SignInScreen({ navigation }: Props) {
         <ScrollView 
           contentContainerStyle={[
             styles.scrollContent, 
-            { paddingTop: insets.top + Spacing["4xl"], paddingBottom: insets.bottom + Spacing.xl }
+            { paddingTop: insets.top + Spacing.safeAreaTopOffset + Spacing.xl, paddingBottom: insets.bottom + Spacing.xl }
           ]}
           showsVerticalScrollIndicator={false}
         >

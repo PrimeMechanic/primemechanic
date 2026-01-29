@@ -49,7 +49,7 @@ export default function BrowseScreen() {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={{
-          paddingTop: insets.top + Spacing["2xl"],
+          paddingTop: insets.top + Spacing.safeAreaTopOffset,
           paddingBottom: tabBarHeight + Spacing["5xl"],
         }}
         showsVerticalScrollIndicator={false}

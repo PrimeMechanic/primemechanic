@@ -91,7 +91,7 @@ export default function SignUpScreen({ navigation }: Props) {
       >
         <ScrollView 
           showsVerticalScrollIndicator={false} 
-          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + Spacing.lg }]}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + Spacing.safeAreaTopOffset + Spacing.xl }]}
         >
           <View style={styles.header}>
             <Pressable onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={12}>
