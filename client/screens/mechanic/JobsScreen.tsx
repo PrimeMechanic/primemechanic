@@ -216,7 +216,8 @@ export default function JobsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: headerHeight + Spacing.lg }]}>
+      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
+        <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Jobs</ThemedText>
         <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SegmentedControl
             segments={["Requests", "Active", "History"]}
@@ -256,6 +257,12 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.lg,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
+    marginBottom: Spacing.lg,
   },
   segmentContainer: {
     borderRadius: 14,

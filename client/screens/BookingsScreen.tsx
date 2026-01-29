@@ -66,7 +66,8 @@ export default function BookingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: headerHeight + Spacing.lg, backgroundColor: colors.backgroundRoot }]}>
+      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md, backgroundColor: colors.backgroundRoot }]}>
+        <ThemedText style={[styles.screenTitle, { color: colors.text }]}>My Bookings</ThemedText>
         <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SegmentedControl
             segments={["Upcoming", "Past"]}
@@ -101,6 +102,12 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.lg,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
+    marginBottom: Spacing.lg,
   },
   segmentContainer: {
     borderRadius: 14,

@@ -91,6 +91,10 @@ export default function EarningsScreen() {
       }}
       showsVerticalScrollIndicator={false}
     >
+      <View style={styles.header}>
+        <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Earnings</ThemedText>
+      </View>
+
       <View style={styles.periodSelector}>
         <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SegmentedControl
@@ -237,6 +241,15 @@ export default function EarningsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    paddingHorizontal: Spacing.xl,
+    marginBottom: Spacing.md,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
   },
   periodSelector: {
     paddingHorizontal: Spacing.xl,

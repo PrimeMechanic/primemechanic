@@ -32,7 +32,15 @@ export default function MessagesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: headerHeight + Spacing.lg }]}>
+      <View style={[styles.header, { paddingTop: headerHeight + Spacing.md }]}>
+        <View style={styles.titleRow}>
+          <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Messages</ThemedText>
+          {unreadCount > 0 ? (
+            <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
+              <ThemedText style={styles.unreadBadgeText}>{unreadCount}</ThemedText>
+            </View>
+          ) : null}
+        </View>
         {conversations.length > 0 ? (
           <View style={[styles.searchBar, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
             <Feather name="search" size={18} color={colors.textSecondary} />
@@ -77,6 +85,27 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.lg,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
+  },
+  unreadBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  unreadBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
   },
   searchBar: {
     flexDirection: "row",
