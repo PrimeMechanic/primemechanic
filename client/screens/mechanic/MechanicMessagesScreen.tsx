@@ -30,7 +30,7 @@ export default function MechanicMessagesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.lg }]}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing["2xl"] }]}>
         <View style={styles.titleRow}>
           <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Messages</ThemedText>
           {unreadCount > 0 ? (

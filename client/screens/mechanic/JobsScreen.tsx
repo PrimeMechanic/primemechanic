@@ -214,7 +214,7 @@ export default function JobsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <View style={[styles.header, { paddingTop: insets.top + Spacing.lg }]}>
+      <View style={[styles.header, { paddingTop: insets.top + Spacing["2xl"] }]}>
         <ThemedText style={[styles.screenTitle, { color: colors.text }]}>Jobs</ThemedText>
         <View style={[styles.segmentContainer, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
           <SegmentedControl
