@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { Shadows } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
@@ -27,11 +28,11 @@ export function FloatingActionButton({ onPress, bottom }: FloatingActionButtonPr
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.9, { damping: 15 });
+    scale.value = withSpring(0.9, { damping: 20, stiffness: 200 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15 });
+    scale.value = withSpring(1, { damping: 20, stiffness: 200 });
   };
 
   const handlePress = () => {
@@ -39,20 +40,21 @@ export function FloatingActionButton({ onPress, bottom }: FloatingActionButtonPr
     onPress();
   };
 
-  const shadowStyle: ViewStyle = Platform.select({
-    ios: Shadows.medium as ViewStyle,
-    android: { elevation: 8 },
-    default: {},
-  }) || {};
-
   return (
     <AnimatedPressable
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, { bottom, backgroundColor: colors.primary }, shadowStyle, animatedStyle]}
+      style={[styles.container, { bottom }, Shadows.fab, animatedStyle]}
     >
-      <Feather name="plus" size={28} color={colors.buttonText} />
+      <LinearGradient
+        colors={["#0FA958", "#0B8A47"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      >
+        <Feather name="plus" size={28} color="#FFFFFF" />
+      </LinearGradient>
     </AnimatedPressable>
   );
 }
@@ -61,9 +63,14 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     right: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  gradient: {
+    width: "100%",
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },

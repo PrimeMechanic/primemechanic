@@ -12,15 +12,22 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { Button } from "@/components/Button";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
-import { Spacing, BorderRadius, Typography } from "@/constants/theme";
+import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import type { AuthStackParamList } from "@/navigation/RootStackNavigator";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "SignUp">;
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function SignUpScreen({ navigation }: Props) {
   const { colors } = useTheme();
@@ -36,6 +43,17 @@ export default function SignUpScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const customerScale = useSharedValue(1);
+  const mechanicScale = useSharedValue(1);
+
+  const customerAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: customerScale.value }],
+  }));
+
+  const mechanicAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: mechanicScale.value }],
+  }));
 
   const handleSignUp = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
@@ -66,76 +84,107 @@ export default function SignUpScreen({ navigation }: Props) {
   };
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing.xl }]}>
+    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <ScrollView 
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + Spacing.lg }]}
+        >
           <View style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Feather name="arrow-left" size={24} color={colors.text} />
+            <Pressable onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={12}>
+              <View style={[styles.backButtonCircle, { backgroundColor: colors.backgroundDefault }]}>
+                <Feather name="arrow-left" size={20} color={colors.text} />
+              </View>
             </Pressable>
-            <ThemedText style={styles.title}>Create Account</ThemedText>
+            <ThemedText style={[styles.title, { color: colors.text }]}>Create Account</ThemedText>
             <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
               Join PrimeMechanic today
             </ThemedText>
           </View>
 
           <View style={styles.roleContainer}>
-            <ThemedText style={styles.label}>I am a:</ThemedText>
+            <ThemedText style={[styles.label, { color: colors.textSecondary }]}>I AM A</ThemedText>
             <View style={styles.roleButtons}>
-              <Pressable
+              <AnimatedPressable
                 style={[
                   styles.roleButton,
+                  { backgroundColor: role === "customer" ? `${colors.primary}12` : colors.backgroundDefault },
                   { borderColor: role === "customer" ? colors.primary : colors.border },
-                  role === "customer" && { backgroundColor: colors.primary + "20" },
+                  customerAnimatedStyle,
                 ]}
                 onPress={() => setRole("customer")}
+                onPressIn={() => { customerScale.value = withSpring(0.97); }}
+                onPressOut={() => { customerScale.value = withSpring(1); }}
               >
-                <Feather 
-                  name="user" 
-                  size={20} 
-                  color={role === "customer" ? colors.primary : colors.textSecondary} 
-                />
+                <View style={[
+                  styles.roleIcon, 
+                  { backgroundColor: role === "customer" ? `${colors.primary}20` : `${colors.textSecondary}10` }
+                ]}>
+                  <Feather 
+                    name="user" 
+                    size={20} 
+                    color={role === "customer" ? colors.primary : colors.textSecondary} 
+                  />
+                </View>
                 <ThemedText 
                   style={[
                     styles.roleText, 
-                    { color: role === "customer" ? colors.primary : colors.textSecondary }
+                    { color: role === "customer" ? colors.primary : colors.text }
                   ]}
                 >
                   Customer
                 </ThemedText>
-              </Pressable>
-              <Pressable
+                {role === "customer" ? (
+                  <View style={[styles.checkCircle, { backgroundColor: colors.primary }]}>
+                    <Feather name="check" size={12} color="#FFFFFF" />
+                  </View>
+                ) : null}
+              </AnimatedPressable>
+              <AnimatedPressable
                 style={[
                   styles.roleButton,
+                  { backgroundColor: role === "mechanic" ? `${colors.primary}12` : colors.backgroundDefault },
                   { borderColor: role === "mechanic" ? colors.primary : colors.border },
-                  role === "mechanic" && { backgroundColor: colors.primary + "20" },
+                  mechanicAnimatedStyle,
                 ]}
                 onPress={() => setRole("mechanic")}
+                onPressIn={() => { mechanicScale.value = withSpring(0.97); }}
+                onPressOut={() => { mechanicScale.value = withSpring(1); }}
               >
-                <Feather 
-                  name="tool" 
-                  size={20} 
-                  color={role === "mechanic" ? colors.primary : colors.textSecondary} 
-                />
+                <View style={[
+                  styles.roleIcon, 
+                  { backgroundColor: role === "mechanic" ? `${colors.primary}20` : `${colors.textSecondary}10` }
+                ]}>
+                  <Feather 
+                    name="tool" 
+                    size={20} 
+                    color={role === "mechanic" ? colors.primary : colors.textSecondary} 
+                  />
+                </View>
                 <ThemedText 
                   style={[
                     styles.roleText, 
-                    { color: role === "mechanic" ? colors.primary : colors.textSecondary }
+                    { color: role === "mechanic" ? colors.primary : colors.text }
                   ]}
                 >
                   Mechanic
                 </ThemedText>
-              </Pressable>
+                {role === "mechanic" ? (
+                  <View style={[styles.checkCircle, { backgroundColor: colors.primary }]}>
+                    <Feather name="check" size={12} color="#FFFFFF" />
+                  </View>
+                ) : null}
+              </AnimatedPressable>
             </View>
           </View>
 
-          <View style={styles.form}>
+          <View style={[styles.formCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
             <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Full Name *</ThemedText>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundDefault }]}>
+              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>FULL NAME</ThemedText>
+              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundRoot }]}>
                 <Feather name="user" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
@@ -150,8 +199,8 @@ export default function SignUpScreen({ navigation }: Props) {
             </View>
 
             <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Email *</ThemedText>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundDefault }]}>
+              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>EMAIL</ThemedText>
+              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundRoot }]}>
                 <Feather name="mail" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
@@ -168,8 +217,8 @@ export default function SignUpScreen({ navigation }: Props) {
             </View>
 
             <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Phone (Optional)</ThemedText>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundDefault }]}>
+              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>PHONE (OPTIONAL)</ThemedText>
+              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundRoot }]}>
                 <Feather name="phone" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
@@ -184,8 +233,8 @@ export default function SignUpScreen({ navigation }: Props) {
             </View>
 
             <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Password *</ThemedText>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundDefault }]}>
+              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>PASSWORD</ThemedText>
+              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundRoot }]}>
                 <Feather name="lock" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
@@ -205,8 +254,8 @@ export default function SignUpScreen({ navigation }: Props) {
             </View>
 
             <View style={styles.inputContainer}>
-              <ThemedText style={styles.label}>Confirm Password *</ThemedText>
-              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundDefault }]}>
+              <ThemedText style={[styles.label, { color: colors.textSecondary }]}>CONFIRM PASSWORD</ThemedText>
+              <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.backgroundRoot }]}>
                 <Feather name="lock" size={20} color={colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                   style={[styles.input, { color: colors.text }]}
@@ -223,24 +272,20 @@ export default function SignUpScreen({ navigation }: Props) {
             </View>
 
             {error ? (
-              <View style={[styles.errorContainer, { backgroundColor: colors.error + "20" }]}>
+              <View style={[styles.errorContainer, { backgroundColor: `${colors.error}15` }]}>
                 <Feather name="alert-circle" size={16} color={colors.error} />
                 <ThemedText style={[styles.errorText, { color: colors.error }]}>{error}</ThemedText>
               </View>
             ) : null}
 
-            <Pressable
-              style={[styles.button, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
+            <Button
               onPress={handleSignUp}
               disabled={loading}
-              testID="button-signup"
+              size="large"
+              style={styles.signUpButton}
             >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <ThemedText style={styles.buttonText}>Create Account</ThemedText>
-              )}
-            </Pressable>
+              {loading ? <ActivityIndicator color="#FFFFFF" /> : "Create Account"}
+            </Button>
 
             <View style={styles.signinContainer}>
               <ThemedText style={{ color: colors.textSecondary }}>
@@ -251,9 +296,13 @@ export default function SignUpScreen({ navigation }: Props) {
               </Pressable>
             </View>
           </View>
+
+          <ThemedText style={[styles.termsText, { color: colors.textSecondary }]}>
+            By creating an account, you agree to our Terms of Service and Privacy Policy
+          </ThemedText>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -263,9 +312,9 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     flex: 1,
-    paddingHorizontal: Spacing.xl,
   },
   scrollContent: {
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing["4xl"],
   },
   header: {
@@ -273,14 +322,22 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginBottom: Spacing.lg,
+  },
+  backButtonCircle: {
     width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
-    ...Typography.h1,
+    fontSize: 28,
+    fontWeight: "700",
+    fontFamily: "Montserrat_700Bold",
     marginBottom: Spacing.xs,
   },
   subtitle: {
-    ...Typography.body,
+    fontSize: 16,
   },
   roleContainer: {
     marginBottom: Spacing.xl,
@@ -294,26 +351,44 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    borderWidth: 1.5,
+    borderRadius: BorderRadius.md,
     gap: Spacing.sm,
-    paddingVertical: Spacing.md,
-    borderWidth: 2,
-    borderRadius: BorderRadius.sm,
+  },
+  roleIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   roleText: {
-    ...Typography.small,
+    fontSize: 15,
     fontWeight: "600",
-  },
-  form: {
     flex: 1,
+  },
+  checkCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  formCard: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    marginBottom: Spacing.xl,
   },
   inputContainer: {
     marginBottom: Spacing.lg,
   },
   label: {
-    ...Typography.small,
-    marginBottom: Spacing.sm,
+    fontSize: 12,
     fontWeight: "600",
+    marginBottom: Spacing.sm,
+    letterSpacing: 0.5,
   },
   inputWrapper: {
     flexDirection: "row",
@@ -328,7 +403,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    ...Typography.body,
+    fontSize: 16,
     height: "100%",
   },
   eyeButton: {
@@ -343,22 +418,11 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   errorText: {
-    ...Typography.small,
+    fontSize: 14,
     flex: 1,
   },
-  button: {
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.sm,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: Spacing.md,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    ...Typography.h4,
+  signUpButton: {
+    marginTop: Spacing.sm,
   },
   signinContainer: {
     flexDirection: "row",
@@ -367,5 +431,10 @@ const styles = StyleSheet.create({
   },
   link: {
     fontWeight: "600",
+  },
+  termsText: {
+    fontSize: 12,
+    textAlign: "center",
+    lineHeight: 18,
   },
 });
