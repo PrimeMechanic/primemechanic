@@ -333,12 +333,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
+    lineHeight: 28 * 1.2,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     marginBottom: Spacing.xs,
   },
   subtitle: {
     fontSize: 16,
+    lineHeight: 16 * 1.3,
   },
   roleContainer: {
     marginBottom: Spacing.xl,
