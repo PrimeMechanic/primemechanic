@@ -145,13 +145,16 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     paddingHorizontal: Spacing.xl,
     marginBottom: Spacing.lg,
+    flexShrink: 0,
   },
   welcomeText: {
     fontSize: 15,
+    lineHeight: 15 * 1.3,
     marginBottom: 4,
   },
   headline: {
     fontSize: 28,
+    lineHeight: 28 * 1.2,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
   },

@@ -207,6 +207,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
     marginBottom: Spacing["2xl"],
+    flexShrink: 0,
   },
   logoCircle: {
     width: 80,

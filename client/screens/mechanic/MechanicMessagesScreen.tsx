@@ -83,15 +83,18 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.lg,
+    flexShrink: 0,
   },
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
     marginBottom: Spacing.lg,
+    flexShrink: 0,
   },
   screenTitle: {
     fontSize: 28,
+    lineHeight: 28 * 1.2,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
   },

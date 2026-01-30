@@ -245,9 +245,11 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: Spacing.xl,
     marginBottom: Spacing.md,
+    flexShrink: 0,
   },
   screenTitle: {
     fontSize: 28,
+    lineHeight: 28 * 1.2,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
   },

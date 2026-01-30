@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: Spacing.xl,
+    flexShrink: 0,
   },
   backButton: {
     marginBottom: Spacing.lg,

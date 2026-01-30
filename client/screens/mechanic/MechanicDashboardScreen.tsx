@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
   welcomeSection: {
     paddingHorizontal: Spacing.xl,
     marginBottom: Spacing.xl,
+    flexShrink: 0,
   },
   welcomeRow: {
     flexDirection: "row",
@@ -282,9 +283,11 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 16,
+    lineHeight: 16 * 1.3,
   },
   name: {
     fontSize: 26,
+    lineHeight: 26 * 1.2,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
   },

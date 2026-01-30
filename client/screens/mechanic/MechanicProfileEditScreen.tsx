@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     borderRadius: BorderRadius.xl,
-    overflow: "hidden",
+    flexShrink: 0,
   },
   profileGradient: {
     alignItems: "center",
@@ -327,6 +327,7 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: 22,
+    lineHeight: 22 * 1.2,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
     color: "#FFFFFF",

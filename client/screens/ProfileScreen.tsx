@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.xl,
     borderRadius: BorderRadius.xl,
     marginBottom: Spacing["2xl"],
-    overflow: "hidden",
+    flexShrink: 0,
   },
   profileGradient: {
     paddingTop: Spacing["2xl"],
