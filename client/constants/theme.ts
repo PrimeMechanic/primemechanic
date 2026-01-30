@@ -56,7 +56,7 @@ export const Spacing = {
   inputHeight: 52,
   buttonHeight: 56,
   /** Extra padding to add after safe area inset for screen headers */
-  safeAreaTopOffset: 20,
+  safeAreaTopOffset: 24,
 };
 
 export const BorderRadius = {
