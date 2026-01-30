@@ -265,22 +265,26 @@ const styles = StyleSheet.create({
   },
   totalCard: {
     borderRadius: BorderRadius.xl,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.lg,
+    paddingTop: Spacing["2xl"],
+    paddingBottom: Spacing.xl,
     paddingHorizontal: Spacing.xl,
     alignItems: "center",
   },
   totalLabel: {
     fontSize: 14,
+    lineHeight: 14 * 1.15,
     color: "rgba(255, 255, 255, 0.8)",
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
   },
   totalAmount: {
     fontSize: 36,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
+    lineHeight: 36 * 1.15,
     color: "#FFFFFF",
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
+    includeFontPadding: false,
+    textAlignVertical: "center",
   },
   totalStats: {
     flexDirection: "row",
@@ -350,7 +354,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    minHeight: 88,
   },
   earningsIconContainer: {
     width: 44,
@@ -362,17 +368,24 @@ const styles = StyleSheet.create({
   },
   earningsContent: {
     flex: 1,
+    justifyContent: "center",
   },
   earningsTitle: {
     fontSize: 13,
+    lineHeight: 13 * 1.15,
+    marginBottom: 4,
   },
   earningsAmount: {
     fontSize: 22,
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
+    lineHeight: 22 * 1.15,
+    includeFontPadding: false,
+    textAlignVertical: "center",
   },
   earningsSubtitle: {
     fontSize: 12,
+    lineHeight: 12 * 1.15,
   },
   transactionsSection: {
     paddingHorizontal: Spacing.xl,
