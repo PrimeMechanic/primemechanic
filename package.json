@@ -88,6 +88,4 @@
 88     "build": "expo export:web"
 89   }
 90 }
-git add package.json
-git commit -m "Fix package.json structure"
-git push
+
