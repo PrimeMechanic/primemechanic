@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "build": "npx expo export:web"
+    "scripts": {
+      "dev": "expo start",
+      "build": "expo export --platform web",
+      "start": "npx serve web-build"
+    }
+
   },
   "dependencies": {
     "expo": "^54.0.23",
