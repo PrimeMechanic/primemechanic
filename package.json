@@ -81,3 +81,8 @@
   },
   "private": true
 }
+  "scripts": {
+    "start": "expo start",
+    "web": "expo start --web",
+    "build": "expo export --platform web"
+  }
