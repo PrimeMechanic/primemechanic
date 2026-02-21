@@ -616,6 +616,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Address routes
+  app.get("/api/users/:id/addresses", async (req, res) => {
+    try {
+      const addrs = await storage.getAddresses(req.params.id);
+      res.json(addrs);
+    } catch (error) {
+      console.error("Get addresses error:", error);
+      res.status(500).json({ error: "Failed to get addresses" });
+    }
+  });
+
+  app.post("/api/addresses", async (req, res) => {
+    try {
+      const { userId, label, street, apt, city, state, zipCode, isDefault } = req.body;
+      if (!userId || !label || !street || !city || !state || !zipCode) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      const address = await storage.createAddress({ userId, label, street, apt: apt || null, city, state, zipCode, isDefault: isDefault || false });
+      if (isDefault) {
+        await storage.setDefaultAddress(userId, address.id);
+      }
+      res.json(address);
+    } catch (error) {
+      console.error("Create address error:", error);
+      res.status(500).json({ error: "Failed to create address" });
+    }
+  });
+
+  app.patch("/api/addresses/:id", async (req, res) => {
+    try {
+      const { label, street, apt, city, state, zipCode, isDefault, userId } = req.body;
+      const address = await storage.updateAddress(Number(req.params.id), { label, street, apt: apt || null, city, state, zipCode });
+      if (isDefault && userId) {
+        await storage.setDefaultAddress(userId, Number(req.params.id));
+      }
+      res.json(address);
+    } catch (error) {
+      console.error("Update address error:", error);
+      res.status(500).json({ error: "Failed to update address" });
+    }
+  });
+
+  app.delete("/api/addresses/:id", async (req, res) => {
+    try {
+      await storage.deleteAddress(Number(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete address error:", error);
+      res.status(500).json({ error: "Failed to delete address" });
+    }
+  });
+
+  app.post("/api/addresses/:id/default", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "userId required" });
+      }
+      await storage.setDefaultAddress(userId, Number(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Set default address error:", error);
+      res.status(500).json({ error: "Failed to set default address" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
