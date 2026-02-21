@@ -3,6 +3,7 @@ import { createServer, type Server } from "node:http";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -326,6 +327,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(review);
     } catch (error) {
       res.status(500).json({ error: "Failed to create review" });
+    }
+  });
+
+  app.post("/api/objects/upload", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Upload URL error:", error);
+      res.status(500).json({ error: "Failed to get upload URL" });
+    }
+  });
+
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      console.error("Object serve error:", error);
+      return res.sendStatus(500);
+    }
+  });
+
+  app.get("/api/mechanics/:id/portfolio", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const items = await storage.getPortfolioItems(id);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch portfolio" });
+    }
+  });
+
+  app.post("/api/portfolio", async (req, res) => {
+    try {
+      const { mechanicId, uploadURL, caption, serviceType } = req.body;
+      if (!mechanicId || !uploadURL) {
+        return res.status(400).json({ error: "mechanicId and uploadURL are required" });
+      }
+
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
+
+      const item = await storage.createPortfolioItem({
+        mechanicId,
+        imageUrl: objectPath,
+        caption: caption || null,
+        serviceType: serviceType || null,
+      });
+      res.status(201).json(item);
+    } catch (error) {
+      console.error("Portfolio create error:", error);
+      res.status(500).json({ error: "Failed to create portfolio item" });
+    }
+  });
+
+  app.delete("/api/portfolio/:id", async (req, res) => {
+    try {
+      await storage.deletePortfolioItem(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete portfolio item" });
+    }
+  });
+
+  app.get("/api/users/:id/mechanic-profile", async (req, res) => {
+    try {
+      const profile = await storage.getMechanicProfileByUserId(req.params.id);
+      if (!profile) {
+        return res.status(404).json({ error: "Mechanic profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mechanic profile" });
     }
   });
 
