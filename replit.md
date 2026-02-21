@@ -9,6 +9,20 @@ The platform operates on a 20% commission model per completed job, similar to Ub
 ## Recent Changes
 
 ### February 21, 2026
+- **Mechanic Onboarding & Real-Time Dashboard**:
+  - Multi-step MechanicOnboardingScreen (4 steps: specialty, services, hourly rate/service radius, bio)
+  - Animated progress bar with step indicator, validation per step
+  - POST /api/mechanics/onboard creates mechanic profile in database
+  - AuthContext tracks needsOnboarding state, checks GET /api/users/:id/mechanic-profile
+  - Navigation auto-routes new mechanics to onboarding before showing main app
+  - WebSocket server on `/ws` path for real-time dashboard metric broadcasts
+  - useWebSocket hook with reconnection logic and AppState awareness
+  - MechanicDashboardScreen rewritten to fetch from GET /api/mechanics/dashboard/:userId
+  - Dashboard shows live earnings (today/week/month), rating, pending requests, today's schedule
+  - Real-time updates via WebSocket when bookings complete (broadcasts updated stats)
+  - Pull-to-refresh and "Live" connection indicator on dashboard
+  - Booking status changes trigger mechanic earnings update + WebSocket broadcast
+
 - **Shops Feature (Physical Auto Repair Locations)**:
   - `shopProfiles` and `shopServices` database tables with Drizzle ORM
   - Shop schema: name, description, phone, email, address (street/city/state/zip), rating, hours (hoursOpen/hoursClose/daysOpen), verified status
