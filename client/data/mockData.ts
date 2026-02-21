@@ -57,6 +57,14 @@ export const services: Service[] = [
     duration: 120,
     icon: "edit-3",
   },
+  {
+    id: "8",
+    name: "Vehicle Wraps",
+    description: "Full and partial vehicle wraps, color change, and custom graphics",
+    price: 500,
+    duration: 480,
+    icon: "layers",
+  },
 ];
 
 export const mechanics: Mechanic[] = [
