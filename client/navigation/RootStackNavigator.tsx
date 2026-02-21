@@ -14,6 +14,7 @@ import PaymentMethodsScreen from "@/screens/PaymentMethodsScreen";
 import SavedAddressesScreen from "@/screens/SavedAddressesScreen";
 import ShopProfileScreen from "@/screens/ShopProfileScreen";
 import HelpSupportScreen from "@/screens/HelpSupportScreen";
+import AllServicesScreen from "@/screens/AllServicesScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
 import DemoScreen from "@/screens/DemoScreen";
@@ -41,6 +42,7 @@ export type RootStackParamList = {
   SavedAddresses: undefined;
   ShopProfile: { shopId: string };
   HelpSupport: undefined;
+  AllServices: undefined;
 } & AuthStackParamList;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -170,6 +172,13 @@ export default function RootStackNavigator() {
         component={HelpSupportScreen}
         options={{
           headerTitle: "Help & Support",
+        }}
+      />
+      <Stack.Screen
+        name="AllServices"
+        component={AllServicesScreen}
+        options={{
+          headerTitle: "All Services",
         }}
       />
     </Stack.Navigator>

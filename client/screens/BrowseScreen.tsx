@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { StyleSheet, View, ScrollView } from "react-native";
+import { StyleSheet, View, ScrollView, Pressable } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 
 import { ThemedText } from "@/components/ThemedText";
 import { SearchBar } from "@/components/SearchBar";
@@ -52,6 +53,11 @@ export default function BrowseScreen() {
     navigation.navigate("ShopProfile", { shopId });
   };
 
+  const handleSeeAllServices = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("AllServices");
+  };
+
   const handleBookNow = () => {
     navigation.navigate("BookService", {});
   };
@@ -88,12 +94,16 @@ export default function BrowseScreen() {
             <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
               Popular Services
             </ThemedText>
-            <View style={[styles.seeAllButton, { backgroundColor: `${colors.primary}10` }]}>
+            <Pressable
+              onPress={handleSeeAllServices}
+              style={[styles.seeAllButton, { backgroundColor: `${colors.primary}10` }]}
+              testID="button-see-all-services"
+            >
               <ThemedText style={[styles.seeAllText, { color: colors.primary }]}>
                 See All
               </ThemedText>
               <Feather name="chevron-right" size={14} color={colors.primary} />
-            </View>
+            </Pressable>
           </View>
           <ScrollView
             horizontal
@@ -115,9 +125,11 @@ export default function BrowseScreen() {
             <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
               Nearby Mechanics
             </ThemedText>
-            <ThemedText style={[styles.countText, { color: colors.textSecondary }]}>
-              {filteredMechanics.length} available
-            </ThemedText>
+            <View style={[styles.countBadge, { backgroundColor: `${colors.textSecondary}12` }]}>
+              <ThemedText style={[styles.countText, { color: colors.textSecondary }]}>
+                {filteredMechanics.length} available
+              </ThemedText>
+            </View>
           </View>
           {filteredMechanics.length > 0 ? (
             <View style={styles.mechanicsGrid}>
@@ -143,9 +155,11 @@ export default function BrowseScreen() {
             <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
               Nearby Shops
             </ThemedText>
-            <ThemedText style={[styles.countText, { color: colors.textSecondary }]}>
-              {filteredShops.length} available
-            </ThemedText>
+            <View style={[styles.countBadge, { backgroundColor: `${colors.textSecondary}12` }]}>
+              <ThemedText style={[styles.countText, { color: colors.textSecondary }]}>
+                {filteredShops.length} available
+              </ThemedText>
+            </View>
           </View>
           {filteredShops.length > 0 ? (
             <View style={styles.mechanicsGrid}>
@@ -228,8 +242,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  countBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
   countText: {
-    fontSize: 14,
+    fontSize: 13,
+    fontWeight: "600",
   },
   servicesRow: {
     paddingHorizontal: Spacing.xl,
