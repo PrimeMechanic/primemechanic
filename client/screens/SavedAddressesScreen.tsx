@@ -34,14 +34,12 @@ interface Address {
   isDefault: boolean | null;
 }
 
-const LABEL_OPTIONS = ["Home", "Work", "Other"];
+const LABEL_OPTIONS = ["Home", "Other"];
 
 function getLabelIcon(label: string): string {
   switch (label.toLowerCase()) {
     case "home":
       return "home";
-    case "work":
-      return "briefcase";
     default:
       return "map-pin";
   }
@@ -279,7 +277,7 @@ export default function SavedAddressesScreen() {
                 No Saved Addresses
               </ThemedText>
               <ThemedText style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-                Add your home, work, or other locations for faster booking
+                Add your home or other locations for faster booking
               </ThemedText>
             </View>
           )}
