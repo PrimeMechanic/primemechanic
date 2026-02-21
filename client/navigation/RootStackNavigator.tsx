@@ -11,6 +11,7 @@ import BookingDetailScreen from "@/screens/BookingDetailScreen";
 import ChatScreen from "@/screens/ChatScreen";
 import AddVehicleScreen from "@/screens/AddVehicleScreen";
 import PaymentMethodsScreen from "@/screens/PaymentMethodsScreen";
+import SavedAddressesScreen from "@/screens/SavedAddressesScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
 import DemoScreen from "@/screens/DemoScreen";
@@ -35,6 +36,7 @@ export type RootStackParamList = {
   Chat: { conversationId: string; mechanicId?: string };
   AddVehicle: undefined;
   PaymentMethods: undefined;
+  SavedAddresses: undefined;
 } & AuthStackParamList;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -143,6 +145,13 @@ export default function RootStackNavigator() {
         component={PaymentMethodsScreen}
         options={{
           headerTitle: "Payment Methods",
+        }}
+      />
+      <Stack.Screen
+        name="SavedAddresses"
+        component={SavedAddressesScreen}
+        options={{
+          headerTitle: "Saved Addresses",
         }}
       />
     </Stack.Navigator>

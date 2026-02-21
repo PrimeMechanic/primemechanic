@@ -225,7 +225,7 @@ export default function ProfileScreen() {
                   style={styles.deleteButton}
                   testID={`button-delete-vehicle-${v.id}`}
                 >
-                  <Feather name="trash-2" size={18} color={colors.danger || "#E53E3E"} />
+                  <Feather name="trash-2" size={18} color={colors.error || "#E53E3E"} />
                 </Pressable>
               </View>
             ))
@@ -274,7 +274,7 @@ export default function ProfileScreen() {
             badgeText="On"
           />
           <SettingsItem icon="credit-card" label="Payment Methods" onPress={() => navigation.navigate("PaymentMethods")} />
-          <SettingsItem icon="map-pin" label="Saved Addresses" onPress={() => {}} />
+          <SettingsItem icon="map-pin" label="Saved Addresses" onPress={() => navigation.navigate("SavedAddresses")} />
           <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} />
         </View>
       </View>
