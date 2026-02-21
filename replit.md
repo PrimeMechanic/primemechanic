@@ -9,6 +9,17 @@ The platform operates on a 20% commission model per completed job, similar to Ub
 ## Recent Changes
 
 ### February 21, 2026
+- **Shops Feature (Physical Auto Repair Locations)**:
+  - `shopProfiles` and `shopServices` database tables with Drizzle ORM
+  - Shop schema: name, description, phone, email, address (street/city/state/zip), rating, hours (hoursOpen/hoursClose/daysOpen), verified status
+  - API routes: `GET /api/shops` (list all), `GET /api/shops/:id` (single shop)
+  - ShopCard component: displays name, address, rating, days open, distance, reviews
+  - ShopProfileScreen: full detail view with stats, about, shop info (address/hours/phone), services offered, reviews, call/book buttons
+  - BrowseScreen updated with "Nearby Shops" section below "Nearby Mechanics"
+  - Navigation: ShopProfile screen registered in RootStackNavigator
+  - 3 demo shops seeded: AutoCare Pro Center, Precision Auto Works, QuickFix Garage
+  - Mock data in client/data/mockData.ts with Shop type in client/types/index.ts
+
 - **Mechanic Portfolio Feature**:
   - Portfolio items table (mechanicId, imageUrl, caption, serviceType) with Drizzle ORM
   - Object Storage integration for photo uploads via presigned URLs

@@ -270,6 +270,64 @@ export class DatabaseStorage implements IStorage {
 }
 
 export async function seedDatabase() {
+  const existingShops = await db.select().from(shopProfiles);
+  if (existingShops.length === 0) {
+    console.log("Seeding shops...");
+    await db.insert(shopProfiles).values([
+      {
+        name: "AutoCare Pro Center",
+        description: "Full-service auto repair center with state-of-the-art diagnostic equipment and certified technicians.",
+        phone: "(310) 555-0180",
+        email: "info@autocarepro.com",
+        street: "2450 Pacific Coast Hwy",
+        city: "Long Beach",
+        state: "CA",
+        zipCode: "90803",
+        rating: "4.80",
+        reviewCount: 215,
+        completedJobs: 1240,
+        isVerified: true,
+        hoursOpen: "7:00 AM",
+        hoursClose: "7:00 PM",
+        daysOpen: "Mon-Sat",
+      },
+      {
+        name: "Precision Auto Works",
+        description: "Specializing in European and luxury vehicle maintenance with factory-trained mechanics.",
+        phone: "(323) 555-0241",
+        email: "service@precisionauto.com",
+        street: "8901 Sunset Blvd",
+        city: "West Hollywood",
+        state: "CA",
+        zipCode: "90069",
+        rating: "4.90",
+        reviewCount: 178,
+        completedJobs: 890,
+        isVerified: true,
+        hoursOpen: "8:00 AM",
+        hoursClose: "6:00 PM",
+        daysOpen: "Mon-Fri",
+      },
+      {
+        name: "QuickFix Garage",
+        description: "Fast, reliable auto repairs for all makes and models. Open 7 days a week for your convenience.",
+        phone: "(424) 555-0399",
+        email: "hello@quickfixgarage.com",
+        street: "1234 Main Street",
+        city: "Santa Monica",
+        state: "CA",
+        zipCode: "90401",
+        rating: "4.60",
+        reviewCount: 312,
+        completedJobs: 2150,
+        isVerified: true,
+        hoursOpen: "6:00 AM",
+        hoursClose: "9:00 PM",
+        daysOpen: "Mon-Sun",
+      },
+    ]);
+  }
+
   const existingServices = await db.select().from(services);
   if (existingServices.length > 0) {
     console.log("Database already seeded, skipping...");
@@ -331,63 +389,6 @@ export async function seedDatabase() {
       { conversationId: conv.id, senderId: "m1", content: "Hi! I saw you need help with your vehicle. What seems to be the issue?", isRead: true },
       { conversationId: conv.id, senderId: "demo", content: "Hey! Yes, my car has been making a strange noise when I brake.", isRead: true },
       { conversationId: conv.id, senderId: "m1", content: "I'll be there in 15 minutes!", isRead: false },
-    ]);
-  }
-
-  const existingShops = await db.select().from(shopProfiles);
-  if (existingShops.length === 0) {
-    await db.insert(shopProfiles).values([
-      {
-        name: "AutoCare Pro Center",
-        description: "Full-service auto repair center with state-of-the-art diagnostic equipment and certified technicians.",
-        phone: "(310) 555-0180",
-        email: "info@autocarepro.com",
-        street: "2450 Pacific Coast Hwy",
-        city: "Long Beach",
-        state: "CA",
-        zipCode: "90803",
-        rating: "4.80",
-        reviewCount: 215,
-        completedJobs: 1240,
-        isVerified: true,
-        hoursOpen: "7:00 AM",
-        hoursClose: "7:00 PM",
-        daysOpen: "Mon-Sat",
-      },
-      {
-        name: "Precision Auto Works",
-        description: "Specializing in European and luxury vehicle maintenance with factory-trained mechanics.",
-        phone: "(323) 555-0241",
-        email: "service@precisionauto.com",
-        street: "8901 Sunset Blvd",
-        city: "West Hollywood",
-        state: "CA",
-        zipCode: "90069",
-        rating: "4.90",
-        reviewCount: 178,
-        completedJobs: 890,
-        isVerified: true,
-        hoursOpen: "8:00 AM",
-        hoursClose: "6:00 PM",
-        daysOpen: "Mon-Fri",
-      },
-      {
-        name: "QuickFix Garage",
-        description: "Fast, reliable auto repairs for all makes and models. Open 7 days a week for your convenience.",
-        phone: "(424) 555-0399",
-        email: "hello@quickfixgarage.com",
-        street: "1234 Main Street",
-        city: "Santa Monica",
-        state: "CA",
-        zipCode: "90401",
-        rating: "4.60",
-        reviewCount: 312,
-        completedJobs: 2150,
-        isVerified: true,
-        hoursOpen: "6:00 AM",
-        hoursClose: "9:00 PM",
-        daysOpen: "Mon-Sun",
-      },
     ]);
   }
 
