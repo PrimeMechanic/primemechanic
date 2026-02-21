@@ -143,6 +143,20 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
+export const portfolioItems = pgTable("portfolio_items", {
+  id: serial("id").primaryKey(),
+  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  imageUrl: text("image_url").notNull(),
+  caption: text("caption"),
+  serviceType: varchar("service_type", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertPortfolioItemSchema = createInsertSchema(portfolioItems).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertMessageSchema = createInsertSchema(messages).omit({
   id: true,
   createdAt: true,
@@ -162,3 +176,5 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Conversation = typeof conversations.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type PortfolioItem = typeof portfolioItems.$inferSelect;
+export type InsertPortfolioItem = z.infer<typeof insertPortfolioItemSchema>;

@@ -12,6 +12,8 @@ import {
   type Conversation,
   type Message,
   type InsertMessage,
+  type PortfolioItem,
+  type InsertPortfolioItem,
   users,
   vehicles,
   mechanicProfiles,
@@ -19,7 +21,8 @@ import {
   bookings,
   reviews,
   conversations,
-  messages
+  messages,
+  portfolioItems,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -48,6 +51,11 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   
   createReview(review: InsertReview): Promise<Review>;
+  
+  getPortfolioItems(mechanicId: number): Promise<PortfolioItem[]>;
+  createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
+  deletePortfolioItem(id: number): Promise<void>;
+  getMechanicProfileByUserId(userId: string): Promise<MechanicProfile | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -183,6 +191,26 @@ export class DatabaseStorage implements IStorage {
         .where(eq(mechanicProfiles.id, review.mechanicId));
     }
     return newReview;
+  }
+
+  async getPortfolioItems(mechanicId: number): Promise<PortfolioItem[]> {
+    return db.select().from(portfolioItems)
+      .where(eq(portfolioItems.mechanicId, mechanicId))
+      .orderBy(desc(portfolioItems.createdAt));
+  }
+
+  async createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem> {
+    const [newItem] = await db.insert(portfolioItems).values(item).returning();
+    return newItem;
+  }
+
+  async deletePortfolioItem(id: number): Promise<void> {
+    await db.delete(portfolioItems).where(eq(portfolioItems.id, id));
+  }
+
+  async getMechanicProfileByUserId(userId: string): Promise<MechanicProfile | undefined> {
+    const [profile] = await db.select().from(mechanicProfiles).where(eq(mechanicProfiles.userId, userId));
+    return profile;
   }
 }
 
