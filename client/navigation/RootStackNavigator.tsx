@@ -12,6 +12,7 @@ import ChatScreen from "@/screens/ChatScreen";
 import AddVehicleScreen from "@/screens/AddVehicleScreen";
 import PaymentMethodsScreen from "@/screens/PaymentMethodsScreen";
 import SavedAddressesScreen from "@/screens/SavedAddressesScreen";
+import ShopProfileScreen from "@/screens/ShopProfileScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
 import DemoScreen from "@/screens/DemoScreen";
@@ -37,6 +38,7 @@ export type RootStackParamList = {
   AddVehicle: undefined;
   PaymentMethods: undefined;
   SavedAddresses: undefined;
+  ShopProfile: { shopId: string };
 } & AuthStackParamList;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -152,6 +154,13 @@ export default function RootStackNavigator() {
         component={SavedAddressesScreen}
         options={{
           headerTitle: "Saved Addresses",
+        }}
+      />
+      <Stack.Screen
+        name="ShopProfile"
+        component={ShopProfileScreen}
+        options={{
+          headerTitle: "Shop Profile",
         }}
       />
     </Stack.Navigator>

@@ -165,6 +165,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/shops", async (req, res) => {
+    try {
+      const shops = await storage.getShops();
+      const formattedShops = shops.map(s => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        phone: s.phone,
+        email: s.email,
+        street: s.street,
+        city: s.city,
+        state: s.state,
+        zipCode: s.zipCode,
+        rating: parseFloat(s.rating || "0"),
+        reviewCount: s.reviewCount,
+        completedJobs: s.completedJobs,
+        isVerified: s.isVerified,
+        hoursOpen: s.hoursOpen,
+        hoursClose: s.hoursClose,
+        daysOpen: s.daysOpen,
+        avatarUrl: s.avatarUrl,
+      }));
+      res.json(formattedShops);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch shops" });
+    }
+  });
+
+  app.get("/api/shops/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const shop = await storage.getShop(id);
+      if (!shop) {
+        return res.status(404).json({ error: "Shop not found" });
+      }
+      res.json({
+        id: shop.id,
+        name: shop.name,
+        description: shop.description,
+        phone: shop.phone,
+        email: shop.email,
+        street: shop.street,
+        city: shop.city,
+        state: shop.state,
+        zipCode: shop.zipCode,
+        rating: parseFloat(shop.rating || "0"),
+        reviewCount: shop.reviewCount,
+        completedJobs: shop.completedJobs,
+        isVerified: shop.isVerified,
+        hoursOpen: shop.hoursOpen,
+        hoursClose: shop.hoursClose,
+        daysOpen: shop.daysOpen,
+        avatarUrl: shop.avatarUrl,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch shop" });
+    }
+  });
+
   app.get("/api/users/:id", async (req, res) => {
     try {
       const user = await storage.getUser(req.params.id);

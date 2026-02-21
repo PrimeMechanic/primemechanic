@@ -10,10 +10,11 @@ import { ThemedText } from "@/components/ThemedText";
 import { SearchBar } from "@/components/SearchBar";
 import { ServiceCard } from "@/components/ServiceCard";
 import { MechanicCard } from "@/components/MechanicCard";
+import { ShopCard } from "@/components/ShopCard";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { EmptyState } from "@/components/EmptyState";
 import { Spacing } from "@/constants/theme";
-import { services, mechanics } from "@/data/mockData";
+import { services, mechanics, shops } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -32,12 +33,23 @@ export default function BrowseScreen() {
       m.specialty.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const filteredShops = shops.filter(
+    (s) =>
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.city.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleServicePress = (serviceId: string) => {
     navigation.navigate("BookService", { serviceId });
   };
 
   const handleMechanicPress = (mechanicId: string) => {
     navigation.navigate("MechanicProfile", { mechanicId });
+  };
+
+  const handleShopPress = (shopId: string) => {
+    navigation.navigate("ShopProfile", { shopId });
   };
 
   const handleBookNow = () => {
@@ -59,7 +71,7 @@ export default function BrowseScreen() {
             Welcome back
           </ThemedText>
           <ThemedText style={[styles.headline, { color: colors.text }]}>
-            Find a Mechanic
+            Find a Service
           </ThemedText>
         </View>
 
@@ -122,6 +134,34 @@ export default function BrowseScreen() {
               image={require("../../assets/images/empty-mechanics.png")}
               title="No Mechanics Found"
               message="We couldn't find any mechanics matching your search. Try adjusting your filters."
+            />
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
+              Nearby Shops
+            </ThemedText>
+            <ThemedText style={[styles.countText, { color: colors.textSecondary }]}>
+              {filteredShops.length} available
+            </ThemedText>
+          </View>
+          {filteredShops.length > 0 ? (
+            <View style={styles.mechanicsGrid}>
+              {filteredShops.map((shop) => (
+                <ShopCard
+                  key={shop.id}
+                  shop={shop}
+                  onPress={() => handleShopPress(shop.id)}
+                />
+              ))}
+            </View>
+          ) : (
+            <EmptyState
+              image={require("../../assets/images/empty-mechanics.png")}
+              title="No Shops Found"
+              message="We couldn't find any shops matching your search. Try adjusting your filters."
             />
           )}
         </View>
