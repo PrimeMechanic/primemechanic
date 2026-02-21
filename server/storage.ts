@@ -14,6 +14,8 @@ import {
   type InsertMessage,
   type PortfolioItem,
   type InsertPortfolioItem,
+  type Address,
+  type InsertAddress,
   users,
   vehicles,
   mechanicProfiles,
@@ -23,6 +25,7 @@ import {
   conversations,
   messages,
   portfolioItems,
+  addresses,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -57,6 +60,12 @@ export interface IStorage {
   deletePortfolioItem(id: number): Promise<void>;
   getMechanicProfileByUserId(userId: string): Promise<MechanicProfile | undefined>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
+
+  getAddresses(userId: string): Promise<Address[]>;
+  createAddress(address: InsertAddress): Promise<Address>;
+  updateAddress(id: number, updates: Partial<InsertAddress>): Promise<Address | undefined>;
+  deleteAddress(id: number): Promise<void>;
+  setDefaultAddress(userId: string, addressId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -217,6 +226,31 @@ export class DatabaseStorage implements IStorage {
   async getMechanicProfileByUserId(userId: string): Promise<MechanicProfile | undefined> {
     const [profile] = await db.select().from(mechanicProfiles).where(eq(mechanicProfiles.userId, userId));
     return profile;
+  }
+
+  async getAddresses(userId: string): Promise<Address[]> {
+    return db.select().from(addresses)
+      .where(eq(addresses.userId, userId))
+      .orderBy(desc(addresses.createdAt));
+  }
+
+  async createAddress(address: InsertAddress): Promise<Address> {
+    const [newAddress] = await db.insert(addresses).values(address).returning();
+    return newAddress;
+  }
+
+  async updateAddress(id: number, updates: Partial<InsertAddress>): Promise<Address | undefined> {
+    const [updated] = await db.update(addresses).set(updates).where(eq(addresses.id, id)).returning();
+    return updated;
+  }
+
+  async deleteAddress(id: number): Promise<void> {
+    await db.delete(addresses).where(eq(addresses.id, id));
+  }
+
+  async setDefaultAddress(userId: string, addressId: number): Promise<void> {
+    await db.update(addresses).set({ isDefault: false }).where(eq(addresses.userId, userId));
+    await db.update(addresses).set({ isDefault: true }).where(eq(addresses.id, addressId));
   }
 }
 
