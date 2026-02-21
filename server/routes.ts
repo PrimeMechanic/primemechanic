@@ -250,6 +250,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/users/:id/mechanic-profile", async (req, res) => {
+    try {
+      const profile = await storage.getMechanicProfileByUserId(req.params.id);
+      if (!profile) {
+        return res.status(404).json({ error: "Mechanic profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mechanic profile" });
+    }
+  });
+
   app.get("/api/users/:id/vehicles", async (req, res) => {
     try {
       const vehicles = await storage.getVehicles(req.params.id);

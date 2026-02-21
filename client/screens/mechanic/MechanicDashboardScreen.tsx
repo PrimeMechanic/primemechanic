@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, View, ScrollView, Pressable, Image } from "react-native";
+import React, { useCallback, useState } from "react";
+import { StyleSheet, View, ScrollView, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -7,19 +7,40 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
-import {
-  mechanicProfile,
-  earningsData,
-  todaysSchedule,
-  jobRequests,
-} from "@/data/mechanicData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+interface DashboardStats {
+  mechanicId: number;
+  name: string;
+  rating: number | null;
+  reviewCount: number;
+  completedJobs: number;
+  totalEarnings: number;
+  todayEarnings: number;
+  weekEarnings: number;
+  monthEarnings: number;
+  pendingEarnings: number;
+  pendingRequests: number;
+  todaySchedule: ScheduleEntry[];
+}
+
+interface ScheduleEntry {
+  id: number;
+  time: string;
+  customer: string;
+  service: string;
+  location: string;
+  status: "upcoming" | "in_progress";
+}
 
 interface StatCardProps {
   icon: string;
@@ -31,7 +52,7 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, gradient, iconColor }: StatCardProps) {
   const { colors } = useTheme();
-  
+
   return (
     <View style={[styles.statCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
       {gradient ? (
@@ -64,17 +85,9 @@ interface ScheduleItemProps {
   isLast: boolean;
 }
 
-function ScheduleItem({
-  time,
-  customer,
-  service,
-  location,
-  status,
-  onPress,
-  isLast,
-}: ScheduleItemProps) {
+function ScheduleItem({ time, customer, service, location, status, onPress, isLast }: ScheduleItemProps) {
   const { colors } = useTheme();
-  
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -117,14 +130,59 @@ function ScheduleItem({
 export default function MechanicDashboardScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
+  const queryClient = useQueryClient();
 
-  const pendingRequests = jobRequests.filter((j) => j.status === "pending").length;
+  const { data: stats, isLoading, refetch } = useQuery<DashboardStats>({
+    queryKey: ["/api/mechanics/dashboard", user?.id],
+    enabled: !!user?.id,
+  });
+
+  const handleWsMessage = useCallback((data: any) => {
+    if (data.type === "dashboard_update") {
+      queryClient.setQueryData(["/api/mechanics/dashboard", user?.id], data.data);
+    }
+  }, [queryClient, user?.id]);
+
+  const { isConnected } = useWebSocket({
+    userId: user?.id,
+    onMessage: handleWsMessage,
+    enabled: !!user?.id && user?.role === "mechanic",
+  });
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const handleSchedulePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning,";
+    if (hour < 17) return "Good afternoon,";
+    return "Good evening,";
+  };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: colors.backgroundRoot }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  const todayEarnings = stats?.todayEarnings ?? 0;
+  const weekEarnings = stats?.weekEarnings ?? 0;
+  const rating = stats?.rating;
+  const pendingRequests = stats?.pendingRequests ?? 0;
+  const schedule = stats?.todaySchedule ?? [];
 
   return (
     <ScrollView
@@ -134,14 +192,24 @@ export default function MechanicDashboardScreen() {
         paddingBottom: tabBarHeight + Spacing["3xl"],
       }}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
+      }
     >
       <View style={styles.welcomeSection}>
         <View style={styles.welcomeRow}>
           <View>
-            <ThemedText style={[styles.greeting, { color: colors.textSecondary }]}>Good morning,</ThemedText>
-            <ThemedText style={[styles.name, { color: colors.text }]}>{mechanicProfile.name}</ThemedText>
+            <ThemedText style={[styles.greeting, { color: colors.textSecondary }]}>{getGreeting()}</ThemedText>
+            <ThemedText style={[styles.name, { color: colors.text }]}>{stats?.name || user?.name || "Mechanic"}</ThemedText>
           </View>
-          <Image source={mechanicProfile.avatar} style={[styles.avatar, { borderColor: colors.primary }]} />
+          <View style={styles.statusRow}>
+            {isConnected ? (
+              <View style={[styles.liveIndicator, { backgroundColor: `${colors.primary}15` }]}>
+                <View style={[styles.liveDot, { backgroundColor: colors.primary }]} />
+                <ThemedText style={[styles.liveText, { color: colors.primary }]}>Live</ThemedText>
+              </View>
+            ) : null}
+          </View>
         </View>
         {pendingRequests > 0 ? (
           <Pressable style={({ pressed }) => [pressed && { opacity: 0.9 }]}>
@@ -167,19 +235,19 @@ export default function MechanicDashboardScreen() {
         <StatCard
           icon="dollar-sign"
           label="Today"
-          value={`$${earningsData.today}`}
+          value={`$${todayEarnings.toFixed(0)}`}
           gradient={["#22C55E", "#16A34A"]}
         />
         <StatCard
           icon="trending-up"
           label="This Week"
-          value={`$${earningsData.thisWeek}`}
+          value={`$${weekEarnings.toFixed(0)}`}
           gradient={["#0FA958", "#0B8A47"]}
         />
         <StatCard
           icon="star"
           label="Rating"
-          value={mechanicProfile.rating.toString()}
+          value={rating != null ? rating.toFixed(1) : "--"}
           iconColor="#F59E0B"
         />
       </View>
@@ -189,13 +257,13 @@ export default function MechanicDashboardScreen() {
           <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Today's Schedule</ThemedText>
           <View style={[styles.countBadge, { backgroundColor: `${colors.primary}15` }]}>
             <ThemedText style={[styles.countText, { color: colors.primary }]}>
-              {todaysSchedule.length} jobs
+              {schedule.length} jobs
             </ThemedText>
           </View>
         </View>
-        {todaysSchedule.length > 0 ? (
+        {schedule.length > 0 ? (
           <View style={[styles.scheduleList, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
-            {todaysSchedule.map((item, index) => (
+            {schedule.map((item, index) => (
               <ScheduleItem
                 key={item.id}
                 time={item.time}
@@ -204,7 +272,7 @@ export default function MechanicDashboardScreen() {
                 location={item.location}
                 status={item.status}
                 onPress={handleSchedulePress}
-                isLast={index === todaysSchedule.length - 1}
+                isLast={index === schedule.length - 1}
               />
             ))}
           </View>
@@ -229,7 +297,7 @@ export default function MechanicDashboardScreen() {
               <Feather name="check-circle" size={18} color={colors.primary} />
             </View>
             <ThemedText style={[styles.quickStatValue, { color: colors.text }]}>
-              {mechanicProfile.completedJobs}
+              {stats?.completedJobs ?? 0}
             </ThemedText>
             <ThemedText style={[styles.quickStatLabel, { color: colors.textSecondary }]}>Total Jobs</ThemedText>
           </View>
@@ -238,7 +306,7 @@ export default function MechanicDashboardScreen() {
               <Feather name="message-square" size={18} color="#F59E0B" />
             </View>
             <ThemedText style={[styles.quickStatValue, { color: colors.text }]}>
-              {mechanicProfile.reviewCount}
+              {stats?.reviewCount ?? 0}
             </ThemedText>
             <ThemedText style={[styles.quickStatLabel, { color: colors.textSecondary }]}>Reviews</ThemedText>
           </View>
@@ -247,7 +315,7 @@ export default function MechanicDashboardScreen() {
               <Feather name="calendar" size={18} color="#22C55E" />
             </View>
             <ThemedText style={[styles.quickStatValue, { color: colors.text }]}>
-              ${earningsData.thisMonth}
+              ${stats?.monthEarnings?.toFixed(0) ?? 0}
             </ThemedText>
             <ThemedText style={[styles.quickStatLabel, { color: colors.textSecondary }]}>This Month</ThemedText>
           </View>
@@ -256,7 +324,7 @@ export default function MechanicDashboardScreen() {
               <Feather name="clock" size={18} color="#6366F1" />
             </View>
             <ThemedText style={[styles.quickStatValue, { color: colors.text }]}>
-              ${earningsData.pending}
+              ${stats?.pendingEarnings?.toFixed(0) ?? 0}
             </ThemedText>
             <ThemedText style={[styles.quickStatLabel, { color: colors.textSecondary }]}>Pending</ThemedText>
           </View>
@@ -269,6 +337,11 @@ export default function MechanicDashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   welcomeSection: {
     paddingHorizontal: Spacing.xl,
@@ -291,11 +364,26 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontFamily: "Montserrat_700Bold",
   },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 18,
-    borderWidth: 2,
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  liveIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: BorderRadius.full,
+    gap: 6,
+  },
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  liveText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
   alertBanner: {
     flexDirection: "row",
