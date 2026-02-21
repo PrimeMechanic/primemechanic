@@ -16,9 +16,11 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  needsOnboarding: boolean;
   signUp: (email: string, password: string, name: string, phone?: string, role?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  completeOnboarding: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,10 +34,31 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
   useEffect(() => {
     loadStoredAuth();
   }, []);
+
+  const checkMechanicProfile = async (userData: User) => {
+    if (userData.role !== "mechanic") {
+      setNeedsOnboarding(false);
+      return;
+    }
+    try {
+      const response = await fetch(
+        new URL(`/api/users/${userData.id}/mechanic-profile`, getApiUrl()).href,
+        { credentials: "include" }
+      );
+      if (response.status === 404) {
+        setNeedsOnboarding(true);
+      } else {
+        setNeedsOnboarding(false);
+      }
+    } catch {
+      setNeedsOnboarding(false);
+    }
+  };
 
   const loadStoredAuth = async () => {
     try {
@@ -43,6 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (stored) {
         const userData = JSON.parse(stored);
         setUser(userData);
+        await checkMechanicProfile(userData);
       }
     } catch (error) {
       console.error("Failed to load auth:", error);
@@ -67,6 +91,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     setUser(data.user);
     await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data.user));
+
+    if ((role || "customer") === "mechanic") {
+      setNeedsOnboarding(true);
+    }
   };
 
   const signIn = async (email: string, password: string) => {
@@ -82,11 +110,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     setUser(data.user);
     await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data.user));
+    await checkMechanicProfile(data.user);
   };
 
   const signOut = async () => {
     setUser(null);
+    setNeedsOnboarding(false);
     await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+  };
+
+  const completeOnboarding = () => {
+    setNeedsOnboarding(false);
   };
 
   return (
@@ -95,9 +129,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user,
         isLoading,
         isAuthenticated: !!user,
+        needsOnboarding,
         signUp,
         signIn,
         signOut,
+        completeOnboarding,
       }}
     >
       {children}

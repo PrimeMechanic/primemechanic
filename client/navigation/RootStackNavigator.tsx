@@ -15,6 +15,7 @@ import SavedAddressesScreen from "@/screens/SavedAddressesScreen";
 import ShopProfileScreen from "@/screens/ShopProfileScreen";
 import HelpSupportScreen from "@/screens/HelpSupportScreen";
 import AllServicesScreen from "@/screens/AllServicesScreen";
+import MechanicOnboardingScreen from "@/screens/mechanic/MechanicOnboardingScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
 import DemoScreen from "@/screens/DemoScreen";
@@ -50,7 +51,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
   const { role, setRole } = useUser();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, needsOnboarding, completeOnboarding } = useAuth();
   const { colors } = useTheme();
 
   const [isDemo, setIsDemo] = React.useState(false);
@@ -74,6 +75,10 @@ export default function RootStackNavigator() {
         </Stack.Screen>
       </Stack.Navigator>
     );
+  }
+
+  if (needsOnboarding && user?.role === "mechanic") {
+    return <MechanicOnboardingScreen onComplete={completeOnboarding} />;
   }
 
   const currentRole = user?.role === "mechanic" ? "mechanic" : role;
