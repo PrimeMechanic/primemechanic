@@ -1,9 +1,23 @@
 import type { Express } from "express";
 import { createServer, type Server } from "node:http";
 import bcrypt from "bcryptjs";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+
+const mechanicClients = new Map<string, Set<WebSocket>>();
+
+export function broadcastToMechanic(userId: string, data: any) {
+  const clients = mechanicClients.get(userId);
+  if (!clients) return;
+  const message = JSON.stringify(data);
+  for (const ws of clients) {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(message);
+    }
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -332,6 +346,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!booking) {
         return res.status(404).json({ error: "Booking not found" });
       }
+
+      if (status === "completed" && booking.mechanicId) {
+        const payout = parseFloat(booking.mechanicPayout || "0");
+        if (payout > 0) {
+          await storage.updateMechanicEarnings(booking.mechanicId, payout);
+        }
+        const mechanic = await storage.getMechanic(booking.mechanicId);
+        if (mechanic) {
+          const stats = await storage.getMechanicDashboardStats(mechanic.userId);
+          if (stats) {
+            broadcastToMechanic(mechanic.userId, { type: "dashboard_update", data: stats });
+          }
+        }
+      }
+
       res.json(booking);
     } catch (error) {
       res.status(500).json({ error: "Failed to update booking status" });
@@ -741,6 +770,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/mechanics/onboard", async (req, res) => {
+    try {
+      const { userId, specialty, bio, hourlyRate, serviceRadius } = req.body;
+      if (!userId || !hourlyRate) {
+        return res.status(400).json({ error: "userId and hourlyRate are required" });
+      }
+
+      const existing = await storage.getMechanicProfileByUserId(userId);
+      if (existing) {
+        return res.status(400).json({ error: "Mechanic profile already exists" });
+      }
+
+      const profile = await storage.createMechanicProfile({
+        userId,
+        specialty: specialty || null,
+        bio: bio || null,
+        hourlyRate: parseFloat(hourlyRate).toFixed(2),
+        serviceRadius: serviceRadius || 10,
+      });
+
+      res.status(201).json(profile);
+    } catch (error) {
+      console.error("Mechanic onboard error:", error);
+      res.status(500).json({ error: "Failed to create mechanic profile" });
+    }
+  });
+
+  app.get("/api/mechanics/dashboard/:userId", async (req, res) => {
+    try {
+      const stats = await storage.getMechanicDashboardStats(req.params.userId);
+      if (!stats) {
+        return res.status(404).json({ error: "Mechanic profile not found" });
+      }
+      res.json(stats);
+    } catch (error) {
+      console.error("Dashboard stats error:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard stats" });
+    }
+  });
+
   const httpServer = createServer(app);
+
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" });
+
+  wss.on("connection", (ws, req) => {
+    let userId: string | null = null;
+
+    ws.on("message", (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        if (data.type === "register" && data.userId) {
+          userId = data.userId;
+          if (!mechanicClients.has(userId)) {
+            mechanicClients.set(userId, new Set());
+          }
+          mechanicClients.get(userId)!.add(ws);
+          ws.send(JSON.stringify({ type: "registered", userId }));
+        }
+      } catch (e) {}
+    });
+
+    ws.on("close", () => {
+      if (userId) {
+        const clients = mechanicClients.get(userId);
+        if (clients) {
+          clients.delete(ws);
+          if (clients.size === 0) {
+            mechanicClients.delete(userId);
+          }
+        }
+      }
+    });
+  });
+
   return httpServer;
 }
