@@ -9,6 +9,7 @@ import BookServiceScreen from "@/screens/BookServiceScreen";
 import MechanicProfileScreen from "@/screens/MechanicProfileScreen";
 import BookingDetailScreen from "@/screens/BookingDetailScreen";
 import ChatScreen from "@/screens/ChatScreen";
+import AddVehicleScreen from "@/screens/AddVehicleScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
 import DemoScreen from "@/screens/DemoScreen";
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   MechanicProfile: { mechanicId: string };
   BookingDetail: { bookingId: string };
   Chat: { conversationId: string; mechanicId?: string };
+  AddVehicle: undefined;
 } & AuthStackParamList;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -125,6 +127,13 @@ export default function RootStackNavigator() {
           return {
             headerTitle: mechanic.name,
           };
+        }}
+      />
+      <Stack.Screen
+        name="AddVehicle"
+        component={AddVehicleScreen}
+        options={{
+          headerTitle: "Add Vehicle",
         }}
       />
     </Stack.Navigator>

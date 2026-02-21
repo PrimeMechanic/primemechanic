@@ -11,6 +11,9 @@ import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { currentUser } from "@/data/mockData";
 import { useUser } from "@/context/UserContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 interface SettingsItemProps {
   icon: string;
@@ -96,6 +99,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { toggleRole } = useUser();
   const { isDark, toggleTheme, colors } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const vehicle = currentUser.vehicles[0];
 
@@ -174,7 +178,14 @@ export default function ProfileScreen() {
               <Feather name="edit-2" size={16} color={colors.textSecondary} />
             </Pressable>
           </View>
-          <Pressable style={[styles.addVehicleRow, { borderTopColor: colors.border }]}>
+          <Pressable
+            style={[styles.addVehicleRow, { borderTopColor: colors.border }]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              navigation.navigate("AddVehicle");
+            }}
+            testID="button-add-vehicle"
+          >
             <Feather name="plus-circle" size={18} color={colors.primary} />
             <ThemedText style={[styles.addVehicleText, { color: colors.primary }]}>Add Vehicle</ThemedText>
           </Pressable>
