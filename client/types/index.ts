@@ -20,6 +20,25 @@ export interface Mechanic {
   completedJobs: number;
 }
 
+export interface Shop {
+  id: string;
+  name: string;
+  avatar: any;
+  rating: number;
+  reviewCount: number;
+  distance: string;
+  address: string;
+  city: string;
+  state: string;
+  phone: string;
+  hoursOpen: string;
+  hoursClose: string;
+  daysOpen: string;
+  completedJobs: number;
+  isVerified: boolean;
+  description: string;
+}
+
 export interface Booking {
   id: string;
   service: Service;

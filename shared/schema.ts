@@ -157,6 +157,40 @@ export const insertPortfolioItemSchema = createInsertSchema(portfolioItems).omit
   createdAt: true,
 });
 
+export const shopProfiles = pgTable("shop_profiles", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  phone: varchar("phone", { length: 20 }),
+  email: varchar("email", { length: 255 }),
+  street: varchar("street", { length: 255 }).notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  state: varchar("state", { length: 50 }).notNull(),
+  zipCode: varchar("zip_code", { length: 20 }).notNull(),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
+  reviewCount: integer("review_count").default(0),
+  completedJobs: integer("completed_jobs").default(0),
+  isVerified: boolean("is_verified").default(false),
+  hoursOpen: varchar("hours_open", { length: 50 }).default("8:00 AM"),
+  hoursClose: varchar("hours_close", { length: 50 }).default("6:00 PM"),
+  daysOpen: varchar("days_open", { length: 100 }).default("Mon-Fri"),
+  avatarUrl: text("avatar_url"),
+  stripeConnectId: varchar("stripe_connect_id", { length: 255 }),
+  stripeConnectOnboarded: boolean("stripe_connect_onboarded").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const shopServices = pgTable("shop_services", {
+  id: serial("id").primaryKey(),
+  shopId: integer("shop_id").references(() => shopProfiles.id).notNull(),
+  serviceId: integer("service_id").references(() => services.id).notNull(),
+  customPrice: decimal("custom_price", { precision: 10, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+});
+
 export const addresses = pgTable("addresses", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id).notNull(),
@@ -198,3 +232,4 @@ export type PortfolioItem = typeof portfolioItems.$inferSelect;
 export type InsertPortfolioItem = z.infer<typeof insertPortfolioItemSchema>;
 export type Address = typeof addresses.$inferSelect;
 export type InsertAddress = z.infer<typeof insertAddressSchema>;
+export type ShopProfile = typeof shopProfiles.$inferSelect;

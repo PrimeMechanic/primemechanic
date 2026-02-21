@@ -1,4 +1,4 @@
-import { Service, Mechanic, Booking, Conversation, Vehicle, User } from "@/types";
+import { Service, Mechanic, Shop, Booking, Conversation, Vehicle, User } from "@/types";
 
 export const services: Service[] = [
   {
@@ -107,6 +107,63 @@ export const mechanics: Mechanic[] = [
     hourlyRate: 95,
     isAvailable: true,
     completedJobs: 87,
+  },
+];
+
+export const shops: Shop[] = [
+  {
+    id: "1",
+    name: "AutoCare Pro Center",
+    avatar: require("../../assets/images/shop-avatar-1.png"),
+    rating: 4.8,
+    reviewCount: 215,
+    distance: "1.5 mi",
+    address: "2450 Pacific Coast Hwy",
+    city: "Long Beach",
+    state: "CA",
+    phone: "(310) 555-0180",
+    hoursOpen: "7:00 AM",
+    hoursClose: "7:00 PM",
+    daysOpen: "Mon-Sat",
+    completedJobs: 1240,
+    isVerified: true,
+    description: "Full-service auto repair center with state-of-the-art diagnostic equipment and certified technicians.",
+  },
+  {
+    id: "2",
+    name: "Precision Auto Works",
+    avatar: require("../../assets/images/shop-avatar-2.png"),
+    rating: 4.9,
+    reviewCount: 178,
+    distance: "2.3 mi",
+    address: "8901 Sunset Blvd",
+    city: "West Hollywood",
+    state: "CA",
+    phone: "(323) 555-0241",
+    hoursOpen: "8:00 AM",
+    hoursClose: "6:00 PM",
+    daysOpen: "Mon-Fri",
+    completedJobs: 890,
+    isVerified: true,
+    description: "Specializing in European and luxury vehicle maintenance with factory-trained mechanics.",
+  },
+  {
+    id: "3",
+    name: "QuickFix Garage",
+    avatar: require("../../assets/images/shop-avatar-1.png"),
+    rating: 4.6,
+    reviewCount: 312,
+    distance: "0.9 mi",
+    address: "1234 Main Street",
+    city: "Santa Monica",
+    state: "CA",
+    phone: "(424) 555-0399",
+    hoursOpen: "6:00 AM",
+    hoursClose: "9:00 PM",
+    daysOpen: "Mon-Sun",
+    completedJobs: 2150,
+    isVerified: true,
+    description: "Fast, reliable auto repairs for all makes and models. Open 7 days a week for your convenience.",
   },
 ];
 
