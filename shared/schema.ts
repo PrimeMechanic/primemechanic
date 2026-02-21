@@ -44,6 +44,7 @@ export const mechanicProfiles = pgTable("mechanic_profiles", {
   latitude: decimal("latitude", { precision: 10, scale: 8 }),
   longitude: decimal("longitude", { precision: 11, scale: 8 }),
   serviceRadius: integer("service_radius").default(10),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
   stripeConnectId: varchar("stripe_connect_id", { length: 255 }),
   stripeConnectOnboarded: boolean("stripe_connect_onboarded").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),

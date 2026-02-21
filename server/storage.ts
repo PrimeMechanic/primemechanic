@@ -64,6 +64,10 @@ export interface IStorage {
   getMechanicProfileByUserId(userId: string): Promise<MechanicProfile | undefined>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
 
+  createMechanicProfile(profile: { userId: string; specialty?: string; bio?: string; hourlyRate: string; serviceRadius?: number }): Promise<MechanicProfile>;
+  getMechanicDashboardStats(userId: string): Promise<any>;
+  updateMechanicEarnings(mechanicId: number, amount: number): Promise<void>;
+
   getShops(): Promise<ShopProfile[]>;
   getShop(id: number): Promise<ShopProfile | undefined>;
 
@@ -232,6 +236,104 @@ export class DatabaseStorage implements IStorage {
   async getMechanicProfileByUserId(userId: string): Promise<MechanicProfile | undefined> {
     const [profile] = await db.select().from(mechanicProfiles).where(eq(mechanicProfiles.userId, userId));
     return profile;
+  }
+
+  async createMechanicProfile(profile: { userId: string; specialty?: string; bio?: string; hourlyRate: string; serviceRadius?: number }): Promise<MechanicProfile> {
+    const [newProfile] = await db.insert(mechanicProfiles).values({
+      userId: profile.userId,
+      specialty: profile.specialty || null,
+      bio: profile.bio || null,
+      hourlyRate: profile.hourlyRate,
+      rating: null,
+      reviewCount: 0,
+      completedJobs: 0,
+      totalEarnings: "0",
+      isVerified: false,
+      isAvailable: true,
+      serviceRadius: profile.serviceRadius || 10,
+    }).returning();
+    return newProfile;
+  }
+
+  async getMechanicDashboardStats(userId: string): Promise<any> {
+    const profile = await this.getMechanicProfileByUserId(userId);
+    if (!profile) return null;
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    const allBookings = await db.select().from(bookings)
+      .where(eq(bookings.mechanicId, profile.id));
+
+    const completedBookings = allBookings.filter(b => b.status === "completed");
+    const todayEarnings = completedBookings
+      .filter(b => b.completedAt && new Date(b.completedAt) >= todayStart)
+      .reduce((sum, b) => sum + parseFloat(b.mechanicPayout || "0"), 0);
+    const weekEarnings = completedBookings
+      .filter(b => b.completedAt && new Date(b.completedAt) >= weekStart)
+      .reduce((sum, b) => sum + parseFloat(b.mechanicPayout || "0"), 0);
+    const monthEarnings = completedBookings
+      .filter(b => b.completedAt && new Date(b.completedAt) >= monthStart)
+      .reduce((sum, b) => sum + parseFloat(b.mechanicPayout || "0"), 0);
+    const pendingEarnings = allBookings
+      .filter(b => b.status === "upcoming" || b.status === "in_progress" || b.status === "accepted")
+      .reduce((sum, b) => sum + parseFloat(b.mechanicPayout || "0"), 0);
+
+    const todayBookings = allBookings.filter(b => {
+      const scheduled = new Date(b.scheduledDate);
+      return scheduled >= todayStart && (b.status === "upcoming" || b.status === "in_progress" || b.status === "accepted");
+    });
+
+    const pendingRequests = allBookings.filter(b => b.status === "pending").length;
+
+    const svcList = await db.select().from(services);
+    const usersList = await db.select().from(users);
+
+    const schedule = todayBookings.map(b => {
+      const svc = svcList.find(s => s.id === b.serviceId);
+      const customer = usersList.find(u => u.id === b.customerId);
+      return {
+        id: b.id,
+        time: new Date(b.scheduledDate).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }),
+        customer: customer?.name || "Customer",
+        service: svc?.name || "Service",
+        location: b.location,
+        status: b.status === "in_progress" ? "in_progress" : "upcoming",
+      };
+    });
+
+    const user = await this.getUser(userId);
+
+    return {
+      mechanicId: profile.id,
+      name: user?.name || "Mechanic",
+      rating: profile.rating ? parseFloat(profile.rating) : null,
+      reviewCount: profile.reviewCount || 0,
+      completedJobs: profile.completedJobs || 0,
+      totalEarnings: parseFloat(profile.totalEarnings || "0"),
+      todayEarnings,
+      weekEarnings,
+      monthEarnings,
+      pendingEarnings,
+      pendingRequests,
+      todaySchedule: schedule,
+    };
+  }
+
+  async updateMechanicEarnings(mechanicId: number, amount: number): Promise<void> {
+    await db.update(mechanicProfiles)
+      .set({
+        totalEarnings: sql`COALESCE(total_earnings, '0')::numeric + ${amount.toFixed(2)}::numeric`,
+        completedJobs: sql`COALESCE(completed_jobs, 0) + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(mechanicProfiles.id, mechanicId));
   }
 
   async getShops(): Promise<ShopProfile[]> {
