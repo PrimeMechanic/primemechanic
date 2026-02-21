@@ -8,6 +8,17 @@ The platform operates on a 20% commission model per completed job, similar to Ub
 
 ## Recent Changes
 
+### February 21, 2026
+- **Mechanic Portfolio Feature**:
+  - Portfolio items table (mechanicId, imageUrl, caption, serviceType) with Drizzle ORM
+  - Object Storage integration for photo uploads via presigned URLs
+  - API routes: `GET /api/mechanics/:id/portfolio`, `POST /api/portfolio`, `DELETE /api/portfolio/:id`
+  - Upload URL endpoint: `POST /api/objects/upload`, Object serving: `GET /objects/{*path}`
+  - MechanicProfileEditScreen: "My Portfolio" section with image picker, grid gallery, delete capability
+  - MechanicProfileScreen: Public portfolio gallery with full-screen image modal viewer
+  - Uses expo-image-picker for native photo selection
+  - Object storage files stored via objectStorageExpo.ts with ACL metadata
+
 ### January 29, 2025
 - **Premium UI Design Overhaul**:
   - New Emerald Tech Green color theme (#0FA958 primary, #0B3D2E secondary)
