@@ -19,11 +19,13 @@ import { useMutation } from "@tanstack/react-query";
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, BorderRadius, Shadows, Typography } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
-import { vehicleMakesList, getModelsForMake, getYearRange } from "@/data/vehicleData";
+import { vehicleMakesList, getModelsForMake, getTrimsForMakeModel, getYearRange } from "@/data/vehicleData";
 import { apiRequest, queryClient } from "@/lib/query-client";
 import { useAuth } from "@/context/AuthContext";
 
-type Step = "make" | "model" | "year" | "plate" | "review";
+type Step = "make" | "model" | "year" | "trim" | "plate" | "review";
+
+const ALL_STEPS: Step[] = ["make", "model", "year", "trim", "plate", "review"];
 
 export default function AddVehicleScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -35,11 +37,13 @@ export default function AddVehicleScreen({ navigation }: any) {
   const [selectedMake, setSelectedMake] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedYear, setSelectedYear] = useState<number>(0);
+  const [selectedTrim, setSelectedTrim] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const years = useMemo(() => getYearRange(), []);
   const models = useMemo(() => getModelsForMake(selectedMake), [selectedMake]);
+  const trims = useMemo(() => getTrimsForMakeModel(selectedMake, selectedModel), [selectedMake, selectedModel]);
 
   const filteredMakes = useMemo(() => {
     if (!searchQuery.trim()) return vehicleMakesList;
@@ -53,6 +57,12 @@ export default function AddVehicleScreen({ navigation }: any) {
     return models.filter((m) => m.toLowerCase().includes(q));
   }, [searchQuery, models]);
 
+  const filteredTrims = useMemo(() => {
+    if (!searchQuery.trim()) return trims;
+    const q = searchQuery.toLowerCase();
+    return trims.filter((t) => t.toLowerCase().includes(q));
+  }, [searchQuery, trims]);
+
   const createVehicleMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/vehicles", {
@@ -60,6 +70,7 @@ export default function AddVehicleScreen({ navigation }: any) {
         make: selectedMake,
         model: selectedModel,
         year: selectedYear,
+        trim: selectedTrim || null,
         licensePlate: licensePlate || null,
       });
       return res.json();
@@ -75,6 +86,7 @@ export default function AddVehicleScreen({ navigation }: any) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedMake(make);
     setSelectedModel("");
+    setSelectedTrim("");
     setSearchQuery("");
     setStep("model");
   };
@@ -82,6 +94,7 @@ export default function AddVehicleScreen({ navigation }: any) {
   const handleSelectModel = (model: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedModel(model);
+    setSelectedTrim("");
     setSearchQuery("");
     setStep("year");
   };
@@ -89,6 +102,25 @@ export default function AddVehicleScreen({ navigation }: any) {
   const handleSelectYear = (year: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedYear(year);
+    setSearchQuery("");
+    const availableTrims = getTrimsForMakeModel(selectedMake, selectedModel);
+    if (availableTrims.length > 0) {
+      setStep("trim");
+    } else {
+      setStep("plate");
+    }
+  };
+
+  const handleSelectTrim = (trim: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedTrim(trim);
+    setSearchQuery("");
+    setStep("plate");
+  };
+
+  const handleSkipTrim = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedTrim("");
     setStep("plate");
   };
 
@@ -102,7 +134,15 @@ export default function AddVehicleScreen({ navigation }: any) {
     setSearchQuery("");
     if (step === "model") setStep("make");
     else if (step === "year") setStep("model");
-    else if (step === "plate") setStep("year");
+    else if (step === "trim") setStep("year");
+    else if (step === "plate") {
+      const availableTrims = getTrimsForMakeModel(selectedMake, selectedModel);
+      if (availableTrims.length > 0) {
+        setStep("trim");
+      } else {
+        setStep("year");
+      }
+    }
     else if (step === "review") setStep("plate");
   };
 
@@ -114,23 +154,33 @@ export default function AddVehicleScreen({ navigation }: any) {
     make: "Select Make",
     model: "Select Model",
     year: "Select Year",
+    trim: "Select Trim",
     plate: "License Plate",
     review: "Review Vehicle",
   };
 
-  const stepNumber = ["make", "model", "year", "plate", "review"].indexOf(step) + 1;
+  const activeSteps = useMemo(() => {
+    const availableTrims = getTrimsForMakeModel(selectedMake, selectedModel);
+    if (availableTrims.length > 0) {
+      return ALL_STEPS;
+    }
+    return ALL_STEPS.filter((s) => s !== "trim");
+  }, [selectedMake, selectedModel]);
+
+  const stepNumber = activeSteps.indexOf(step) + 1;
+  const totalSteps = activeSteps.length;
 
   const renderStepIndicator = () => (
     <View style={styles.stepIndicatorRow}>
-      {[1, 2, 3, 4, 5].map((s) => (
+      {activeSteps.map((s, i) => (
         <View
           key={s}
           style={[
             styles.stepDot,
             {
-              backgroundColor: s <= stepNumber ? colors.primary : colors.border,
+              backgroundColor: i + 1 <= stepNumber ? colors.primary : colors.border,
             },
-            s === stepNumber ? styles.stepDotActive : null,
+            i + 1 === stepNumber ? styles.stepDotActive : null,
           ]}
         />
       ))}
@@ -142,6 +192,7 @@ export default function AddVehicleScreen({ navigation }: any) {
     if (selectedMake) parts.push(selectedMake);
     if (selectedModel) parts.push(selectedModel);
     if (selectedYear) parts.push(String(selectedYear));
+    if (selectedTrim) parts.push(selectedTrim);
     if (parts.length === 0) return null;
 
     return (
@@ -154,12 +205,12 @@ export default function AddVehicleScreen({ navigation }: any) {
     );
   };
 
-  const renderSearchBar = () => (
+  const renderSearchBar = (placeholder: string) => (
     <View style={[styles.searchContainer, { backgroundColor: colors.backgroundDefault, borderColor: colors.border }]}>
       <Feather name="search" size={18} color={colors.textSecondary} />
       <TextInput
         style={[styles.searchInput, { color: colors.text }]}
-        placeholder={step === "make" ? "Search makes..." : "Search models..."}
+        placeholder={placeholder}
         placeholderTextColor={colors.textSecondary}
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -198,7 +249,7 @@ export default function AddVehicleScreen({ navigation }: any) {
 
   const renderMakeStep = () => (
     <View style={styles.listContainer}>
-      {renderSearchBar()}
+      {renderSearchBar("Search makes...")}
       <FlatList
         data={filteredMakes}
         keyExtractor={(item) => item}
@@ -219,7 +270,7 @@ export default function AddVehicleScreen({ navigation }: any) {
 
   const renderModelStep = () => (
     <View style={styles.listContainer}>
-      {renderSearchBar()}
+      {renderSearchBar("Search models...")}
       <FlatList
         data={filteredModels}
         keyExtractor={(item) => item}
@@ -273,6 +324,42 @@ export default function AddVehicleScreen({ navigation }: any) {
         contentContainerStyle={styles.flatListContent}
         columnWrapperStyle={styles.yearRow}
         testID="list-years"
+      />
+    </View>
+  );
+
+  const renderTrimStep = () => (
+    <View style={styles.listContainer}>
+      {trims.length > 6 ? renderSearchBar("Search trims...") : null}
+      <FlatList
+        data={filteredTrims}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) =>
+          renderListItem({
+            item,
+            onPress: () => handleSelectTrim(item),
+            selected: item === selectedTrim,
+          })
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContent}
+        keyboardShouldPersistTaps="handled"
+        ListFooterComponent={
+          <Pressable
+            style={({ pressed }) => [
+              styles.skipButton,
+              { borderColor: colors.border },
+              pressed ? { backgroundColor: `${colors.primary}05` } : null,
+            ]}
+            onPress={handleSkipTrim}
+            testID="button-skip-trim"
+          >
+            <ThemedText style={[styles.skipText, { color: colors.textSecondary }]}>
+              Skip - I don't know my trim
+            </ThemedText>
+          </Pressable>
+        }
+        testID="list-trims"
       />
     </View>
   );
@@ -341,7 +428,7 @@ export default function AddVehicleScreen({ navigation }: any) {
           {selectedYear} {selectedMake}
         </ThemedText>
         <ThemedText style={[styles.reviewModel, { color: colors.primary }]}>
-          {selectedModel}
+          {selectedModel}{selectedTrim ? ` ${selectedTrim}` : ""}
         </ThemedText>
         {licensePlate.length > 0 ? (
           <View style={[styles.reviewPlateContainer, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]}>
@@ -355,6 +442,7 @@ export default function AddVehicleScreen({ navigation }: any) {
           {[
             { label: "Make", value: selectedMake, icon: "tag" },
             { label: "Model", value: selectedModel, icon: "layers" },
+            { label: "Trim", value: selectedTrim || "Not specified", icon: "sliders" },
             { label: "Year", value: String(selectedYear), icon: "calendar" },
             { label: "Plate", value: licensePlate || "Not provided", icon: "credit-card" },
           ].map((detail) => (
@@ -412,6 +500,7 @@ export default function AddVehicleScreen({ navigation }: any) {
       case "make": return renderMakeStep();
       case "model": return renderModelStep();
       case "year": return renderYearStep();
+      case "trim": return renderTrimStep();
       case "plate": return renderPlateStep();
       case "review": return renderReviewStep();
     }
@@ -549,6 +638,19 @@ const styles = StyleSheet.create({
   },
   yearText: {
     fontSize: 16,
+    fontWeight: "500",
+  },
+  skipButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    marginTop: Spacing.sm,
+  },
+  skipText: {
+    fontSize: 15,
     fontWeight: "500",
   },
   plateContainer: {

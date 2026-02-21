@@ -24,6 +24,7 @@ export const vehicles = pgTable("vehicles", {
   make: varchar("make", { length: 100 }).notNull(),
   model: varchar("model", { length: 100 }).notNull(),
   year: integer("year").notNull(),
+  trim: varchar("trim", { length: 100 }),
   licensePlate: varchar("license_plate", { length: 20 }),
   vin: varchar("vin", { length: 17 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
