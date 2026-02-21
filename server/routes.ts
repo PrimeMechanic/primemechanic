@@ -409,6 +409,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/stripe/publishable-key", async (req, res) => {
+    try {
+      const publishableKey = await getStripePublishableKey();
+      res.json({ publishableKey });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get Stripe key" });
+    }
+  });
+
+  app.get("/api/users/:id/payment-methods", async (req, res) => {
+    try {
+      const user = await storage.getUser(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (!user.stripeCustomerId) {
+        return res.json([]);
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: user.stripeCustomerId,
+        type: "card",
+      });
+
+      const formatted = paymentMethods.data.map((pm: any) => ({
+        id: pm.id,
+        brand: pm.card?.brand || "unknown",
+        last4: pm.card?.last4 || "****",
+        expMonth: pm.card?.exp_month,
+        expYear: pm.card?.exp_year,
+        isDefault: false,
+      }));
+
+      if (formatted.length > 0) {
+        try {
+          const customer = await stripe.customers.retrieve(user.stripeCustomerId) as any;
+          const defaultPmId = customer.invoice_settings?.default_payment_method;
+          if (defaultPmId) {
+            const defaultCard = formatted.find((pm: any) => pm.id === defaultPmId);
+            if (defaultCard) defaultCard.isDefault = true;
+          }
+        } catch (e) {}
+      }
+
+      res.json(formatted);
+    } catch (error) {
+      console.error("Payment methods error:", error);
+      res.status(500).json({ error: "Failed to fetch payment methods" });
+    }
+  });
+
+  app.post("/api/users/:id/setup-intent", async (req, res) => {
+    try {
+      const user = await storage.getUser(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.name,
+          metadata: { userId: user.id },
+        });
+        customerId = customer.id;
+        await storage.updateUser(user.id, { stripeCustomerId: customerId });
+      }
+
+      const setupIntent = await stripe.setupIntents.create({
+        customer: customerId,
+        payment_method_types: ["card"],
+      });
+
+      res.json({ clientSecret: setupIntent.client_secret });
+    } catch (error) {
+      console.error("Setup intent error:", error);
+      res.status(500).json({ error: "Failed to create setup intent" });
+    }
+  });
+
+  app.delete("/api/payment-methods/:paymentMethodId", async (req, res) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      await stripe.paymentMethods.detach(req.params.paymentMethodId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete payment method error:", error);
+      res.status(500).json({ error: "Failed to remove payment method" });
+    }
+  });
+
+  app.post("/api/payment-methods/:paymentMethodId/default", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const user = await storage.getUser(userId);
+      if (!user?.stripeCustomerId) {
+        return res.status(400).json({ error: "No Stripe customer" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      await stripe.customers.update(user.stripeCustomerId, {
+        invoice_settings: {
+          default_payment_method: req.params.paymentMethodId,
+        },
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Set default error:", error);
+      res.status(500).json({ error: "Failed to set default payment method" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -56,6 +56,7 @@ export interface IStorage {
   createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
   deletePortfolioItem(id: number): Promise<void>;
   getMechanicProfileByUserId(userId: string): Promise<MechanicProfile | undefined>;
+  updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -66,6 +67,11 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const [user] = await db.update(users).set(updates).where(eq(users.id, id)).returning();
     return user;
   }
 
