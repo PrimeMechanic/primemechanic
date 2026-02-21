@@ -105,7 +105,11 @@ export default function BrowseScreen() {
               <Feather name="chevron-right" size={14} color={colors.primary} />
             </Pressable>
           </View>
-          <View style={styles.servicesGrid}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.servicesRow}
+          >
             {services.map((service) => (
               <ServiceCard
                 key={service.id}
@@ -113,7 +117,7 @@ export default function BrowseScreen() {
                 onPress={() => handleServicePress(service.id)}
               />
             ))}
-          </View>
+          </ScrollView>
         </View>
 
         <View style={styles.section}>
@@ -249,9 +253,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
-  servicesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  servicesRow: {
     paddingHorizontal: Spacing.xl,
     gap: Spacing.md,
   },
