@@ -275,7 +275,7 @@ export default function ProfileScreen() {
           />
           <SettingsItem icon="credit-card" label="Payment Methods" onPress={() => navigation.navigate("PaymentMethods")} />
           <SettingsItem icon="map-pin" label="Saved Addresses" onPress={() => navigation.navigate("SavedAddresses")} />
-          <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} />
+          <SettingsItem icon="help-circle" label="Help & Support" onPress={() => navigation.navigate("HelpSupport")} />
         </View>
       </View>
 
