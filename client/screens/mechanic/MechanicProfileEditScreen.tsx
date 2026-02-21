@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   ScrollView,
@@ -6,12 +6,17 @@ import {
   Image,
   Switch,
   StyleSheet,
+  ActivityIndicator,
+  Dimensions,
+  Platform,
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
@@ -19,6 +24,12 @@ import { mechanicProfile } from "@/data/mechanicData";
 import { services } from "@/data/mockData";
 import { useUser } from "@/context/UserContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import { apiRequest, getApiUrl } from "@/lib/query-client";
+import { uploadFileToStorage } from "@/utils/objectStorageExpo";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const PORTFOLIO_ITEM_SIZE = (SCREEN_WIDTH - Spacing.xl * 2 - Spacing.sm * 2) / 3;
 
 interface SettingsItemProps {
   icon: string;
@@ -93,9 +104,75 @@ export default function MechanicProfileEditScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const { toggleRole } = useUser();
+  const { user: authUser } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [isAvailable, setIsAvailable] = useState(mechanicProfile.isAvailable);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const mechanicUserId = authUser?.id || "m1";
+
+  const { data: mechProfile } = useQuery<any>({
+    queryKey: ["/api/users", mechanicUserId, "mechanic-profile"],
+  });
+
+  const mechanicId = mechProfile?.id;
+
+  const { data: portfolioData = [], isLoading: portfolioLoading } = useQuery<any[]>({
+    queryKey: ["/api/mechanics", String(mechanicId), "portfolio"],
+    enabled: !!mechanicId,
+  });
+
+  const deletePortfolioMutation = useMutation({
+    mutationFn: async (itemId: number) => {
+      await apiRequest("DELETE", `/api/portfolio/${itemId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/mechanics", String(mechanicId), "portfolio"] });
+    },
+  });
+
+  const handlePickImage = useCallback(async () => {
+    if (!mechanicId) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    setUploading(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      const { File } = await import("expo-file-system");
+      const file = new File(result.assets[0].uri);
+      const uploadURL = await uploadFileToStorage(file);
+
+      await apiRequest("POST", "/api/portfolio", {
+        mechanicId,
+        uploadURL,
+        caption: null,
+        serviceType: null,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["/api/mechanics", String(mechanicId), "portfolio"] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setUploading(false);
+    }
+  }, [mechanicId, queryClient]);
+
+  const handleDeletePortfolioItem = useCallback((itemId: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    deletePortfolioMutation.mutate(itemId);
+  }, [deletePortfolioMutation]);
 
   const handleSwitchToCustomer = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -116,6 +193,14 @@ export default function MechanicProfileEditScreen() {
     const service = services.find((s) => s.id === ms.serviceId);
     return { ...service, customPrice: ms.price };
   });
+
+  const getPortfolioImageUrl = (imageUrl: string) => {
+    const baseUrl = getApiUrl();
+    if (imageUrl.startsWith("/objects/")) {
+      return `${baseUrl}${imageUrl}`;
+    }
+    return imageUrl;
+  };
 
   return (
     <ScrollView
@@ -194,6 +279,75 @@ export default function MechanicProfileEditScreen() {
             trackColor={{ false: colors.border, true: colors.success }}
             thumbColor="#FFFFFF"
           />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeaderRow}>
+          <ThemedText style={[styles.sectionLabel, { color: colors.textSecondary }]}>MY PORTFOLIO</ThemedText>
+          <ThemedText style={[styles.portfolioCount, { color: colors.textSecondary }]}>
+            {portfolioData.length} {portfolioData.length === 1 ? "photo" : "photos"}
+          </ThemedText>
+        </View>
+        <View style={[styles.sectionCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
+          <View style={styles.portfolioGrid}>
+            <Pressable
+              testID="button-add-portfolio"
+              style={[styles.portfolioAddButton, { borderColor: colors.border }]}
+              onPress={handlePickImage}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <>
+                  <LinearGradient
+                    colors={["#0FA958", "#0B8A47"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.portfolioAddIcon}
+                  >
+                    <Feather name="plus" size={20} color="#FFFFFF" />
+                  </LinearGradient>
+                  <ThemedText style={[styles.portfolioAddText, { color: colors.textSecondary }]}>
+                    Add Photo
+                  </ThemedText>
+                </>
+              )}
+            </Pressable>
+
+            {portfolioLoading ? (
+              <View style={styles.portfolioLoadingContainer}>
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : null}
+
+            {portfolioData.map((item: any) => (
+              <View key={item.id} style={styles.portfolioItemWrapper}>
+                <Image
+                  source={{ uri: getPortfolioImageUrl(item.imageUrl) }}
+                  style={styles.portfolioImage}
+                  testID={`image-portfolio-${item.id}`}
+                />
+                <Pressable
+                  testID={`button-delete-portfolio-${item.id}`}
+                  style={styles.portfolioDeleteButton}
+                  onPress={() => handleDeletePortfolioItem(item.id)}
+                >
+                  <Feather name="x" size={12} color="#FFFFFF" />
+                </Pressable>
+              </View>
+            ))}
+          </View>
+
+          {portfolioData.length === 0 && !portfolioLoading ? (
+            <View style={styles.portfolioEmptyState}>
+              <Feather name="image" size={32} color={colors.textSecondary} />
+              <ThemedText style={[styles.portfolioEmptyText, { color: colors.textSecondary }]}>
+                Showcase your best work to attract more customers
+              </ThemedText>
+            </View>
+          ) : null}
         </View>
       </View>
 
@@ -401,6 +555,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     marginBottom: Spacing.xl,
   },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: Spacing.sm,
+  },
   sectionLabel: {
     fontSize: 12,
     fontWeight: "600",
@@ -410,6 +570,77 @@ const styles = StyleSheet.create({
   sectionCard: {
     borderRadius: BorderRadius.xl,
     overflow: "hidden",
+  },
+  portfolioCount: {
+    fontSize: 12,
+    marginBottom: Spacing.sm,
+  },
+  portfolioGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    padding: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  portfolioAddButton: {
+    width: PORTFOLIO_ITEM_SIZE,
+    height: PORTFOLIO_ITEM_SIZE,
+    borderRadius: BorderRadius.md,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+  },
+  portfolioAddIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  portfolioAddText: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  portfolioLoadingContainer: {
+    width: PORTFOLIO_ITEM_SIZE,
+    height: PORTFOLIO_ITEM_SIZE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  portfolioItemWrapper: {
+    width: PORTFOLIO_ITEM_SIZE,
+    height: PORTFOLIO_ITEM_SIZE,
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+    position: "relative",
+  },
+  portfolioImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: BorderRadius.md,
+  },
+  portfolioDeleteButton: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  portfolioEmptyState: {
+    alignItems: "center",
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  portfolioEmptyText: {
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
   },
   serviceItem: {
     flexDirection: "row",

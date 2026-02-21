@@ -1,11 +1,12 @@
-import React from "react";
-import { StyleSheet, View, Image, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, View, Image, ScrollView, Pressable, Dimensions, Modal } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
@@ -13,9 +14,13 @@ import { useTheme } from "@/context/ThemeContext";
 import { Colors, Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { mechanics, services } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { getApiUrl } from "@/lib/query-client";
 
 type MechanicProfileRouteProp = RouteProp<RootStackParamList, "MechanicProfile">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const PORTFOLIO_THUMB_SIZE = (SCREEN_WIDTH - Spacing.lg * 2 - Spacing.sm * 2) / 3;
 
 const reviews = [
   {
@@ -175,6 +180,33 @@ function createStyles(colors: typeof Colors.light) {
       fontWeight: "600",
       color: colors.primary,
     },
+    portfolioCard: {
+      backgroundColor: colors.backgroundRoot,
+      borderRadius: BorderRadius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: "hidden",
+      padding: Spacing.sm,
+    },
+    portfolioGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: Spacing.sm,
+    },
+    portfolioThumb: {
+      width: PORTFOLIO_THUMB_SIZE,
+      height: PORTFOLIO_THUMB_SIZE,
+      borderRadius: BorderRadius.sm,
+    },
+    portfolioEmptyState: {
+      alignItems: "center",
+      paddingVertical: Spacing.xl,
+      gap: Spacing.sm,
+    },
+    portfolioEmptyText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
     reviewCard: {
       backgroundColor: colors.backgroundRoot,
       borderRadius: BorderRadius.lg,
@@ -227,6 +259,36 @@ function createStyles(colors: typeof Colors.light) {
     bookButton: {
       flex: 2,
     },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.95)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalCloseButton: {
+      position: "absolute",
+      top: 60,
+      right: 20,
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: "rgba(255, 255, 255, 0.2)",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 10,
+    },
+    modalImage: {
+      width: SCREEN_WIDTH - 40,
+      height: SCREEN_WIDTH - 40,
+      borderRadius: BorderRadius.lg,
+    },
+    modalCaption: {
+      color: "#FFFFFF",
+      fontSize: 16,
+      marginTop: Spacing.lg,
+      textAlign: "center",
+      paddingHorizontal: Spacing.xl,
+    },
   });
 }
 
@@ -236,9 +298,25 @@ export default function MechanicProfileScreen() {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { colors } = useTheme();
+  const [selectedImage, setSelectedImage] = useState<any>(null);
 
   const styles = createStyles(colors);
   const mechanic = mechanics.find((m) => m.id === route.params.mechanicId) || mechanics[0];
+
+  const mechanicProfileId = parseInt(route.params.mechanicId);
+
+  const { data: portfolioData = [] } = useQuery<any[]>({
+    queryKey: ["/api/mechanics", route.params.mechanicId, "portfolio"],
+    enabled: !isNaN(mechanicProfileId),
+  });
+
+  const getPortfolioImageUrl = (imageUrl: string) => {
+    const baseUrl = getApiUrl();
+    if (imageUrl.startsWith("/objects/")) {
+      return `${baseUrl}${imageUrl}`;
+    }
+    return imageUrl;
+  };
 
   const handleBookNow = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -248,6 +326,11 @@ export default function MechanicProfileScreen() {
   const handleMessage = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.navigate("Chat", { conversationId: "new", mechanicId: mechanic.id });
+  };
+
+  const handleImagePress = (item: any) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedImage(item);
   };
 
   return (
@@ -307,6 +390,33 @@ export default function MechanicProfileScreen() {
           </View>
         </View>
 
+        {portfolioData.length > 0 ? (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>Portfolio</ThemedText>
+              <ThemedText style={styles.reviewCount}>
+                {portfolioData.length} {portfolioData.length === 1 ? "photo" : "photos"}
+              </ThemedText>
+            </View>
+            <View style={styles.portfolioCard}>
+              <View style={styles.portfolioGrid}>
+                {portfolioData.map((item: any) => (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => handleImagePress(item)}
+                    testID={`portfolio-thumb-${item.id}`}
+                  >
+                    <Image
+                      source={{ uri: getPortfolioImageUrl(item.imageUrl) }}
+                      style={styles.portfolioThumb}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          </View>
+        ) : null}
+
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Services Offered</ThemedText>
           <View style={styles.servicesGrid}>
@@ -360,6 +470,34 @@ export default function MechanicProfileScreen() {
           Book Now
         </Button>
       </View>
+
+      <Modal
+        visible={!!selectedImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedImage(null)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setSelectedImage(null)}
+        >
+          <Pressable style={styles.modalCloseButton} onPress={() => setSelectedImage(null)}>
+            <Feather name="x" size={24} color="#FFFFFF" />
+          </Pressable>
+          {selectedImage ? (
+            <>
+              <Image
+                source={{ uri: getPortfolioImageUrl(selectedImage.imageUrl) }}
+                style={styles.modalImage}
+                resizeMode="contain"
+              />
+              {selectedImage.caption ? (
+                <ThemedText style={styles.modalCaption}>{selectedImage.caption}</ThemedText>
+              ) : null}
+            </>
+          ) : null}
+        </Pressable>
+      </Modal>
     </View>
   );
 }
