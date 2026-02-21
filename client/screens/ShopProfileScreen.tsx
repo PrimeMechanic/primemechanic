@@ -401,7 +401,6 @@ export default function ShopProfileScreen() {
                   color={colors.accent}
                 />
                 <ThemedText style={styles.serviceName}>{service.name}</ThemedText>
-                <ThemedText style={styles.servicePrice}>${service.price}</ThemedText>
               </View>
             ))}
           </View>

@@ -72,10 +72,6 @@ function ServiceListItem({ service, onPress }: { service: Service; onPress: () =
           {service.description}
         </ThemedText>
       </View>
-      <View style={styles.priceContainer}>
-        <ThemedText style={[styles.priceLabel, { color: colors.textSecondary }]}>from</ThemedText>
-        <ThemedText style={[styles.priceValue, { color: colors.primary }]}>${service.price}</ThemedText>
-      </View>
       <View style={[styles.chevronContainer, { backgroundColor: `${colors.primary}10` }]}>
         <Feather name="chevron-right" size={18} color={colors.primary} />
       </View>
