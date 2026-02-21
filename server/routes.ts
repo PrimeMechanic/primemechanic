@@ -494,6 +494,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/users/:id/checkout-setup", async (req, res) => {
+    try {
+      const user = await storage.getUser(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.name,
+          metadata: { userId: user.id },
+        });
+        customerId = customer.id;
+        await storage.updateUser(user.id, { stripeCustomerId: customerId });
+      }
+
+      const host = req.headers.host || process.env.REPLIT_DEV_DOMAIN || "localhost:5000";
+      const protocol = host.includes("localhost") ? "http" : "https";
+      const baseUrl = `${protocol}://${host}`;
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "setup",
+        customer: customerId,
+        payment_method_types: ["card"],
+        success_url: `${baseUrl}/api/payment-setup/success`,
+        cancel_url: `${baseUrl}/api/payment-setup/cancel`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error) {
+      console.error("Checkout setup error:", error);
+      res.status(500).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  app.get("/api/payment-setup/success", (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #F6F8F7; }
+            .card { text-align: center; padding: 40px; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); max-width: 360px; }
+            .icon { width: 64px; height: 64px; border-radius: 32px; background: #E8F8EF; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+            h2 { color: #1C1C1C; margin: 0 0 8px; font-size: 20px; }
+            p { color: #6B6F73; margin: 0; font-size: 15px; line-height: 1.5; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">&#10003;</div>
+            <h2>Card Added Successfully</h2>
+            <p>Your payment method has been saved. You can close this window and return to the app.</p>
+          </div>
+        </body>
+      </html>
+    `);
+  });
+
+  app.get("/api/payment-setup/cancel", (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { font-family: -apple-system, system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #F6F8F7; }
+            .card { text-align: center; padding: 40px; background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); max-width: 360px; }
+            .icon { width: 64px; height: 64px; border-radius: 32px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+            h2 { color: #1C1C1C; margin: 0 0 8px; font-size: 20px; }
+            p { color: #6B6F73; margin: 0; font-size: 15px; line-height: 1.5; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">&#10007;</div>
+            <h2>Setup Cancelled</h2>
+            <p>No card was added. You can close this window and return to the app.</p>
+          </div>
+        </body>
+      </html>
+    `);
+  });
+
   app.delete("/api/payment-methods/:paymentMethodId", async (req, res) => {
     try {
       const stripe = await getUncachableStripeClient();

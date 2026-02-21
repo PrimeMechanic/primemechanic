@@ -6,12 +6,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Modal,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as WebBrowser from "expo-web-browser";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, getApiUrl } from "@/lib/query-client";
@@ -28,18 +28,6 @@ interface PaymentMethod {
   expMonth: number;
   expYear: number;
   isDefault: boolean;
-}
-
-function getCardIcon(brand: string): string {
-  switch (brand.toLowerCase()) {
-    case "visa":
-    case "mastercard":
-    case "amex":
-    case "discover":
-      return "credit-card";
-    default:
-      return "credit-card";
-  }
 }
 
 function formatBrand(brand: string): string {
@@ -104,45 +92,18 @@ export default function PaymentMethodsScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       const baseUrl = getApiUrl();
-      const res = await fetch(new URL(`/api/users/${userId}/setup-intent`, baseUrl), {
+      const res = await fetch(new URL(`/api/users/${userId}/checkout-setup`, baseUrl), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
       const data = await res.json();
 
-      if (data.clientSecret) {
-        if (Platform.OS === "web") {
-          const pkRes = await fetch(new URL("/api/stripe/publishable-key", baseUrl), {
-            credentials: "include",
-          });
-          const pkData = await pkRes.json();
-          const { loadStripe } = await import("@stripe/stripe-js");
-          const stripe = await loadStripe(pkData.publishableKey);
-          if (!stripe) {
-            throw new Error("Stripe failed to load");
-          }
-
-          const { error } = await stripe.confirmCardSetup(data.clientSecret, {
-            payment_method: {
-              card: (await createCardElement(stripe)) as any,
-            },
-          });
-
-          if (error) {
-            console.error("Stripe error:", error.message);
-          } else {
-            queryClient.invalidateQueries({
-              queryKey: ["/api/users", userId, "payment-methods"],
-            });
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          }
-        } else {
-          console.log("Use Stripe SDK on native for card setup");
-          queryClient.invalidateQueries({
-            queryKey: ["/api/users", userId, "payment-methods"],
-          });
-        }
+      if (data.url) {
+        await WebBrowser.openBrowserAsync(data.url);
+        queryClient.invalidateQueries({
+          queryKey: ["/api/users", userId, "payment-methods"],
+        });
       }
     } catch (error) {
       console.error("Add card error:", error);
@@ -210,11 +171,7 @@ export default function PaymentMethodsScreen() {
                       { backgroundColor: `${colors.primary}10` },
                     ]}
                   >
-                    <Feather
-                      name={getCardIcon(pm.brand) as any}
-                      size={22}
-                      color={colors.primary}
-                    />
+                    <Feather name="credit-card" size={22} color={colors.primary} />
                   </View>
                   <View style={styles.cardInfo}>
                     <View style={styles.cardNameRow}>
@@ -272,7 +229,7 @@ export default function PaymentMethodsScreen() {
         <View style={styles.section}>
           <Pressable
             style={({ pressed }) => [
-              styles.addCardButton,
+              styles.addCardButtonMain,
               pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
             ]}
             onPress={handleAddCard}
@@ -358,10 +315,6 @@ export default function PaymentMethodsScreen() {
       </Modal>
     </>
   );
-}
-
-async function createCardElement(stripe: any): Promise<any> {
-  return {};
 }
 
 const styles = StyleSheet.create({
@@ -452,7 +405,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-  addCardButton: {
+  addCardButtonMain: {
     borderRadius: BorderRadius.md,
     overflow: "hidden",
   },

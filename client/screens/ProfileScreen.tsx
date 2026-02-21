@@ -273,7 +273,7 @@ export default function ProfileScreen() {
             showBadge
             badgeText="On"
           />
-          <SettingsItem icon="credit-card" label="Payment Methods" onPress={() => {}} />
+          <SettingsItem icon="credit-card" label="Payment Methods" onPress={() => navigation.navigate("PaymentMethods")} />
           <SettingsItem icon="map-pin" label="Saved Addresses" onPress={() => {}} />
           <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} />
         </View>
