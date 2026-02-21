@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useIsFocused } from "@react-navigation/native";
 import { apiRequest } from "@/lib/query-client";
 
 import { ThemedText } from "@/components/ThemedText";
@@ -66,8 +67,12 @@ export default function SavedAddressesScreen() {
   const [zipCode, setZipCode] = useState("");
   const [isDefault, setIsDefault] = useState(false);
 
-  const { data: addressList = [], isLoading } = useQuery<Address[]>({
+  const isFocused = useIsFocused();
+
+  const { data: addressList = [], isLoading, refetch } = useQuery<Address[]>({
     queryKey: ["/api/users", userId, "addresses"],
+    enabled: isFocused,
+    staleTime: 0,
   });
 
   const createMutation = useMutation({
