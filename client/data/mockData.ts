@@ -49,6 +49,14 @@ export const services: Service[] = [
     duration: 60,
     icon: "wind",
   },
+  {
+    id: "7",
+    name: "Dent, Scratch & Paint Repair",
+    description: "Paintless dent removal, scratch buffing, and touch-up paint",
+    price: 200,
+    duration: 120,
+    icon: "edit-3",
+  },
 ];
 
 export const mechanics: Mechanic[] = [

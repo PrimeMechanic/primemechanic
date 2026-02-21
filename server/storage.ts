@@ -230,6 +230,7 @@ export async function seedDatabase() {
     { name: "Tire Service", description: "Tire rotation, balancing, and inspection", basePrice: "60.00", duration: 45, icon: "circle", isActive: true },
     { name: "Battery", description: "Battery test, replacement, and terminal cleaning", basePrice: "150.00", duration: 30, icon: "battery-charging", isActive: true },
     { name: "AC Service", description: "AC system check, recharge, and leak detection", basePrice: "120.00", duration: 60, icon: "wind", isActive: true },
+    { name: "Dent, Scratch & Paint Repair", description: "Paintless dent removal, scratch buffing, and touch-up paint", basePrice: "200.00", duration: 120, icon: "edit-3", isActive: true },
   ]);
 
   const mechanicUserData = [
