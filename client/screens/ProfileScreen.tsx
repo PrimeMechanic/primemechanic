@@ -1,16 +1,18 @@
 import React from "react";
-import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share } from "react-native";
+import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share, ActivityIndicator } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 import { currentUser } from "@/data/mockData";
 import { useUser } from "@/context/UserContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "@/navigation/RootStackNavigator";
@@ -100,8 +102,12 @@ export default function ProfileScreen() {
   const { toggleRole } = useUser();
   const { isDark, toggleTheme, colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { user: authUser } = useAuth();
 
-  const vehicle = currentUser.vehicles[0];
+  const userId = authUser?.id || "demo";
+  const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery<any[]>({
+    queryKey: ["/api/users", userId, "vehicles"],
+  });
 
   const handleSwitchToMechanic = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -162,22 +168,39 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>MY VEHICLES</ThemedText>
         <View style={[styles.card, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
-          <View style={styles.vehicleRow}>
-            <View style={[styles.vehicleIconContainer, { backgroundColor: `${colors.primary}10` }]}>
-              <Feather name="truck" size={22} color={colors.primary} />
+          {vehiclesLoading ? (
+            <View style={styles.vehicleLoadingRow}>
+              <ActivityIndicator size="small" color={colors.primary} />
             </View>
-            <View style={styles.vehicleInfo}>
-              <ThemedText style={[styles.vehicleName, { color: colors.text }]}>
-                {vehicle.year} {vehicle.make} {vehicle.model}
-              </ThemedText>
-              <ThemedText style={[styles.vehiclePlate, { color: colors.textSecondary }]}>
-                {vehicle.licensePlate}
+          ) : vehicles.length > 0 ? (
+            vehicles.map((v: any, index: number) => (
+              <View
+                key={v.id}
+                style={[
+                  styles.vehicleRow,
+                  index > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : null,
+                ]}
+              >
+                <View style={[styles.vehicleIconContainer, { backgroundColor: `${colors.primary}10` }]}>
+                  <Feather name="truck" size={22} color={colors.primary} />
+                </View>
+                <View style={styles.vehicleInfo}>
+                  <ThemedText style={[styles.vehicleName, { color: colors.text }]}>
+                    {v.year} {v.make} {v.model}
+                  </ThemedText>
+                  <ThemedText style={[styles.vehiclePlate, { color: colors.textSecondary }]}>
+                    {[v.trim, v.licensePlate].filter(Boolean).join(" \u00B7 ") || "No plate"}
+                  </ThemedText>
+                </View>
+              </View>
+            ))
+          ) : (
+            <View style={styles.noVehiclesRow}>
+              <ThemedText style={[styles.noVehiclesText, { color: colors.textSecondary }]}>
+                No vehicles added yet
               </ThemedText>
             </View>
-            <Pressable style={styles.editButton} hitSlop={8}>
-              <Feather name="edit-2" size={16} color={colors.textSecondary} />
-            </Pressable>
-          </View>
+          )}
           <Pressable
             style={[styles.addVehicleRow, { borderTopColor: colors.border }]}
             onPress={() => {
@@ -332,8 +355,19 @@ const styles = StyleSheet.create({
   vehiclePlate: {
     fontSize: 14,
   },
-  editButton: {
-    padding: Spacing.xs,
+  vehicleLoadingRow: {
+    padding: Spacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noVehiclesRow: {
+    padding: Spacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noVehiclesText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
   addVehicleRow: {
     flexDirection: "row",

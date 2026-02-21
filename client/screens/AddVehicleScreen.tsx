@@ -76,7 +76,8 @@ export default function AddVehicleScreen({ navigation }: any) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      const uid = user?.id || "demo";
+      queryClient.invalidateQueries({ queryKey: ["/api/users", uid, "vehicles"] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.goBack();
     },
