@@ -109,6 +109,8 @@ export default function MechanicProfileEditScreen() {
   const [isAvailable, setIsAvailable] = useState(mechanicProfile.isAvailable);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const mechanicUserId = authUser?.id || "m1";
@@ -174,6 +176,34 @@ export default function MechanicProfileEditScreen() {
     deletePortfolioMutation.mutate(itemId);
   }, [deletePortfolioMutation]);
 
+  const handlePickAvatar = useCallback(async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (result.canceled || !result.assets[0]) return;
+
+    setUploadingAvatar(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      const { File } = await import("expo-file-system");
+      const file = new File(result.assets[0].uri);
+      const uploadURL = await uploadFileToStorage(file);
+      setAvatarUri(result.assets[0].uri);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+      setAvatarUri(result.assets[0].uri);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }, []);
+
   const handleSwitchToCustomer = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     toggleRole();
@@ -220,9 +250,21 @@ export default function MechanicProfileEditScreen() {
             style={styles.profileGradient}
           >
             <View style={styles.avatarContainer}>
-              <Image source={mechanicProfile.avatar} style={styles.avatar} />
-              <Pressable style={styles.cameraButton}>
-                <Feather name="camera" size={14} color="#FFFFFF" />
+              <Image
+                source={avatarUri ? { uri: avatarUri } : mechanicProfile.avatar}
+                style={styles.avatar}
+              />
+              <Pressable
+                style={styles.cameraButton}
+                onPress={handlePickAvatar}
+                disabled={uploadingAvatar}
+                testID="button-change-avatar"
+              >
+                {uploadingAvatar ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Feather name="camera" size={14} color="#FFFFFF" />
+                )}
               </Pressable>
             </View>
             <ThemedText style={styles.profileName}>{mechanicProfile.name}</ThemedText>
