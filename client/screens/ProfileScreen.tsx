@@ -1,11 +1,12 @@
-import React from "react";
-import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share, ActivityIndicator } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, View, Image, Pressable, ScrollView, Switch, Share, ActivityIndicator, Modal } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/query-client";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
@@ -104,10 +105,35 @@ export default function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user: authUser } = useAuth();
 
+  const queryClient = useQueryClient();
   const userId = authUser?.id || "demo";
   const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery<any[]>({
     queryKey: ["/api/users", userId, "vehicles"],
   });
+
+  const [vehicleToDelete, setVehicleToDelete] = useState<any>(null);
+
+  const deleteVehicleMutation = useMutation({
+    mutationFn: async (vehicleId: number) => {
+      await apiRequest("DELETE", `/api/vehicles/${vehicleId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users", userId, "vehicles"] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setVehicleToDelete(null);
+    },
+  });
+
+  const handleDeleteVehicle = (vehicle: any) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setVehicleToDelete(vehicle);
+  };
+
+  const confirmDelete = () => {
+    if (vehicleToDelete) {
+      deleteVehicleMutation.mutate(vehicleToDelete.id);
+    }
+  };
 
   const handleSwitchToMechanic = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -144,6 +170,7 @@ export default function ProfileScreen() {
   };
 
   return (
+    <>
     <ScrollView
       style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
       contentContainerStyle={{
@@ -192,6 +219,14 @@ export default function ProfileScreen() {
                     {[v.trim, v.licensePlate].filter(Boolean).join(" \u00B7 ") || "No plate"}
                   </ThemedText>
                 </View>
+                <Pressable
+                  onPress={() => handleDeleteVehicle(v)}
+                  hitSlop={8}
+                  style={styles.deleteButton}
+                  testID={`button-delete-vehicle-${v.id}`}
+                >
+                  <Feather name="trash-2" size={18} color={colors.danger || "#E53E3E"} />
+                </Pressable>
               </View>
             ))
           ) : (
@@ -280,6 +315,51 @@ export default function ProfileScreen() {
         </View>
       </View>
     </ScrollView>
+
+      <Modal
+        visible={vehicleToDelete !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setVehicleToDelete(null)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setVehicleToDelete(null)}
+        >
+          <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
+            <View style={styles.modalIconWrap}>
+              <View style={[styles.modalIconCircle, { backgroundColor: "#FEE2E2" }]}>
+                <Feather name="trash-2" size={24} color="#E53E3E" />
+              </View>
+            </View>
+            <ThemedText style={[styles.modalTitle, { color: colors.text }]}>Remove Vehicle</ThemedText>
+            <ThemedText style={[styles.modalMessage, { color: colors.textSecondary }]}>
+              Are you sure you want to remove your {vehicleToDelete?.year} {vehicleToDelete?.make} {vehicleToDelete?.model}?
+            </ThemedText>
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancelButton, { borderColor: colors.border }]}
+                onPress={() => setVehicleToDelete(null)}
+                testID="button-cancel-delete"
+              >
+                <ThemedText style={[styles.modalButtonText, { color: colors.text }]}>Cancel</ThemedText>
+              </Pressable>
+              <Pressable
+                style={[styles.modalButton, styles.modalDeleteButton]}
+                onPress={confirmDelete}
+                testID="button-confirm-delete"
+              >
+                {deleteVehicleMutation.isPending ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <ThemedText style={[styles.modalButtonText, { color: "#fff" }]}>Remove</ThemedText>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
+    </>
   );
 }
 
@@ -418,5 +498,65 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  deleteButton: {
+    padding: Spacing.xs,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 340,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing["2xl"],
+    alignItems: "center",
+  },
+  modalIconWrap: {
+    marginBottom: Spacing.lg,
+  },
+  modalIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: Spacing.sm,
+  },
+  modalMessage: {
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: Spacing.xl,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    width: "100%",
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalCancelButton: {
+    borderWidth: 1,
+  },
+  modalDeleteButton: {
+    backgroundColor: "#E53E3E",
+  },
+  modalButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

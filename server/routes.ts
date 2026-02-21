@@ -194,6 +194,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/vehicles/:id", async (req, res) => {
+    try {
+      await storage.deleteVehicle(Number(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete vehicle" });
+    }
+  });
+
   app.get("/api/users/:id/bookings", async (req, res) => {
     try {
       const bookings = await storage.getBookings(req.params.id);

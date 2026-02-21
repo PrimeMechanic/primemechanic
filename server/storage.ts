@@ -31,6 +31,7 @@ export interface IStorage {
   
   getVehicles(userId: string): Promise<Vehicle[]>;
   createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
+  deleteVehicle(id: number): Promise<void>;
   
   getMechanics(): Promise<(MechanicProfile & { user: User })[]>;
   getMechanic(id: number): Promise<(MechanicProfile & { user: User }) | undefined>;
@@ -81,6 +82,10 @@ export class DatabaseStorage implements IStorage {
     return newVehicle;
   }
   
+  async deleteVehicle(id: number): Promise<void> {
+    await db.delete(vehicles).where(eq(vehicles.id, id));
+  }
+
   async getMechanics(): Promise<(MechanicProfile & { user: User })[]> {
     const profiles = await db.select().from(mechanicProfiles);
     const results: (MechanicProfile & { user: User })[] = [];
