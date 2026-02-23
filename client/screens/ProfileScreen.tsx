@@ -103,7 +103,7 @@ export default function ProfileScreen() {
   const { toggleRole } = useUser();
   const { isDark, toggleTheme, colors } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { user: authUser } = useAuth();
+  const { user: authUser, signOut } = useAuth();
 
   const queryClient = useQueryClient();
   const userId = authUser?.id || "demo";
@@ -310,7 +310,7 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <ThemedText style={[styles.sectionTitle, { color: colors.textSecondary }]}>ACCOUNT</ThemedText>
         <View style={[styles.settingsGroup, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
-          <SettingsItem icon="log-out" label="Sign Out" onPress={() => {}} />
+          <SettingsItem icon="log-out" label="Sign Out" onPress={signOut} />
           <SettingsItem icon="trash-2" label="Delete Account" onPress={() => {}} danger />
         </View>
       </View>

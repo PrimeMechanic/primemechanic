@@ -104,7 +104,7 @@ export default function MechanicProfileEditScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const { toggleRole } = useUser();
-  const { user: authUser } = useAuth();
+  const { user: authUser, signOut } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [isAvailable, setIsAvailable] = useState(mechanicProfile.isAvailable);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -474,7 +474,7 @@ export default function MechanicProfileEditScreen() {
         <ThemedText style={[styles.sectionLabel, { color: colors.textSecondary }]}>ACCOUNT</ThemedText>
         <View style={[styles.sectionCard, { backgroundColor: colors.backgroundDefault }, Shadows.medium]}>
           <SettingsItem icon="help-circle" label="Help & Support" onPress={() => {}} />
-          <SettingsItem icon="log-out" label="Sign Out" onPress={() => {}} />
+          <SettingsItem icon="log-out" label="Sign Out" onPress={signOut} />
           <SettingsItem icon="trash-2" label="Delete Account" onPress={() => {}} danger />
         </View>
       </View>
