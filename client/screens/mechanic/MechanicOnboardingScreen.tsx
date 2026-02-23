@@ -42,14 +42,24 @@ const SPECIALTIES = [
 ];
 
 const SERVICE_OPTIONS = [
-  "Oil Change",
+  "General Maintenance",
+  "Engine Repair",
+  "Transmission Service",
   "Brake Service",
-  "Diagnostics",
-  "Tire Service",
-  "Battery",
-  "AC Service",
-  "Dent, Scratch & Paint Repair",
-  "Vehicle Wraps",
+  "Suspension & Steering",
+  "Electrical & Diagnostics",
+  "Heating & Air Conditioning (A/C)",
+  "Tire & Wheel Service",
+  "Exhaust & Emissions",
+  "Cooling System Service",
+  "Fuel System Service",
+  "Drivetrain Service",
+  "Inspections & Diagnostics",
+  "Battery & Charging System",
+  "Mobile Mechanic Services",
+  "Pre-Purchase Inspections",
+  "Performance Upgrades",
+  "Fleet & Commercial Service",
 ];
 
 interface Props {

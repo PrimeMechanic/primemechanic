@@ -439,14 +439,24 @@ export async function seedDatabase() {
   console.log("Seeding database with demo data...");
 
   await db.insert(services).values([
-    { name: "Oil Change", description: "Full synthetic oil change with filter replacement", basePrice: "75.00", duration: 30, icon: "droplet", isActive: true },
-    { name: "Brake Service", description: "Brake pad replacement and rotor inspection", basePrice: "250.00", duration: 90, icon: "disc", isActive: true },
-    { name: "Diagnostics", description: "Full vehicle diagnostic scan and report", basePrice: "100.00", duration: 45, icon: "cpu", isActive: true },
-    { name: "Tire Service", description: "Tire rotation, balancing, and inspection", basePrice: "60.00", duration: 45, icon: "circle", isActive: true },
-    { name: "Battery", description: "Battery test, replacement, and terminal cleaning", basePrice: "150.00", duration: 30, icon: "battery-charging", isActive: true },
-    { name: "AC Service", description: "AC system check, recharge, and leak detection", basePrice: "120.00", duration: 60, icon: "wind", isActive: true },
-    { name: "Dent, Scratch & Paint Repair", description: "Paintless dent removal, scratch buffing, and touch-up paint", basePrice: "200.00", duration: 120, icon: "edit-3", isActive: true },
-    { name: "Vehicle Wraps", description: "Full and partial vehicle wraps, color change, and custom graphics", basePrice: "500.00", duration: 480, icon: "layers", isActive: true },
+    { name: "General Maintenance", description: "Oil changes, fluid top-offs, filter replacements, and routine tune-ups", basePrice: "75.00", duration: 45, icon: "tool", isActive: true },
+    { name: "Engine Repair", description: "Engine diagnostics, rebuilds, timing belt replacement, and head gasket repair", basePrice: "350.00", duration: 180, icon: "settings", isActive: true },
+    { name: "Transmission Service", description: "Transmission fluid flush, filter replacement, and repair", basePrice: "300.00", duration: 120, icon: "repeat", isActive: true },
+    { name: "Brake Service", description: "Brake pad replacement, rotor resurfacing, and brake line inspection", basePrice: "250.00", duration: 90, icon: "disc", isActive: true },
+    { name: "Suspension & Steering", description: "Shock and strut replacement, alignment, and power steering service", basePrice: "275.00", duration: 120, icon: "navigation", isActive: true },
+    { name: "Electrical & Diagnostics", description: "Wiring repair, alternator replacement, and full OBD-II scan", basePrice: "120.00", duration: 60, icon: "zap", isActive: true },
+    { name: "Heating & Air Conditioning (A/C)", description: "AC recharge, compressor repair, heater core service, and leak detection", basePrice: "150.00", duration: 90, icon: "wind", isActive: true },
+    { name: "Tire & Wheel Service", description: "Tire rotation, balancing, mounting, alignment, and flat repair", basePrice: "80.00", duration: 45, icon: "circle", isActive: true },
+    { name: "Exhaust & Emissions", description: "Muffler replacement, catalytic converter service, and emissions testing", basePrice: "200.00", duration: 90, icon: "cloud", isActive: true },
+    { name: "Cooling System Service", description: "Radiator flush, thermostat replacement, and coolant leak repair", basePrice: "150.00", duration: 60, icon: "thermometer", isActive: true },
+    { name: "Fuel System Service", description: "Fuel injector cleaning, fuel pump replacement, and fuel filter service", basePrice: "175.00", duration: 75, icon: "droplet", isActive: true },
+    { name: "Drivetrain Service", description: "CV joint repair, differential service, and driveshaft maintenance", basePrice: "325.00", duration: 120, icon: "git-merge", isActive: true },
+    { name: "Inspections & Diagnostics", description: "Full vehicle diagnostic scan, multi-point inspection, and report", basePrice: "100.00", duration: 45, icon: "cpu", isActive: true },
+    { name: "Battery & Charging System", description: "Battery test and replacement, alternator check, and terminal cleaning", basePrice: "150.00", duration: 30, icon: "battery-charging", isActive: true },
+    { name: "Mobile Mechanic Services", description: "On-site repairs and maintenance at your location", basePrice: "125.00", duration: 60, icon: "truck", isActive: true },
+    { name: "Pre-Purchase Inspections", description: "Comprehensive vehicle inspection before buying a used car", basePrice: "175.00", duration: 90, icon: "clipboard", isActive: true },
+    { name: "Performance Upgrades", description: "Performance tuning, exhaust upgrades, intake systems, and chip tuning", basePrice: "400.00", duration: 180, icon: "trending-up", isActive: true },
+    { name: "Fleet & Commercial Service", description: "Maintenance and repair programs for business and commercial vehicles", basePrice: "200.00", duration: 120, icon: "briefcase", isActive: true },
   ]);
 
   const mechanicUserData = [
