@@ -21,6 +21,8 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { useTheme } from "@/context/ThemeContext";
 import { Service } from "@/types";
 
+const BROWSE_SERVICE_LIMIT = 6;
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function BrowseScreen() {
@@ -43,11 +45,7 @@ export default function BrowseScreen() {
     icon: s.icon || "tool",
   }));
 
-  const filteredServices = services.filter(
-    (s) =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const previewServices = services.slice(0, BROWSE_SERVICE_LIMIT);
 
   const filteredMechanics = mechanics.filter(
     (m) =>
@@ -72,6 +70,11 @@ export default function BrowseScreen() {
 
   const handleShopPress = (shopId: string) => {
     navigation.navigate("ShopProfile", { shopId });
+  };
+
+  const handleSeeAllServices = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("AllServices");
   };
 
   const handleBookNow = () => {
@@ -108,32 +111,35 @@ export default function BrowseScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>
-              All Services
+              Popular Services
             </ThemedText>
-            <View style={[styles.countBadge, { backgroundColor: `${colors.textSecondary}12` }]}>
-              <ThemedText style={[styles.countText, { color: colors.textSecondary }]}>
-                {filteredServices.length} services
+            <Pressable
+              onPress={handleSeeAllServices}
+              style={[styles.seeAllButton, { backgroundColor: `${colors.primary}10` }]}
+              testID="button-see-all-services"
+            >
+              <ThemedText style={[styles.seeAllText, { color: colors.primary }]}>
+                See All
               </ThemedText>
-            </View>
+              <Feather name="chevron-right" size={14} color={colors.primary} />
+            </Pressable>
           </View>
           {servicesLoading ? (
             <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: Spacing.xl }} />
-          ) : filteredServices.length > 0 ? (
-            <View style={styles.servicesGrid}>
-              {filteredServices.map((service) => (
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.servicesRow}
+            >
+              {previewServices.map((service) => (
                 <ServiceCard
                   key={service.id}
                   service={service}
                   onPress={() => handleServicePress(service.id)}
                 />
               ))}
-            </View>
-          ) : (
-            <EmptyState
-              image={require("../../assets/images/empty-mechanics.png")}
-              title="No Services Found"
-              message="No services match your search."
-            />
+            </ScrollView>
           )}
         </View>
 
@@ -270,9 +276,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
-  servicesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+  servicesRow: {
     paddingHorizontal: Spacing.xl,
     gap: Spacing.md,
   },

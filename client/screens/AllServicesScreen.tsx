@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, ScrollView, Pressable } from "react-native";
+import { StyleSheet, View, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -12,11 +12,11 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/context/ThemeContext";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
-import { services } from "@/data/mockData";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { Service } from "@/types";
 
@@ -85,6 +85,19 @@ export default function AllServicesScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
 
+  const { data: apiServices = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/services"],
+  });
+
+  const services: Service[] = apiServices.map((s: any) => ({
+    id: String(s.id),
+    name: s.name,
+    description: s.description || "",
+    price: parseFloat(s.basePrice) || 0,
+    duration: s.duration || 0,
+    icon: s.icon || "tool",
+  }));
+
   const handleServicePress = (serviceId: string) => {
     navigation.navigate("BookService", { serviceId });
   };
@@ -102,15 +115,19 @@ export default function AllServicesScreen() {
         <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
           {services.length} services available
         </ThemedText>
-        <View style={styles.grid}>
-          {services.map((service) => (
-            <ServiceListItem
-              key={service.id}
-              service={service}
-              onPress={() => handleServicePress(service.id)}
-            />
-          ))}
-        </View>
+        {isLoading ? (
+          <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: Spacing["2xl"] }} />
+        ) : (
+          <View style={styles.grid}>
+            {services.map((service) => (
+              <ServiceListItem
+                key={service.id}
+                service={service}
+                onPress={() => handleServicePress(service.id)}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
