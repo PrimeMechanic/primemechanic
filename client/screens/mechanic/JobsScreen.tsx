@@ -18,6 +18,10 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/navigation/RootStackNavigator";
+
 import { ThemedText } from "@/components/ThemedText";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { useTheme } from "@/context/ThemeContext";
@@ -154,6 +158,7 @@ export default function JobsScreen() {
   const { colors } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const pendingJobs = jobRequests.filter((j) => j.status === "pending");
@@ -233,6 +238,7 @@ export default function JobsScreen() {
             showActions={selectedIndex === 0}
             onAccept={() => handleAccept(item.id)}
             onDecline={() => handleDecline(item.id)}
+            onPress={() => navigation.navigate("JobDetail", { job: item })}
           />
         )}
         contentContainerStyle={[

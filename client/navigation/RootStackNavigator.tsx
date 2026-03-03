@@ -16,6 +16,7 @@ import ShopProfileScreen from "@/screens/ShopProfileScreen";
 import HelpSupportScreen from "@/screens/HelpSupportScreen";
 import AllServicesScreen from "@/screens/AllServicesScreen";
 import MechanicOnboardingScreen from "@/screens/mechanic/MechanicOnboardingScreen";
+import JobDetailScreen from "@/screens/mechanic/JobDetailScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
 import DemoScreen from "@/screens/DemoScreen";
@@ -37,6 +38,7 @@ export type RootStackParamList = {
   BookService: { serviceId?: string };
   MechanicProfile: { mechanicId: string };
   BookingDetail: { bookingId: string };
+  JobDetail: { job: any };
   Chat: { conversationId: string; mechanicId?: string };
   AddVehicle: undefined;
   PaymentMethods: undefined;
@@ -184,6 +186,13 @@ export default function RootStackNavigator() {
         component={AllServicesScreen}
         options={{
           headerTitle: "All Services",
+        }}
+      />
+      <Stack.Screen
+        name="JobDetail"
+        component={JobDetailScreen}
+        options={{
+          headerTitle: "Job Details",
         }}
       />
     </Stack.Navigator>

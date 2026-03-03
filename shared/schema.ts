@@ -39,6 +39,7 @@ export const mechanicProfiles = pgTable("mechanic_profiles", {
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),
   completedJobs: integer("completed_jobs").default(0),
+  screeningStatus: varchar("screening_status", { length: 20 }).default("pending"),
   isVerified: boolean("is_verified").default(false),
   isAvailable: boolean("is_available").default(true),
   latitude: decimal("latitude", { precision: 10, scale: 8 }),
@@ -216,6 +217,48 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
   isRead: true,
 });
 
+export const mechanicDocuments = pgTable("mechanic_documents", {
+  id: serial("id").primaryKey(),
+  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  documentType: varchar("document_type", { length: 50 }).notNull(),
+  fileUrl: text("file_url").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+});
+
+export const insertMechanicDocumentSchema = createInsertSchema(mechanicDocuments).omit({
+  id: true,
+  uploadedAt: true,
+});
+
+export const jobPhotos = pgTable("job_photos", {
+  id: serial("id").primaryKey(),
+  bookingId: integer("booking_id").references(() => bookings.id).notNull(),
+  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  photoUrl: text("photo_url").notNull(),
+  photoType: varchar("photo_type", { length: 10 }).notNull(),
+  caption: text("caption"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertJobPhotoSchema = createInsertSchema(jobPhotos).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const jobNotes = pgTable("job_notes", {
+  id: serial("id").primaryKey(),
+  bookingId: integer("booking_id").references(() => bookings.id).notNull(),
+  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertJobNoteSchema = createInsertSchema(jobNotes).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Vehicle = typeof vehicles.$inferSelect;
@@ -234,3 +277,9 @@ export type InsertPortfolioItem = z.infer<typeof insertPortfolioItemSchema>;
 export type Address = typeof addresses.$inferSelect;
 export type InsertAddress = z.infer<typeof insertAddressSchema>;
 export type ShopProfile = typeof shopProfiles.$inferSelect;
+export type MechanicDocument = typeof mechanicDocuments.$inferSelect;
+export type InsertMechanicDocument = z.infer<typeof insertMechanicDocumentSchema>;
+export type JobPhoto = typeof jobPhotos.$inferSelect;
+export type InsertJobPhoto = z.infer<typeof insertJobPhotoSchema>;
+export type JobNote = typeof jobNotes.$inferSelect;
+export type InsertJobNote = z.infer<typeof insertJobNoteSchema>;

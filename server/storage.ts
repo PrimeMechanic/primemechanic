@@ -17,6 +17,12 @@ import {
   type Address,
   type InsertAddress,
   type ShopProfile,
+  type MechanicDocument,
+  type InsertMechanicDocument,
+  type JobPhoto,
+  type InsertJobPhoto,
+  type JobNote,
+  type InsertJobNote,
   users,
   vehicles,
   mechanicProfiles,
@@ -29,6 +35,9 @@ import {
   addresses,
   shopProfiles,
   shopServices,
+  mechanicDocuments,
+  jobPhotos,
+  jobNotes,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -76,6 +85,15 @@ export interface IStorage {
   updateAddress(id: number, updates: Partial<InsertAddress>): Promise<Address | undefined>;
   deleteAddress(id: number): Promise<void>;
   setDefaultAddress(userId: string, addressId: number): Promise<void>;
+
+  getMechanicDocuments(mechanicId: number): Promise<MechanicDocument[]>;
+  createMechanicDocument(doc: InsertMechanicDocument): Promise<MechanicDocument>;
+
+  getJobPhotos(bookingId: number): Promise<JobPhoto[]>;
+  createJobPhoto(photo: InsertJobPhoto): Promise<JobPhoto>;
+
+  getJobNotes(bookingId: number): Promise<JobNote[]>;
+  createJobNote(note: InsertJobNote): Promise<JobNote>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -368,6 +386,51 @@ export class DatabaseStorage implements IStorage {
   async setDefaultAddress(userId: string, addressId: number): Promise<void> {
     await db.update(addresses).set({ isDefault: false }).where(eq(addresses.userId, userId));
     await db.update(addresses).set({ isDefault: true }).where(eq(addresses.id, addressId));
+  }
+
+  async getMechanicDocuments(mechanicId: number): Promise<MechanicDocument[]> {
+    return db.select().from(mechanicDocuments)
+      .where(eq(mechanicDocuments.mechanicId, mechanicId))
+      .orderBy(desc(mechanicDocuments.uploadedAt));
+  }
+
+  async createMechanicDocument(doc: InsertMechanicDocument): Promise<MechanicDocument> {
+    const existing = await db.select().from(mechanicDocuments)
+      .where(and(
+        eq(mechanicDocuments.mechanicId, doc.mechanicId),
+        eq(mechanicDocuments.documentType, doc.documentType)
+      ));
+    if (existing.length > 0) {
+      const [updated] = await db.update(mechanicDocuments)
+        .set({ fileUrl: doc.fileUrl, status: "pending", uploadedAt: new Date() })
+        .where(eq(mechanicDocuments.id, existing[0].id))
+        .returning();
+      return updated;
+    }
+    const [newDoc] = await db.insert(mechanicDocuments).values(doc).returning();
+    return newDoc;
+  }
+
+  async getJobPhotos(bookingId: number): Promise<JobPhoto[]> {
+    return db.select().from(jobPhotos)
+      .where(eq(jobPhotos.bookingId, bookingId))
+      .orderBy(desc(jobPhotos.createdAt));
+  }
+
+  async createJobPhoto(photo: InsertJobPhoto): Promise<JobPhoto> {
+    const [newPhoto] = await db.insert(jobPhotos).values(photo).returning();
+    return newPhoto;
+  }
+
+  async getJobNotes(bookingId: number): Promise<JobNote[]> {
+    return db.select().from(jobNotes)
+      .where(eq(jobNotes.bookingId, bookingId))
+      .orderBy(desc(jobNotes.createdAt));
+  }
+
+  async createJobNote(note: InsertJobNote): Promise<JobNote> {
+    const [newNote] = await db.insert(jobNotes).values(note).returning();
+    return newNote;
   }
 }
 

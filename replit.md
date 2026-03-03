@@ -1,240 +1,57 @@
 # PrimeMechanic - Mobile Mechanic Marketplace
 
 ## Overview
-
-PrimeMechanic is a two-sided marketplace mobile application connecting vehicle owners with mobile mechanics for on-demand automotive services. Built with React Native (Expo) for cross-platform mobile development and a Node.js/Express backend, the platform enables customers to browse mechanics, book services, and track appointments while mechanics can manage their profiles, accept jobs, and handle payouts.
-
-The platform operates on a 20% commission model per completed job, similar to Uber's marketplace model but for mobile auto repair services.
-
-## Recent Changes
-
-### February 21, 2026
-- **Mechanic Onboarding & Real-Time Dashboard**:
-  - Multi-step MechanicOnboardingScreen (4 steps: specialty, services, hourly rate/service radius, bio)
-  - Animated progress bar with step indicator, validation per step
-  - POST /api/mechanics/onboard creates mechanic profile in database
-  - AuthContext tracks needsOnboarding state, checks GET /api/users/:id/mechanic-profile
-  - Navigation auto-routes new mechanics to onboarding before showing main app
-  - WebSocket server on `/ws` path for real-time dashboard metric broadcasts
-  - useWebSocket hook with reconnection logic and AppState awareness
-  - MechanicDashboardScreen rewritten to fetch from GET /api/mechanics/dashboard/:userId
-  - Dashboard shows live earnings (today/week/month), rating, pending requests, today's schedule
-  - Real-time updates via WebSocket when bookings complete (broadcasts updated stats)
-  - Pull-to-refresh and "Live" connection indicator on dashboard
-  - Booking status changes trigger mechanic earnings update + WebSocket broadcast
-
-- **Shops Feature (Physical Auto Repair Locations)**:
-  - `shopProfiles` and `shopServices` database tables with Drizzle ORM
-  - Shop schema: name, description, phone, email, address (street/city/state/zip), rating, hours (hoursOpen/hoursClose/daysOpen), verified status
-  - API routes: `GET /api/shops` (list all), `GET /api/shops/:id` (single shop)
-  - ShopCard component: displays name, address, rating, days open, distance, reviews
-  - ShopProfileScreen: full detail view with stats, about, shop info (address/hours/phone), services offered, reviews, call/book buttons
-  - BrowseScreen updated with "Nearby Shops" section below "Nearby Mechanics"
-  - Navigation: ShopProfile screen registered in RootStackNavigator
-  - 3 demo shops seeded: AutoCare Pro Center, Precision Auto Works, QuickFix Garage
-  - Mock data in client/data/mockData.ts with Shop type in client/types/index.ts
-
-- **Mechanic Portfolio Feature**:
-  - Portfolio items table (mechanicId, imageUrl, caption, serviceType) with Drizzle ORM
-  - Object Storage integration for photo uploads via presigned URLs
-  - API routes: `GET /api/mechanics/:id/portfolio`, `POST /api/portfolio`, `DELETE /api/portfolio/:id`
-  - Upload URL endpoint: `POST /api/objects/upload`, Object serving: `GET /objects/{*path}`
-  - MechanicProfileEditScreen: "My Portfolio" section with image picker, grid gallery, delete capability
-  - MechanicProfileScreen: Public portfolio gallery with full-screen image modal viewer
-  - Uses expo-image-picker for native photo selection
-  - Object storage files stored via objectStorageExpo.ts with ACL metadata
-
-### January 29, 2025
-- **Premium UI Design Overhaul**:
-  - New Emerald Tech Green color theme (#0FA958 primary, #0B3D2E secondary)
-  - Card-based layouts with subtle shadows (shadowOpacity: 0.04-0.08)
-  - Button component with LinearGradient (#0FA958 to #0B8A47)
-  - Redesigned SignInScreen and SignUpScreen with modern card layouts
-  - Enhanced BrowseScreen with welcome header and premium styling
-  - Updated ProfileScreen with gradient header and improved settings UI
-  - New FloatingActionButton with gradient and rounded corners
-  - Premium ServiceCard and MechanicCard with improved visual hierarchy
-  - SearchBar with card-style shadow instead of border
-  - Updated Shadows, BorderRadius, and Spacing in theme constants
-  - Generated comprehensive design_guidelines.md for consistent styling
-
-### January 26, 2025
-- **Authentication System Implemented**:
-  - SignInScreen and SignUpScreen with email/password authentication
-  - AuthContext for managing user session state with AsyncStorage persistence
-  - bcryptjs password hashing (10 rounds)
-  - API routes: `POST /api/auth/signup`, `POST /api/auth/signin`
-  - Demo mode access for testing without registration
-- **Stripe Payment Integration**:
-  - stripe-replit-sync for webhook management and database sync
-  - Stripe schema automatically created via runMigrations
-  - Webhook route registered BEFORE express.json() middleware
-  - 20% platform commission model on bookings
-  - Server files: stripeClient.ts, webhookHandlers.ts
-- **Database Schema Updated**:
-  - Added passwordHash field to users table
-  - Added stripeCustomerId and stripeSubscriptionId fields
-  - Schema supports both auth and payment tracking
-
-### January 24, 2025
-- Built complete MVP with Browse, Bookings, Messages, and Profile screens
-- Implemented mechanic marketplace with service cards and mechanic profiles
-- Added booking flow with service selection, vehicle, date/time, and location
-- Created chat interface for customer-mechanic communication
-- Set up database schema with Drizzle ORM (Users, Vehicles, MechanicProfiles, Services, Bookings, Reviews, Conversations, Messages)
-- Implemented in-memory storage with seeded demo data for testing
-- Added REST API endpoints for all core features
-- **Updated to light theme** with Midnight Blue (#0D1B2A) primary, Electric Blue (#00D4FF) accent, White background
-- **Built complete Mechanic UI** with role-based navigation:
-  - MechanicDashboardScreen: Stats cards, today's schedule, earnings summary
-  - JobsScreen: Incoming requests with Accept/Decline, Active jobs, History
-  - EarningsScreen: Weekly chart, earnings cards, transaction history
-  - MechanicProfileEditScreen: Availability toggle, services management, profile settings
-- Added UserContext for role switching between Customer and Mechanic views
-- Demo mode: Toggle between views via Profile screen "Switch to Mechanic/Customer View"
-- **Added Dark/Light Mode Support**:
-  - ThemeContext with AsyncStorage persistence
-  - Theme toggle switch in both Customer and Mechanic Profile screens under "Appearance" section
-  - Dynamic sun/moon icon changes based on current theme
-  - Light theme: White backgrounds, Midnight Blue primary
-  - Dark theme: Slate backgrounds (#0F172A, #1E293B), Electric Blue accent
+PrimeMechanic is a two-sided mobile marketplace connecting vehicle owners with mobile mechanics for on-demand automotive services. The platform facilitates booking, service tracking, and mechanic management. It operates on a 20% commission model per completed job, similar to a ride-sharing service, focusing on the mobile auto repair sector.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React Native with Expo SDK 54 for cross-platform iOS, Android, and web support
-- **Navigation**: React Navigation with role-based structure:
-  - **Customer Tabs** (4): Browse, Bookings, Messages, Profile
-  - **Mechanic Tabs** (4): Dashboard, Jobs, Earnings, Profile
-  - Native stack navigator for push screens and modals
-  - UserContext manages role switching between views
-  - Floating action button for quick service booking (customer only)
-- **State Management**: TanStack React Query for server state management
-- **Styling**: Custom theme system with light/dark mode support, using design tokens (Colors, Spacing, Typography, BorderRadius, Shadows)
-  - ThemeContext provides dynamic colors based on current theme (stored in AsyncStorage)
-  - Light mode: Off-white background (#F6F8F7), Emerald Tech Green primary (#0FA958)
-  - Dark mode: Slate background (#111111), Emerald Green accent (#0FA958)
-  - Secondary Text: Slate Gray (#6B6F73)
-  - Card-based layouts with subtle shadows for premium feel
-  - Button animations scale to 0.97 on press with gradient backgrounds
-- **Animation**: React Native Reanimated for smooth UI animations with haptic feedback via Expo Haptics
-- **Fonts**: Montserrat (Google Fonts) for professional automotive aesthetic
+- **Framework**: React Native with Expo SDK, providing cross-platform support for iOS, Android, and web.
+- **Navigation**: React Navigation, implementing role-based navigation with separate tab structures for Customers and Mechanics. A `UserContext` manages role switching.
+- **State Management**: TanStack React Query for efficient server state management.
+- **Styling**: A custom theme system supports light/dark modes, utilizing design tokens for consistent UI (Colors, Spacing, Typography, BorderRadius, Shadows). The design emphasizes card-based layouts with subtle shadows and uses Emerald Tech Green as the primary accent color.
+- **Animation**: React Native Reanimated is used for smooth UI animations, complemented by Expo Haptics for tactile feedback.
+- **Fonts**: Montserrat is used for a professional aesthetic.
 
 ### Backend Architecture
-- **Server**: Express.js running on Node.js with TypeScript
-- **API Pattern**: RESTful endpoints under `/api/*` prefix
-- **Storage**: Currently uses in-memory storage (MemStorage class) with interface designed for PostgreSQL migration
-- **CORS**: Dynamic origin handling for Replit dev/deployment domains plus localhost for Expo web development
+- **Server**: Express.js on Node.js with TypeScript.
+- **API Pattern**: RESTful endpoints prefixed with `/api/*`.
+- **Storage**: Currently utilizes in-memory storage (`MemStorage class`), designed for future migration to PostgreSQL.
+- **CORS**: Dynamic origin handling for development and deployment environments.
 
 ### Data Layer
-- **ORM**: Drizzle ORM with PostgreSQL dialect (configured but using in-memory storage currently)
-- **Schema Location**: `/shared/schema.ts` - shared between client and server
-- **Validation**: drizzle-zod for schema-based validation
-- **Key Entities**: Users, Vehicles, MechanicProfiles, Services, Bookings, Reviews, Conversations, Messages
+- **ORM**: Drizzle ORM configured for PostgreSQL, with schema defined in `/shared/schema.ts` for client-server consistency.
+- **Validation**: `drizzle-zod` for schema-based validation.
+- **Key Entities**: Users, Vehicles, MechanicProfiles, Services, Bookings, Reviews, Conversations, Messages, and dedicated tables for mechanic documents, job photos, and job notes.
 
-### Directory Structure
-```
-/client          - React Native (Expo) frontend
-  /components    - Reusable UI components (ThemedText, Card, Button, etc.)
-  /screens       - Screen components for each route
-  /navigation    - React Navigation setup
-  /hooks         - Custom React hooks
-  /constants     - Theme tokens and design system
-  /lib           - API client and utilities
-  /types         - TypeScript type definitions
-  /data          - Mock data for development
-/server          - Express backend
-  /templates     - HTML templates for web landing page
-/shared          - Shared code between client/server
-  /schema.ts     - Drizzle database schema
-/scripts         - Build and deployment scripts
-/assets          - Static assets (images, icons)
-```
-
-### Key Screens
-
-**Customer Screens:**
-1. **BrowseScreen**: Search bar, service category cards, nearby mechanics list with ratings and availability
-2. **BookingsScreen**: Segmented control (Upcoming/Past), booking cards with status badges
-3. **MessagesScreen**: Conversation list with unread indicators
-4. **ProfileScreen**: User info, vehicles list, settings, role switch option
-5. **BookServiceScreen**: Modal for creating new bookings
-6. **MechanicProfileScreen**: Detailed mechanic view with reviews, services, stats
-7. **BookingDetailScreen**: Individual booking details with status timeline
-8. **ChatScreen**: Real-time messaging with mechanics
-
-**Mechanic Screens:**
-1. **MechanicDashboardScreen**: Welcome header, earnings stats, today's schedule
-2. **JobsScreen**: Segmented control (Requests/Active/History), job cards with accept/decline
-3. **EarningsScreen**: Period selector, earnings summary, weekly chart, transactions list
-4. **MechanicProfileEditScreen**: Avatar, availability toggle, services management, settings
-
-### User Roles Architecture
-Three distinct user roles with different capabilities:
-1. **Customer**: Book services, manage vehicles, track jobs, message mechanics, leave reviews
-2. **Mechanic**: Set services/pricing, accept/decline jobs, manage availability, handle earnings
-3. **Admin**: Approve mechanics, manage platform commission, view analytics, handle disputes
-
-## API Endpoints
-
-### Services
-- `GET /api/services` - List all available services
-
-### Mechanics
-- `GET /api/mechanics` - List all mechanics with profiles
-- `GET /api/mechanics/:id` - Get single mechanic details
-
-### Users
-- `GET /api/users/:id` - Get user profile
-- `GET /api/users/:id/vehicles` - Get user's vehicles
-- `GET /api/users/:id/bookings` - Get user's bookings
-- `GET /api/users/:id/conversations` - Get user's conversations
-
-### Bookings
-- `POST /api/bookings` - Create new booking
-- `GET /api/bookings/:id` - Get booking details
-- `PATCH /api/bookings/:id/status` - Update booking status
-
-### Messages
-- `GET /api/conversations/:id/messages` - Get conversation messages
-- `POST /api/messages` - Send new message
-
-### Reviews
-- `POST /api/reviews` - Submit review
-
-### Authentication
-- `POST /api/auth/signup` - Create new user account
-- `POST /api/auth/signin` - Sign in with email/password
-
-### Stripe Webhook
-- `POST /api/stripe/webhook` - Stripe webhook handler (raw body required)
+### System Design Choices
+- **Mechanic Screening & Compliance**: Implemented a multi-step onboarding process for mechanics including document uploads (insurance, license, W-9), background check consent, and contractor agreement review. A `screeningStatus` field tracks approval.
+- **Real-time Features**: WebSocket server for real-time dashboard updates (earnings, requests, schedule) for mechanics.
+- **Shops Feature**: Integration of physical auto repair shop profiles, including services offered, hours, and address.
+- **Mechanic Portfolio**: Allows mechanics to upload and display portfolio images with captions, utilizing object storage for photo management.
+- **Authentication**: Custom email/password authentication system with `bcryptjs` hashing, managed via `AuthContext`.
+- **UI/UX**: Premium UI design overhaul featuring a new Emerald Tech Green color theme, card-based layouts with subtle shadows, and gradient buttons. Consistent design guidelines are maintained.
+- **Role-Based Access**: Distinct user roles (Customer, Mechanic, Admin) with tailored interfaces and capabilities.
+- **Photo Enforcement**: Before-photos are enforced for jobs, preventing status changes to `in_progress` without documentation.
 
 ## External Dependencies
 
 ### Database
-- **PostgreSQL**: Primary database (configured via `DATABASE_URL` environment variable)
-- **Drizzle ORM**: Type-safe database queries and migrations
+- **PostgreSQL**: Primary database for persistent storage.
+- **Drizzle ORM**: Used for type-safe database interactions and schema management.
 
-### Third-Party Services (Active)
-- **Stripe**: Marketplace payments with 20% platform commission via stripe-replit-sync
-- **Email/Password Authentication**: Built-in auth with bcryptjs password hashing
+### Third-Party Services
+- **Stripe**: Integrated for marketplace payment processing, including a 20% platform commission model and webhook management via `stripe-replit-sync`.
+- **Object Storage**: Used for storing mechanic portfolio images and job-related photos, accessed via presigned URLs.
 
 ### Key NPM Packages
-- **expo**: Core Expo SDK for React Native
-- **@tanstack/react-query**: Server state management
-- **react-native-reanimated**: Animations
-- **react-native-gesture-handler**: Touch handling
-- **@expo-google-fonts/montserrat**: Custom typography
-- **expo-haptics**: Tactile feedback
-- **pg**: PostgreSQL client
-- **drizzle-orm/drizzle-kit**: Database ORM and migrations
-- **tsx**: TypeScript execution for development server
-
-### Environment Variables Required
-- `DATABASE_URL`: PostgreSQL connection string (for production)
-- `EXPO_PUBLIC_DOMAIN`: Public domain for API requests
-- `REPLIT_DEV_DOMAIN`: Development domain (auto-set by Replit)
+- **expo**: Core framework for React Native development.
+- **@tanstack/react-query**: For server state management.
+- **react-native-reanimated**: For animations.
+- **pg**: PostgreSQL client.
+- **drizzle-orm/drizzle-kit**: ORM and migration tools.
+- **bcryptjs**: For password hashing.
+- **expo-image-picker**: For native photo selection.

@@ -354,6 +354,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
+
+      if (status === "in_progress") {
+        const photos = await storage.getJobPhotos(id);
+        const beforePhotos = photos.filter(p => p.photoType === "before");
+        if (beforePhotos.length === 0) {
+          return res.status(400).json({ error: "At least one before photo is required before starting the job" });
+        }
+      }
+
+      if (status === "completed") {
+        const photos = await storage.getJobPhotos(id);
+        const afterPhotos = photos.filter(p => p.photoType === "after");
+        if (afterPhotos.length === 0) {
+          return res.status(400).json({ error: "At least one after photo is required before completing the job" });
+        }
+      }
+
       const booking = await storage.updateBookingStatus(id, status);
       if (!booking) {
         return res.status(404).json({ error: "Booking not found" });
@@ -819,6 +836,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Dashboard stats error:", error);
       res.status(500).json({ error: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // Mechanic document routes
+  app.get("/api/mechanics/:id/documents", async (req, res) => {
+    try {
+      const mechanicId = parseInt(req.params.id);
+      const docs = await storage.getMechanicDocuments(mechanicId);
+      res.json(docs);
+    } catch (error) {
+      console.error("Get documents error:", error);
+      res.status(500).json({ error: "Failed to get documents" });
+    }
+  });
+
+  app.post("/api/mechanics/:id/documents", async (req, res) => {
+    try {
+      const mechanicId = parseInt(req.params.id);
+      const { documentType, fileUrl } = req.body;
+      if (!documentType || !fileUrl) {
+        return res.status(400).json({ error: "documentType and fileUrl are required" });
+      }
+      const doc = await storage.createMechanicDocument({
+        mechanicId,
+        documentType,
+        fileUrl,
+        status: "pending",
+      });
+      res.status(201).json(doc);
+    } catch (error) {
+      console.error("Create document error:", error);
+      res.status(500).json({ error: "Failed to create document" });
+    }
+  });
+
+  // Job photo routes
+  app.get("/api/bookings/:id/photos", async (req, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const photos = await storage.getJobPhotos(bookingId);
+      res.json(photos);
+    } catch (error) {
+      console.error("Get photos error:", error);
+      res.status(500).json({ error: "Failed to get photos" });
+    }
+  });
+
+  app.post("/api/bookings/:id/photos", async (req, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const { mechanicId, photoUrl, photoType, caption } = req.body;
+      if (!mechanicId || !photoUrl || !photoType) {
+        return res.status(400).json({ error: "mechanicId, photoUrl, and photoType are required" });
+      }
+      if (!["before", "after"].includes(photoType)) {
+        return res.status(400).json({ error: "photoType must be 'before' or 'after'" });
+      }
+      const photo = await storage.createJobPhoto({
+        bookingId,
+        mechanicId,
+        photoUrl,
+        photoType,
+        caption: caption || null,
+      });
+      res.status(201).json(photo);
+    } catch (error) {
+      console.error("Create photo error:", error);
+      res.status(500).json({ error: "Failed to create photo" });
+    }
+  });
+
+  // Job note routes
+  app.get("/api/bookings/:id/notes", async (req, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const notes = await storage.getJobNotes(bookingId);
+      res.json(notes);
+    } catch (error) {
+      console.error("Get notes error:", error);
+      res.status(500).json({ error: "Failed to get notes" });
+    }
+  });
+
+  app.post("/api/bookings/:id/notes", async (req, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const { mechanicId, content } = req.body;
+      if (!mechanicId || !content) {
+        return res.status(400).json({ error: "mechanicId and content are required" });
+      }
+      const note = await storage.createJobNote({
+        bookingId,
+        mechanicId,
+        content,
+      });
+      res.status(201).json(note);
+    } catch (error) {
+      console.error("Create note error:", error);
+      res.status(500).json({ error: "Failed to create note" });
     }
   });
 

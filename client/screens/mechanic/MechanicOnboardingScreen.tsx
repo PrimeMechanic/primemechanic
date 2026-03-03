@@ -10,6 +10,7 @@ import {
   FlatList,
   Platform,
   KeyboardAvoidingView,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -21,16 +22,23 @@ import Animated, {
   FadeIn,
   FadeOut,
 } from "react-native-reanimated";
+import * as ImagePicker from "expo-image-picker";
 
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
-import { apiRequest } from "@/lib/query-client";
+import { apiRequest, getApiUrl } from "@/lib/query-client";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 6;
+
+const REQUIRED_DOCUMENTS = [
+  { key: "insurance", label: "Proof of Insurance", icon: "shield" as const, description: "Upload your general liability insurance certificate" },
+  { key: "license", label: "License / Certification", icon: "credit-card" as const, description: "GA mechanic license or ASE certification" },
+  { key: "w9", label: "W-9 Tax Form", icon: "file-text" as const, description: "Completed W-9 for tax reporting" },
+];
 
 const SPECIALTIES = [
   { label: "German Vehicles", icon: "settings" as const },
@@ -79,6 +87,10 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadedDocs, setUploadedDocs] = useState<Record<string, string>>({});
+  const [uploadingDoc, setUploadingDoc] = useState<string | null>(null);
+  const [backgroundCheckConsent, setBackgroundCheckConsent] = useState(false);
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
 
   const scrollRef = useRef<ScrollView>(null);
   const progressWidth = useSharedValue(1 / TOTAL_STEPS);
@@ -91,6 +103,48 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
     setStep(nextStep);
     progressWidth.value = withSpring((nextStep + 1) / TOTAL_STEPS);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  const pickDocument = async (docKey: string) => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+      });
+      if (result.canceled) return;
+
+      setUploadingDoc(docKey);
+      const uri = result.assets[0].uri;
+
+      const baseUrl = getApiUrl();
+      const uploadRes = await fetch(new URL("/api/objects/upload", baseUrl).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: `doc-${docKey}-${Date.now()}.jpg`,
+          contentType: "image/jpeg",
+          directory: ".private",
+        }),
+      });
+      const uploadData = await uploadRes.json();
+
+      if (uploadData.uploadUrl) {
+        const imageResponse = await fetch(uri);
+        const blob = await imageResponse.blob();
+        await fetch(uploadData.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "image/jpeg" },
+          body: blob,
+        });
+      }
+
+      const fileUrl = uploadData.objectPath || uri;
+      setUploadedDocs((prev) => ({ ...prev, [docKey]: fileUrl }));
+    } catch (err) {
+      setError("Failed to upload document. Please try again.");
+    } finally {
+      setUploadingDoc(null);
+    }
   };
 
   const handleNext = () => {
@@ -106,6 +160,23 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
     if (step === 2 && (!hourlyRate || parseFloat(hourlyRate) < 1)) {
       setError("Please enter a valid hourly rate");
       return;
+    }
+    if (step === 4) {
+      const missingDocs = REQUIRED_DOCUMENTS.filter((d) => !uploadedDocs[d.key]);
+      if (missingDocs.length > 0) {
+        setError(`Please upload: ${missingDocs.map((d) => d.label).join(", ")}`);
+        return;
+      }
+    }
+    if (step === 5) {
+      if (!backgroundCheckConsent) {
+        setError("You must consent to a background check");
+        return;
+      }
+      if (!agreementAccepted) {
+        setError("You must accept the contractor agreement");
+        return;
+      }
     }
     if (step < TOTAL_STEPS - 1) {
       goToStep(step + 1);
@@ -135,13 +206,25 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
     setError(null);
 
     try {
-      await apiRequest("POST", "/api/mechanics/onboard", {
+      const profile = await apiRequest("POST", "/api/mechanics/onboard", {
         userId: user.id,
         specialty,
         bio: bio.trim() || `Specializing in ${specialty}`,
         hourlyRate,
         serviceRadius: parseInt(serviceRadius) || 10,
       });
+
+      const mechanicId = profile.id;
+      if (mechanicId) {
+        const docUploads = Object.entries(uploadedDocs).map(([docType, fileUrl]) =>
+          apiRequest("POST", `/api/mechanics/${mechanicId}/documents`, {
+            documentType: docType,
+            fileUrl,
+          })
+        );
+        await Promise.all(docUploads);
+      }
+
       onComplete();
     } catch (err: any) {
       setError(err.message || "Failed to complete setup");
@@ -451,6 +534,124 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
           </Animated.View>
         );
 
+      case 4:
+        return (
+          <Animated.View entering={FadeIn.duration(300)} key="step4">
+            <View style={styles.stepHeader}>
+              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+                <Feather name="upload" size={28} color={colors.primary} />
+              </View>
+              <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
+                Upload your documents
+              </ThemedText>
+              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+                Required for verification before you can accept jobs
+              </ThemedText>
+            </View>
+
+            <View style={styles.servicesList}>
+              {REQUIRED_DOCUMENTS.map((doc) => {
+                const isUploaded = !!uploadedDocs[doc.key];
+                const isUploading = uploadingDoc === doc.key;
+                return (
+                  <Pressable
+                    key={doc.key}
+                    style={[
+                      styles.docCard,
+                      {
+                        backgroundColor: isUploaded ? `${colors.success}08` : colors.backgroundDefault,
+                        borderColor: isUploaded ? colors.success : colors.border,
+                      },
+                      Shadows.small,
+                    ]}
+                    onPress={() => pickDocument(doc.key)}
+                    disabled={isUploading}
+                    testID={`doc-upload-${doc.key}`}
+                  >
+                    <View style={[styles.docIconWrap, { backgroundColor: isUploaded ? `${colors.success}15` : `${colors.textSecondary}10` }]}>
+                      {isUploading ? (
+                        <ActivityIndicator size="small" color={colors.primary} />
+                      ) : (
+                        <Feather name={isUploaded ? "check-circle" : doc.icon} size={22} color={isUploaded ? colors.success : colors.textSecondary} />
+                      )}
+                    </View>
+                    <View style={styles.docContent}>
+                      <ThemedText style={[styles.docTitle, { color: isUploaded ? colors.success : colors.text }]}>
+                        {doc.label}
+                      </ThemedText>
+                      <ThemedText style={[styles.docDesc, { color: colors.textSecondary }]} numberOfLines={1}>
+                        {isUploaded ? "Uploaded - tap to replace" : doc.description}
+                      </ThemedText>
+                    </View>
+                    <Feather name={isUploaded ? "check" : "upload"} size={18} color={isUploaded ? colors.success : colors.primary} />
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={[styles.infoBox, { backgroundColor: `${colors.primary}08` }]}>
+              <Feather name="info" size={16} color={colors.primary} />
+              <ThemedText style={[styles.infoText, { color: colors.textSecondary }]}>
+                Documents are reviewed within 24-48 hours. You can begin onboarding now but won't receive jobs until verified.
+              </ThemedText>
+            </View>
+          </Animated.View>
+        );
+
+      case 5:
+        return (
+          <Animated.View entering={FadeIn.duration(300)} key="step5">
+            <View style={styles.stepHeader}>
+              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+                <Feather name="check-square" size={28} color={colors.primary} />
+              </View>
+              <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
+                Agreement & Background Check
+              </ThemedText>
+              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+                Review and accept the terms to complete your setup
+              </ThemedText>
+            </View>
+
+            <View style={[styles.agreementCard, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
+              <ThemedText style={[styles.agreementTitle, { color: colors.text }]}>
+                Independent Contractor Agreement
+              </ThemedText>
+              <ScrollView style={[styles.agreementScroll, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]} nestedScrollEnabled>
+                <ThemedText style={[styles.agreementBody, { color: colors.textSecondary }]}>
+                  {`By accepting this agreement, you acknowledge and agree to the following terms:\n\n1. INDEPENDENT CONTRACTOR STATUS: You are an independent contractor, not an employee of PrimeMechanic. You are responsible for your own taxes, insurance, and business expenses.\n\n2. SERVICE STANDARDS: You agree to perform all services in a professional, workmanlike manner consistent with industry standards.\n\n3. COMMISSION: PrimeMechanic retains a 20% platform commission on all completed jobs. Your payout is 80% of the job total.\n\n4. BEFORE/AFTER DOCUMENTATION: You are required to photograph the vehicle before and after every service for quality assurance and dispute resolution.\n\n5. INSURANCE: You must maintain valid general liability insurance at all times while active on the platform.\n\n6. COMPLIANCE: You agree to comply with all applicable federal, state, and local laws and regulations in the state of Georgia.\n\n7. CANCELLATION: Either party may terminate this agreement at any time with written notice.\n\n8. W-9: You agree to provide a completed W-9 form for tax reporting purposes. PrimeMechanic will issue a 1099 for earnings over $600/year.`}
+                </ThemedText>
+              </ScrollView>
+            </View>
+
+            <Pressable
+              style={[styles.checkboxRow, { borderColor: agreementAccepted ? colors.primary : colors.border }]}
+              onPress={() => setAgreementAccepted(!agreementAccepted)}
+              testID="checkbox-agreement"
+            >
+              <View style={[styles.checkbox, { backgroundColor: agreementAccepted ? colors.primary : "transparent", borderColor: agreementAccepted ? colors.primary : colors.border }]}>
+                {agreementAccepted ? <Feather name="check" size={14} color="#FFFFFF" /> : null}
+              </View>
+              <ThemedText style={[styles.checkboxLabel, { color: colors.text }]}>
+                I have read and accept the Independent Contractor Agreement
+              </ThemedText>
+            </Pressable>
+
+            <Pressable
+              style={[styles.checkboxRow, { borderColor: backgroundCheckConsent ? colors.primary : colors.border }]}
+              onPress={() => setBackgroundCheckConsent(!backgroundCheckConsent)}
+              testID="checkbox-background-check"
+            >
+              <View style={[styles.checkbox, { backgroundColor: backgroundCheckConsent ? colors.primary : "transparent", borderColor: backgroundCheckConsent ? colors.primary : colors.border }]}>
+                {backgroundCheckConsent ? <Feather name="check" size={14} color="#FFFFFF" /> : null}
+              </View>
+              <ThemedText style={[styles.checkboxLabel, { color: colors.text }]}>
+                I consent to a background check as required by PrimeMechanic
+              </ThemedText>
+            </Pressable>
+          </Animated.View>
+        );
+
       default:
         return null;
     }
@@ -698,6 +899,89 @@ const styles = StyleSheet.create({
   ratePillText: {
     fontSize: 14,
     fontWeight: "500",
+  },
+  docCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderWidth: 1.5,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.md,
+  },
+  docIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  docContent: {
+    flex: 1,
+  },
+  docTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    fontFamily: "Montserrat_600SemiBold",
+    marginBottom: 2,
+  },
+  docDesc: {
+    fontSize: 13,
+  },
+  infoBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    marginTop: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  infoText: {
+    fontSize: 13,
+    lineHeight: 19,
+    flex: 1,
+  },
+  agreementCard: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  agreementTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "Montserrat_600SemiBold",
+    marginBottom: Spacing.md,
+  },
+  agreementScroll: {
+    maxHeight: 200,
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.md,
+  },
+  agreementBody: {
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderWidth: 1.5,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
   },
   bioCard: {
     borderRadius: BorderRadius.xl,
