@@ -5,6 +5,7 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
+  type ScrollViewInstance,
   ActivityIndicator,
   Dimensions,
   FlatList,
@@ -74,6 +75,10 @@ interface Props {
   onComplete: () => void;
 }
 
+interface MechanicOnboardResponse {
+  id: number;
+}
+
 export default function MechanicOnboardingScreen({ onComplete }: Props) {
   const { colors } = useTheme();
   const { user } = useAuth();
@@ -92,7 +97,7 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
   const [backgroundCheckConsent, setBackgroundCheckConsent] = useState(false);
   const [agreementAccepted, setAgreementAccepted] = useState(false);
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const progressWidth = useSharedValue(1 / TOTAL_STEPS);
 
   const progressStyle = useAnimatedStyle(() => ({
@@ -206,13 +211,14 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
     setError(null);
 
     try {
-      const profile = await apiRequest("POST", "/api/mechanics/onboard", {
+      const profileResponse = await apiRequest("POST", "/api/mechanics/onboard", {
         userId: user.id,
         specialty,
         bio: bio.trim() || `Specializing in ${specialty}`,
         hourlyRate,
         serviceRadius: parseInt(serviceRadius) || 10,
       });
+      const profile: MechanicOnboardResponse = await profileResponse.json();
 
       const mechanicId = profile.id;
       if (mechanicId) {

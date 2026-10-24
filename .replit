@@ -1,5 +1,5 @@
 entrypoint = "README.md"
-modules = ["nodejs-22", "postgresql-16"]
+modules = ["nodejs-22", "postgresql-16", "python-base-3.13"]
 
 [nix]
 channel = "stable-24_05"
@@ -20,6 +20,7 @@ externalPort = 3002
 [[ports]]
 localPort = 8081
 externalPort = 80
+exposeLocalhost = true
 
 [[ports]]
 localPort = 8082

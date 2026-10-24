@@ -243,4 +243,5 @@ export const currentUser: User = {
   phone: "(555) 123-4567",
   avatar: require("../../assets/images/avatar-default.png"),
   vehicles: [defaultVehicle],
+  role: "customer",
 };
