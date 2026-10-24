@@ -26,6 +26,10 @@ exposeLocalhost = true
 localPort = 8082
 externalPort = 3000
 
+[[ports]]
+localPort = 23636
+externalPort = 3003
+
 [env]
 PORT = "5000"
 
