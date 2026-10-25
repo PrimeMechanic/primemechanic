@@ -948,13 +948,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ws.on("message", (message) => {
       try {
         const data = JSON.parse(message.toString());
-        if (data.type === "register" && data.userId) {
-          userId = data.userId;
-          if (!mechanicClients.has(userId)) {
-            mechanicClients.set(userId, new Set());
+        if (
+          data.type === "register" &&
+          typeof data.userId === "string" &&
+          data.userId.length > 0
+        ) {
+          const registeredUserId: string = data.userId;
+          userId = registeredUserId;
+          let clients = mechanicClients.get(registeredUserId);
+          if (!clients) {
+            clients = new Set<WebSocket>();
+            mechanicClients.set(registeredUserId, clients);
           }
-          mechanicClients.get(userId)!.add(ws);
-          ws.send(JSON.stringify({ type: "registered", userId }));
+          clients.add(ws);
+          ws.send(JSON.stringify({ type: "registered", userId: registeredUserId }));
         }
       } catch (e) {}
     });

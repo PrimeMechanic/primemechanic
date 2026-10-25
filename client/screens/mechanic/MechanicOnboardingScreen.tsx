@@ -5,6 +5,7 @@ import {
   Pressable,
   StyleSheet,
   ScrollView,
+  type ScrollViewInstance,
   ActivityIndicator,
   Dimensions,
   FlatList,
@@ -74,6 +75,10 @@ interface Props {
   onComplete: () => void;
 }
 
+interface MechanicOnboardResponse {
+  id: number;
+}
+
 export default function MechanicOnboardingScreen({ onComplete }: Props) {
   const { colors } = useTheme();
   const { user } = useAuth();
@@ -92,7 +97,7 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
   const [backgroundCheckConsent, setBackgroundCheckConsent] = useState(false);
   const [agreementAccepted, setAgreementAccepted] = useState(false);
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const progressWidth = useSharedValue(1 / TOTAL_STEPS);
 
   const progressStyle = useAnimatedStyle(() => ({
@@ -206,13 +211,14 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
     setError(null);
 
     try {
-      const profile = await apiRequest("POST", "/api/mechanics/onboard", {
+      const profileResponse = await apiRequest("POST", "/api/mechanics/onboard", {
         userId: user.id,
         specialty,
         bio: bio.trim() || `Specializing in ${specialty}`,
         hourlyRate,
         serviceRadius: parseInt(serviceRadius) || 10,
       });
+      const profile: MechanicOnboardResponse = await profileResponse.json();
 
       const mechanicId = profile.id;
       if (mechanicId) {
@@ -243,7 +249,7 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                 <Feather name="award" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
-                What's your specialty?
+                What&apos;s your specialty?
               </ThemedText>
               <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
                 Choose the type of vehicles you work with most
@@ -592,7 +598,7 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
             <View style={[styles.infoBox, { backgroundColor: `${colors.primary}08` }]}>
               <Feather name="info" size={16} color={colors.primary} />
               <ThemedText style={[styles.infoText, { color: colors.textSecondary }]}>
-                Documents are reviewed within 24-48 hours. You can begin onboarding now but won't receive jobs until verified.
+                Documents are reviewed within 24-48 hours. You can begin onboarding now but won&apos;t receive jobs until verified.
               </ThemedText>
             </View>
           </Animated.View>
