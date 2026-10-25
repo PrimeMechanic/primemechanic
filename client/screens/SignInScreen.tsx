@@ -153,7 +153,7 @@ export default function SignInScreen({ navigation }: Props) {
 
             <View style={styles.signupContainer}>
               <ThemedText style={{ color: colors.textSecondary }}>
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
               </ThemedText>
               <Pressable onPress={() => navigation.navigate("SignUp")}>
                 <ThemedText style={[styles.link, { color: colors.primary }]}>Sign Up</ThemedText>

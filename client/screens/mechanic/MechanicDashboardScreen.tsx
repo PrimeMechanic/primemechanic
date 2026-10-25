@@ -254,7 +254,7 @@ export default function MechanicDashboardScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Today's Schedule</ThemedText>
+          <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Today&apos;s Schedule</ThemedText>
           <View style={[styles.countBadge, { backgroundColor: `${colors.primary}15` }]}>
             <ThemedText style={[styles.countText, { color: colors.primary }]}>
               {schedule.length} jobs

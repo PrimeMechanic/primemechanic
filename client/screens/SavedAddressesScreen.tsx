@@ -495,7 +495,7 @@ export default function SavedAddressesScreen() {
               Remove Address
             </ThemedText>
             <ThemedText style={[styles.deleteMessage, { color: colors.textSecondary }]}>
-              Are you sure you want to remove your "{addressToDelete?.label}" address at {addressToDelete?.street}?
+              Are you sure you want to remove your &quot;{addressToDelete?.label}&quot; address at {addressToDelete?.street}?
             </ThemedText>
             <View style={styles.deleteButtons}>
               <Pressable

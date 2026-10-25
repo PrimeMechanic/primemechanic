@@ -249,7 +249,7 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                 <Feather name="award" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
-                What's your specialty?
+                What&apos;s your specialty?
               </ThemedText>
               <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
                 Choose the type of vehicles you work with most
@@ -598,7 +598,7 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
             <View style={[styles.infoBox, { backgroundColor: `${colors.primary}08` }]}>
               <Feather name="info" size={16} color={colors.primary} />
               <ThemedText style={[styles.infoText, { color: colors.textSecondary }]}>
-                Documents are reviewed within 24-48 hours. You can begin onboarding now but won't receive jobs until verified.
+                Documents are reviewed within 24-48 hours. You can begin onboarding now but won&apos;t receive jobs until verified.
               </ThemedText>
             </View>
           </Animated.View>

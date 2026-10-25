@@ -356,7 +356,7 @@ export default function AddVehicleScreen({ navigation }: any) {
             testID="button-skip-trim"
           >
             <ThemedText style={[styles.skipText, { color: colors.textSecondary }]}>
-              Skip - I don't know my trim
+              Skip - I don&apos;t know my trim
             </ThemedText>
           </Pressable>
         }
