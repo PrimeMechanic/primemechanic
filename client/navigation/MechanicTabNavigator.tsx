@@ -82,7 +82,6 @@ export default function MechanicTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Feather name="briefcase" size={size} color={color} />
           ),
-          tabBarBadge: 2,
           tabBarBadgeStyle: {
             backgroundColor: colors.accent,
             fontSize: 10,
@@ -98,7 +97,6 @@ export default function MechanicTabNavigator() {
           tabBarIcon: ({ color, size }) => (
             <Feather name="message-circle" size={size} color={color} />
           ),
-          tabBarBadge: 1,
           tabBarBadgeStyle: {
             backgroundColor: colors.accent,
             fontSize: 10,

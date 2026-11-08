@@ -19,26 +19,23 @@ import MechanicOnboardingScreen from "@/screens/mechanic/MechanicOnboardingScree
 import JobDetailScreen from "@/screens/mechanic/JobDetailScreen";
 import SignInScreen from "@/screens/SignInScreen";
 import SignUpScreen from "@/screens/SignUpScreen";
-import DemoScreen from "@/screens/DemoScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useUser } from "@/context/UserContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { conversations, mechanics } from "@/data/mockData";
 
 export type AuthStackParamList = {
   SignIn: undefined;
   SignUp: undefined;
-  Demo: undefined;
 };
 
 export type RootStackParamList = {
   Main: undefined;
   MechanicMain: undefined;
-  BookService: { serviceId?: string };
+  BookService: { serviceId?: string; mechanicId?: string };
   MechanicProfile: { mechanicId: string };
   BookingDetail: { bookingId: string };
-  JobDetail: { job: any };
+  JobDetail: { bookingId: string };
   Chat: { conversationId: string; mechanicId?: string };
   AddVehicle: undefined;
   PaymentMethods: undefined;
@@ -52,29 +49,25 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
-  const { role, setRole } = useUser();
-  const { isAuthenticated, isLoading, user, needsOnboarding, completeOnboarding } = useAuth();
+  const { role } = useUser();
+  const {
+    isAuthenticated,
+    isLoading,
+    user,
+    needsOnboarding,
+    completeOnboarding,
+  } = useAuth();
   const { colors } = useTheme();
-
-  const [isDemo, setIsDemo] = React.useState(false);
-
-  const handleEnterDemo = React.useCallback(() => {
-    setIsDemo(true);
-    setRole("customer");
-  }, [setRole]);
 
   if (isLoading) {
     return null;
   }
 
-  if (!isAuthenticated && !isDemo) {
+  if (!isAuthenticated) {
     return (
       <Stack.Navigator screenOptions={{ ...screenOptions, headerShown: false }}>
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="Demo" options={{ headerShown: false }}>
-          {(props) => <DemoScreen {...props} onEnterDemo={handleEnterDemo} />}
-        </Stack.Screen>
       </Stack.Navigator>
     );
   }
@@ -83,7 +76,7 @@ export default function RootStackNavigator() {
     return <MechanicOnboardingScreen onComplete={completeOnboarding} />;
   }
 
-  const currentRole = user?.role === "mechanic" ? "mechanic" : role;
+  const currentRole = user?.role === "mechanic" ? role : "customer";
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
@@ -134,17 +127,7 @@ export default function RootStackNavigator() {
       <Stack.Screen
         name="Chat"
         component={ChatScreen}
-        options={({ route }) => {
-          const conversation = conversations.find(
-            (c) => c.id === route.params.conversationId
-          );
-          const mechanic = conversation?.mechanic || 
-            mechanics.find((m) => m.id === route.params.mechanicId) || 
-            mechanics[0];
-          return {
-            headerTitle: mechanic.name,
-          };
-        }}
+        options={{ headerTitle: "Conversation" }}
       />
       <Stack.Screen
         name="AddVehicle"

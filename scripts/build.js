@@ -39,6 +39,8 @@ function stripProtocol(domain) {
 }
 
 function getDeploymentDomain() {
+  if (process.env.PUBLIC_APP_URL)
+    return stripProtocol(process.env.PUBLIC_APP_URL);
   // Check Replit deployment environment variables first
   if (process.env.REPLIT_INTERNAL_APP_DOMAIN) {
     return stripProtocol(process.env.REPLIT_INTERNAL_APP_DOMAIN);
@@ -118,11 +120,24 @@ async function startMetro(expoPublicDomain) {
     ...process.env,
     EXPO_PUBLIC_DOMAIN: expoPublicDomain,
   };
-  metroProcess = spawn("npm", ["run", "expo:start:static:build"], {
-    stdio: ["ignore", "pipe", "pipe"],
-    detached: false,
-    env,
-  });
+  metroProcess = spawn(
+    process.execPath,
+    [
+      require.resolve("expo/bin/cli"),
+      "start",
+      "--no-dev",
+      "--minify",
+      "--localhost",
+    ],
+    {
+      stdio: ["ignore", "pipe", "pipe"],
+      detached: false,
+      env,
+    },
+  );
+  metroProcess.on("error", (error) =>
+    exitWithError(`Metro failed to start: ${error.message}`),
+  );
 
   if (metroProcess.stdout) {
     metroProcess.stdout.on("data", (data) => {

@@ -1,5 +1,28 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+let accessToken: string | null = null;
+export function setAccessToken(token: string | null) {
+  accessToken = token;
+}
+export function getAccessToken() {
+  return accessToken;
+}
+export function authHeaders(): Record<string, string> {
+  return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+}
+export async function authFetch(input: string | URL, init: RequestInit = {}) {
+  const url = new URL(String(input), getApiUrl());
+  if (url.origin !== new URL(getApiUrl()).origin)
+    throw new Error("Refusing to send credentials to a different server");
+  return fetch(url.href, {
+    ...init,
+    headers: {
+      ...Object.fromEntries(new Headers(init.headers).entries()),
+      ...authHeaders(),
+    },
+  });
+}
+
 /**
  * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
  * @returns {string} The API base URL
@@ -11,7 +34,9 @@ export function getApiUrl(): string {
     throw new Error("EXPO_PUBLIC_DOMAIN is not set");
   }
 
-  let url = new URL(`https://${host}`);
+  let url = new URL(host.includes("://") ? host : `https://${host}`);
+  if (url.protocol !== "https:" && !(url.hostname === "localhost" && __DEV__))
+    throw new Error("HTTPS API required");
 
   return url.href;
 }
@@ -31,7 +56,7 @@ export async function apiRequest(
   const baseUrl = getApiUrl();
   const url = new URL(route, baseUrl);
 
-  const res = await fetch(url, {
+  const res = await authFetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -51,7 +76,7 @@ export const getQueryFn: <T>(options: {
     const baseUrl = getApiUrl();
     const url = new URL(queryKey.join("/") as string, baseUrl);
 
-    const res = await fetch(url, {
+    const res = await authFetch(url, {
       credentials: "include",
     });
 
@@ -69,7 +94,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 15000,
       retry: false,
     },
     mutations: {

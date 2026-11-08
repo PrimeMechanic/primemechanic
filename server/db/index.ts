@@ -7,4 +7,10 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-export const db = drizzle(pool, { schema });
+export let db = drizzle(pool, { schema });
+
+export function useTestDatabase(database: typeof db) {
+  if (process.env.NODE_ENV !== "test")
+    throw new Error("Test database injection is disabled");
+  db = database;
+}

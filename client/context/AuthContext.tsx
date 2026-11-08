@@ -1,6 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { Platform } from "react-native";
+import * as SecureStore from "expo-secure-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getApiUrl, apiRequest } from "@/lib/query-client";
+import { apiRequest, queryClient, setAccessToken } from "@/lib/query-client";
 
 interface User {
   id: string;
@@ -9,120 +17,98 @@ interface User {
   phone: string | null;
   role: string;
   avatarUrl: string | null;
-  stripeCustomerId: string | null;
 }
-
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   needsOnboarding: boolean;
-  signUp: (email: string, password: string, name: string, phone?: string, role?: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    name: string,
+    phone?: string,
+    role?: string,
+  ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   completeOnboarding: () => void;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const AUTH_STORAGE_KEY = "@primemechanic_auth";
-
-interface AuthProviderProps {
-  children: ReactNode;
+const key = "primemechanic-session-v1";
+async function persist(token: string | null) {
+  if (Platform.OS === "web") return;
+  if (token) await SecureStore.setItemAsync(key, token);
+  else await SecureStore.deleteItemAsync(key);
 }
-
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [needsOnboarding, setNeedsOnboarding] = useState(false);
-
-  useEffect(() => {
-    loadStoredAuth();
-  }, []);
-
-  const checkMechanicProfile = async (userData: User) => {
-    if (userData.role !== "mechanic") {
-      setNeedsOnboarding(false);
+  const [isLoading, setLoading] = useState(true);
+  const [needsOnboarding, setOnboarding] = useState(false);
+  async function checkProfile(current: User) {
+    if (current.role !== "mechanic") {
+      setOnboarding(false);
       return;
     }
     try {
-      const response = await fetch(
-        new URL(`/api/users/${userData.id}/mechanic-profile`, getApiUrl()).href,
-        { credentials: "include" }
+      const response = await apiRequest(
+        "GET",
+        `/api/users/${current.id}/mechanic-profile`,
       );
-      if (response.status === 404) {
-        setNeedsOnboarding(true);
-      } else {
-        setNeedsOnboarding(false);
-      }
+      const profile = await response.json();
+      setOnboarding(!profile.onboardingSubmittedAt);
     } catch {
-      setNeedsOnboarding(false);
+      setOnboarding(true);
     }
-  };
-
-  const loadStoredAuth = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (stored) {
-        const userData = JSON.parse(stored);
-        setUser(userData);
-        await checkMechanicProfile(userData);
+  }
+  useEffect(() => {
+    let disposed = false;
+    (async () => {
+      try {
+        await AsyncStorage.removeItem("@primemechanic_auth");
+        const token =
+          Platform.OS === "web" ? null : await SecureStore.getItemAsync(key);
+        if (!token) return;
+        setAccessToken(token);
+        const response = await apiRequest("GET", "/api/auth/me");
+        const data = await response.json();
+        if (!disposed) {
+          setUser(data.user);
+          await checkProfile(data.user);
+        }
+      } catch {
+        setAccessToken(null);
+        await persist(null);
+      } finally {
+        if (!disposed) setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to load auth:", error);
+    })();
+    return () => {
+      disposed = true;
+    };
+  }, []);
+  async function enter(endpoint: string, input: unknown) {
+    const response = await apiRequest("POST", endpoint, input);
+    const data = await response.json();
+    setAccessToken(data.token);
+    await persist(data.token);
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await checkProfile(data.user);
+    setUser(data.user);
+  }
+  async function signOut() {
+    try {
+      await apiRequest("POST", "/api/auth/signout");
     } finally {
-      setIsLoading(false);
+      setAccessToken(null);
+      await persist(null);
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      setUser(null);
+      setOnboarding(false);
     }
-  };
-
-  const signUp = async (email: string, password: string, name: string, phone?: string, role?: string) => {
-    const response = await apiRequest("POST", "/api/auth/signup", {
-      email,
-      password,
-      name,
-      phone: phone || null,
-      role: role || "customer",
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to sign up");
-    }
-
-    setUser(data.user);
-    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data.user));
-
-    if ((role || "customer") === "mechanic") {
-      setNeedsOnboarding(true);
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    const response = await apiRequest("POST", "/api/auth/signin", {
-      email,
-      password,
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to sign in");
-    }
-
-    setUser(data.user);
-    await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data.user));
-    await checkMechanicProfile(data.user);
-  };
-
-  const signOut = async () => {
-    setUser(null);
-    setNeedsOnboarding(false);
-    await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
-  };
-
-  const completeOnboarding = () => {
-    setNeedsOnboarding(false);
-  };
-
+  }
   return (
     <AuthContext.Provider
       value={{
@@ -130,21 +116,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading,
         isAuthenticated: !!user,
         needsOnboarding,
-        signUp,
-        signIn,
+        signUp: (email, password, name, phone, role) =>
+          enter("/api/auth/signup", {
+            email,
+            password,
+            name,
+            phone: phone || null,
+            role: role || "customer",
+          }),
+        signIn: (email, password) =>
+          enter("/api/auth/signin", { email, password }),
         signOut,
-        completeOnboarding,
+        completeOnboarding: () => setOnboarding(false),
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
-
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const value = useContext(AuthContext);
+  if (!value) throw new Error("AuthProvider required");
+  return value;
 }

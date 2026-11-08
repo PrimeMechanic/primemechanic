@@ -138,6 +138,7 @@ export default function MechanicDashboardScreen() {
   const { data: stats, isLoading, refetch } = useQuery<DashboardStats>({
     queryKey: ["/api/mechanics/dashboard", user?.id],
     enabled: !!user?.id,
+    refetchInterval: 15000,
   });
 
   const handleWsMessage = useCallback((data: any) => {
@@ -149,7 +150,7 @@ export default function MechanicDashboardScreen() {
   const { isConnected } = useWebSocket({
     userId: user?.id,
     onMessage: handleWsMessage,
-    enabled: !!user?.id && user?.role === "mechanic",
+    enabled: false,
   });
 
   const [refreshing, setRefreshing] = useState(false);
