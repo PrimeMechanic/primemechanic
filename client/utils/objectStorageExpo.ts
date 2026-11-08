@@ -1,6 +1,7 @@
 import { File } from 'expo-file-system';
 import { fetch } from 'expo/fetch';
 import { getApiUrl } from '@/lib/query-client';
+import { authHeaders } from '@/lib/query-client';
 
 export async function uploadFileToStorage(
   file: File,
@@ -11,6 +12,7 @@ export async function uploadFileToStorage(
   const presignedUrlResponse = await fetch(uploadUrlEndpoint, {
     method: 'POST',
     credentials: 'include',
+    headers: authHeaders(),
   });
 
   if (!presignedUrlResponse.ok) {
@@ -19,7 +21,7 @@ export async function uploadFileToStorage(
     );
   }
 
-  const { uploadURL } = await presignedUrlResponse.json();
+  const { uploadURL, objectPath } = await presignedUrlResponse.json();
   if (!uploadURL) {
     throw new Error('No uploadURL returned from server');
   }
@@ -38,5 +40,6 @@ export async function uploadFileToStorage(
     );
   }
 
-  return uploadURL;
+  if (!objectPath) throw new Error('Missing object path');
+  return objectPath;
 }

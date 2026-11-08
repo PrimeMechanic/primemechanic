@@ -1,5 +1,14 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, decimal, serial } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  integer,
+  boolean,
+  timestamp,
+  decimal,
+  serial,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -18,9 +27,26 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const sessions = pgTable("sessions", {
+  tokenHash: varchar("token_hash", { length: 64 }).primaryKey(),
+  userId: varchar("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+export const paymentEvents = pgTable("payment_events", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  processedAt: timestamp("processed_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const vehicles = pgTable("vehicles", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
   make: varchar("make", { length: 100 }).notNull(),
   model: varchar("model", { length: 100 }).notNull(),
   year: integer("year").notNull(),
@@ -32,22 +58,34 @@ export const vehicles = pgTable("vehicles", {
 
 export const mechanicProfiles = pgTable("mechanic_profiles", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull().unique(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull()
+    .unique(),
   specialty: varchar("specialty", { length: 255 }),
   bio: text("bio"),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }).notNull(),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),
   completedJobs: integer("completed_jobs").default(0),
-  screeningStatus: varchar("screening_status", { length: 20 }).default("pending"),
+  screeningStatus: varchar("screening_status", { length: 20 }).default(
+    "pending",
+  ),
   isVerified: boolean("is_verified").default(false),
   isAvailable: boolean("is_available").default(true),
   latitude: decimal("latitude", { precision: 10, scale: 8 }),
   longitude: decimal("longitude", { precision: 11, scale: 8 }),
   serviceRadius: integer("service_radius").default(10),
-  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default(
+    "0",
+  ),
   stripeConnectId: varchar("stripe_connect_id", { length: 255 }),
   stripeConnectOnboarded: boolean("stripe_connect_onboarded").default(false),
+  onboardingSubmittedAt: timestamp("onboarding_submitted_at", {
+    withTimezone: true,
+  }),
+  consentVersion: text("consent_version"),
+  offeredServices: text("offered_services").array(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -64,18 +102,30 @@ export const services = pgTable("services", {
 
 export const mechanicServices = pgTable("mechanic_services", {
   id: serial("id").primaryKey(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
-  serviceId: integer("service_id").references(() => services.id).notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
+  serviceId: integer("service_id")
+    .references(() => services.id)
+    .notNull(),
   customPrice: decimal("custom_price", { precision: 10, scale: 2 }),
   isActive: boolean("is_active").default(true),
 });
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
-  customerId: varchar("customer_id").references(() => users.id).notNull(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
-  vehicleId: integer("vehicle_id").references(() => vehicles.id).notNull(),
-  serviceId: integer("service_id").references(() => services.id).notNull(),
+  customerId: varchar("customer_id")
+    .references(() => users.id)
+    .notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
+  vehicleId: integer("vehicle_id")
+    .references(() => vehicles.id)
+    .notNull(),
+  serviceId: integer("service_id")
+    .references(() => services.id)
+    .notNull(),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
   scheduledDate: timestamp("scheduled_date").notNull(),
   location: text("location").notNull(),
@@ -91,13 +141,23 @@ export const bookings = pgTable("bookings", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
+  earningsCreditedAt: timestamp("earnings_credited_at", { withTimezone: true }),
+  checkoutSessionId: varchar("checkout_session_id", { length: 255 }),
+  checkoutStartedAt: timestamp("checkout_started_at", { withTimezone: true }),
 });
 
 export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
-  bookingId: integer("booking_id").references(() => bookings.id).notNull().unique(),
-  customerId: varchar("customer_id").references(() => users.id).notNull(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  bookingId: integer("booking_id")
+    .references(() => bookings.id)
+    .notNull()
+    .unique(),
+  customerId: varchar("customer_id")
+    .references(() => users.id)
+    .notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -105,16 +165,24 @@ export const reviews = pgTable("reviews", {
 
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
-  customerId: varchar("customer_id").references(() => users.id).notNull(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  customerId: varchar("customer_id")
+    .references(() => users.id)
+    .notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
   lastMessageAt: timestamp("last_message_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  conversationId: integer("conversation_id").references(() => conversations.id).notNull(),
-  senderId: varchar("sender_id").references(() => users.id).notNull(),
+  conversationId: integer("conversation_id")
+    .references(() => conversations.id)
+    .notNull(),
+  senderId: varchar("sender_id")
+    .references(() => users.id)
+    .notNull(),
   content: text("content").notNull(),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -147,14 +215,18 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
 
 export const portfolioItems = pgTable("portfolio_items", {
   id: serial("id").primaryKey(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
   imageUrl: text("image_url").notNull(),
   caption: text("caption"),
   serviceType: varchar("service_type", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertPortfolioItemSchema = createInsertSchema(portfolioItems).omit({
+export const insertPortfolioItemSchema = createInsertSchema(
+  portfolioItems,
+).omit({
   id: true,
   createdAt: true,
 });
@@ -187,15 +259,21 @@ export const shopProfiles = pgTable("shop_profiles", {
 
 export const shopServices = pgTable("shop_services", {
   id: serial("id").primaryKey(),
-  shopId: integer("shop_id").references(() => shopProfiles.id).notNull(),
-  serviceId: integer("service_id").references(() => services.id).notNull(),
+  shopId: integer("shop_id")
+    .references(() => shopProfiles.id)
+    .notNull(),
+  serviceId: integer("service_id")
+    .references(() => services.id)
+    .notNull(),
   customPrice: decimal("custom_price", { precision: 10, scale: 2 }),
   isActive: boolean("is_active").default(true),
 });
 
 export const addresses = pgTable("addresses", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
   label: varchar("label", { length: 50 }).notNull(),
   street: varchar("street", { length: 255 }).notNull(),
   apt: varchar("apt", { length: 50 }),
@@ -219,22 +297,30 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 
 export const mechanicDocuments = pgTable("mechanic_documents", {
   id: serial("id").primaryKey(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
   documentType: varchar("document_type", { length: 50 }).notNull(),
   fileUrl: text("file_url").notNull(),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
 });
 
-export const insertMechanicDocumentSchema = createInsertSchema(mechanicDocuments).omit({
+export const insertMechanicDocumentSchema = createInsertSchema(
+  mechanicDocuments,
+).omit({
   id: true,
   uploadedAt: true,
 });
 
 export const jobPhotos = pgTable("job_photos", {
   id: serial("id").primaryKey(),
-  bookingId: integer("booking_id").references(() => bookings.id).notNull(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  bookingId: integer("booking_id")
+    .references(() => bookings.id)
+    .notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
   photoUrl: text("photo_url").notNull(),
   photoType: varchar("photo_type", { length: 10 }).notNull(),
   caption: text("caption"),
@@ -248,8 +334,12 @@ export const insertJobPhotoSchema = createInsertSchema(jobPhotos).omit({
 
 export const jobNotes = pgTable("job_notes", {
   id: serial("id").primaryKey(),
-  bookingId: integer("booking_id").references(() => bookings.id).notNull(),
-  mechanicId: integer("mechanic_id").references(() => mechanicProfiles.id).notNull(),
+  bookingId: integer("booking_id")
+    .references(() => bookings.id)
+    .notNull(),
+  mechanicId: integer("mechanic_id")
+    .references(() => mechanicProfiles.id)
+    .notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -278,7 +368,9 @@ export type Address = typeof addresses.$inferSelect;
 export type InsertAddress = z.infer<typeof insertAddressSchema>;
 export type ShopProfile = typeof shopProfiles.$inferSelect;
 export type MechanicDocument = typeof mechanicDocuments.$inferSelect;
-export type InsertMechanicDocument = z.infer<typeof insertMechanicDocumentSchema>;
+export type InsertMechanicDocument = z.infer<
+  typeof insertMechanicDocumentSchema
+>;
 export type JobPhoto = typeof jobPhotos.$inferSelect;
 export type InsertJobPhoto = z.infer<typeof insertJobPhotoSchema>;
 export type JobNote = typeof jobNotes.$inferSelect;

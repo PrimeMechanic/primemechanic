@@ -6,9 +6,7 @@ import {
   type MechanicProfile,
   type Service,
   type Booking,
-  type InsertBooking,
   type Review,
-  type InsertReview,
   type Conversation,
   type Message,
   type InsertMessage,
@@ -49,7 +47,6 @@ export interface IStorage {
   
   getVehicles(userId: string): Promise<Vehicle[]>;
   createVehicle(vehicle: InsertVehicle): Promise<Vehicle>;
-  deleteVehicle(id: number): Promise<void>;
   
   getMechanics(): Promise<(MechanicProfile & { user: User })[]>;
   getMechanic(id: number): Promise<(MechanicProfile & { user: User }) | undefined>;
@@ -58,14 +55,11 @@ export interface IStorage {
   
   getBookings(userId: string): Promise<Booking[]>;
   getBooking(id: number): Promise<Booking | undefined>;
-  createBooking(booking: InsertBooking): Promise<Booking>;
-  updateBookingStatus(id: number, status: string): Promise<Booking | undefined>;
   
   getConversations(userId: string): Promise<Conversation[]>;
   getMessages(conversationId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   
-  createReview(review: InsertReview): Promise<Review>;
   
   getPortfolioItems(mechanicId: number): Promise<PortfolioItem[]>;
   createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
@@ -75,7 +69,6 @@ export interface IStorage {
 
   createMechanicProfile(profile: { userId: string; specialty?: string; bio?: string; hourlyRate: string; serviceRadius?: number }): Promise<MechanicProfile>;
   getMechanicDashboardStats(userId: string): Promise<any>;
-  updateMechanicEarnings(mechanicId: number, amount: number): Promise<void>;
 
   getShops(): Promise<ShopProfile[]>;
   getShop(id: number): Promise<ShopProfile | undefined>;
@@ -84,7 +77,6 @@ export interface IStorage {
   createAddress(address: InsertAddress): Promise<Address>;
   updateAddress(id: number, updates: Partial<InsertAddress>): Promise<Address | undefined>;
   deleteAddress(id: number): Promise<void>;
-  setDefaultAddress(userId: string, addressId: number): Promise<void>;
 
   getMechanicDocuments(mechanicId: number): Promise<MechanicDocument[]>;
   createMechanicDocument(doc: InsertMechanicDocument): Promise<MechanicDocument>;
@@ -133,10 +125,6 @@ export class DatabaseStorage implements IStorage {
     return newVehicle;
   }
   
-  async deleteVehicle(id: number): Promise<void> {
-    await db.delete(bookings).where(eq(bookings.vehicleId, id));
-    await db.delete(vehicles).where(eq(vehicles.id, id));
-  }
 
   async getMechanics(): Promise<(MechanicProfile & { user: User })[]> {
     const profiles = await db.select().from(mechanicProfiles);
@@ -173,32 +161,7 @@ export class DatabaseStorage implements IStorage {
     return booking;
   }
   
-  async createBooking(booking: InsertBooking): Promise<Booking> {
-    const totalPrice = parseFloat(booking.totalPrice);
-    const platformFee = (totalPrice * 0.20).toFixed(2);
-    const mechanicPayout = (totalPrice * 0.80).toFixed(2);
-    
-    const [newBooking] = await db.insert(bookings).values({
-      ...booking,
-      status: booking.status || "pending",
-      platformFee,
-      mechanicPayout,
-      paymentStatus: "pending",
-    }).returning();
-    return newBooking;
-  }
   
-  async updateBookingStatus(id: number, status: string): Promise<Booking | undefined> {
-    const updates: any = { status, updatedAt: new Date() };
-    if (status === "completed") {
-      updates.completedAt = new Date();
-    }
-    const [booking] = await db.update(bookings)
-      .set(updates)
-      .where(eq(bookings.id, id))
-      .returning();
-    return booking;
-  }
   
   async getConversations(userId: string): Promise<Conversation[]> {
     return db.select().from(conversations)
@@ -220,21 +183,6 @@ export class DatabaseStorage implements IStorage {
     return newMessage;
   }
   
-  async createReview(review: InsertReview): Promise<Review> {
-    const [newReview] = await db.insert(reviews).values(review).returning();
-    const mechanic = await this.getMechanic(review.mechanicId);
-    if (mechanic) {
-      const currentRating = parseFloat(mechanic.rating || "0");
-      const currentCount = mechanic.reviewCount || 0;
-      const newCount = currentCount + 1;
-      const newRating = ((currentRating * currentCount) + review.rating) / newCount;
-      
-      await db.update(mechanicProfiles)
-        .set({ rating: newRating.toFixed(2), reviewCount: newCount })
-        .where(eq(mechanicProfiles.id, review.mechanicId));
-    }
-    return newReview;
-  }
 
   async getPortfolioItems(mechanicId: number): Promise<PortfolioItem[]> {
     return db.select().from(portfolioItems)
@@ -289,7 +237,7 @@ export class DatabaseStorage implements IStorage {
     const allBookings = await db.select().from(bookings)
       .where(eq(bookings.mechanicId, profile.id));
 
-    const completedBookings = allBookings.filter(b => b.status === "completed");
+    const completedBookings = allBookings.filter(b => b.status === "completed" && b.paymentStatus === "paid");
     const todayEarnings = completedBookings
       .filter(b => b.completedAt && new Date(b.completedAt) >= todayStart)
       .reduce((sum, b) => sum + parseFloat(b.mechanicPayout || "0"), 0);
@@ -305,7 +253,7 @@ export class DatabaseStorage implements IStorage {
 
     const todayBookings = allBookings.filter(b => {
       const scheduled = new Date(b.scheduledDate);
-      return scheduled >= todayStart && (b.status === "upcoming" || b.status === "in_progress" || b.status === "accepted");
+      return scheduled >= todayStart && scheduled.getTime() < todayStart.getTime() + 86400000 && (b.status === "upcoming" || b.status === "in_progress" || b.status === "accepted");
     });
 
     const pendingRequests = allBookings.filter(b => b.status === "pending").length;
@@ -344,15 +292,6 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async updateMechanicEarnings(mechanicId: number, amount: number): Promise<void> {
-    await db.update(mechanicProfiles)
-      .set({
-        totalEarnings: sql`COALESCE(total_earnings, '0')::numeric + ${amount.toFixed(2)}::numeric`,
-        completedJobs: sql`COALESCE(completed_jobs, 0) + 1`,
-        updatedAt: new Date(),
-      })
-      .where(eq(mechanicProfiles.id, mechanicId));
-  }
 
   async getShops(): Promise<ShopProfile[]> {
     return db.select().from(shopProfiles);
@@ -383,10 +322,6 @@ export class DatabaseStorage implements IStorage {
     await db.delete(addresses).where(eq(addresses.id, id));
   }
 
-  async setDefaultAddress(userId: string, addressId: number): Promise<void> {
-    await db.update(addresses).set({ isDefault: false }).where(eq(addresses.userId, userId));
-    await db.update(addresses).set({ isDefault: true }).where(eq(addresses.id, addressId));
-  }
 
   async getMechanicDocuments(mechanicId: number): Promise<MechanicDocument[]> {
     return db.select().from(mechanicDocuments)

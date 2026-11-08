@@ -111,10 +111,10 @@ export class ObjectStorageService {
     }
   }
 
-  async getObjectEntityUploadURL(): Promise<string> {
+  async getObjectEntityUploadURL(userId: string): Promise<string> {
     const privateObjectDir = this.getPrivateObjectDir();
     const objectId = randomUUID();
-    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    const fullPath = `${privateObjectDir}/uploads/${userId}/${objectId}`;
     const { bucketName, objectName } = parseObjectPath(fullPath);
     return signObjectURL({
       bucketName,

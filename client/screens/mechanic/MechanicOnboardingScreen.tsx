@@ -30,15 +30,31 @@ import { Button } from "@/components/Button";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest, getApiUrl } from "@/lib/query-client";
+import { uploadImage } from "@/screens/LiveScreens";
 import { Spacing, BorderRadius, Shadows } from "@/constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const TOTAL_STEPS = 6;
 
 const REQUIRED_DOCUMENTS = [
-  { key: "insurance", label: "Proof of Insurance", icon: "shield" as const, description: "Upload your general liability insurance certificate" },
-  { key: "license", label: "License / Certification", icon: "credit-card" as const, description: "GA mechanic license or ASE certification" },
-  { key: "w9", label: "W-9 Tax Form", icon: "file-text" as const, description: "Completed W-9 for tax reporting" },
+  {
+    key: "insurance",
+    label: "Proof of Insurance",
+    icon: "shield" as const,
+    description: "Upload your general liability insurance certificate",
+  },
+  {
+    key: "license",
+    label: "License / Certification",
+    icon: "credit-card" as const,
+    description: "GA mechanic license or ASE certification",
+  },
+  {
+    key: "w9",
+    label: "W-9 Tax Form",
+    icon: "file-text" as const,
+    description: "Completed W-9 for tax reporting",
+  },
 ];
 
 const SPECIALTIES = [
@@ -81,7 +97,7 @@ interface MechanicOnboardResponse {
 
 export default function MechanicOnboardingScreen({ onComplete }: Props) {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const insets = useSafeAreaInsets();
 
   const [step, setStep] = useState(0);
@@ -121,29 +137,10 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
       setUploadingDoc(docKey);
       const uri = result.assets[0].uri;
 
-      const baseUrl = getApiUrl();
-      const uploadRes = await fetch(new URL("/api/objects/upload", baseUrl).toString(), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: `doc-${docKey}-${Date.now()}.jpg`,
-          contentType: "image/jpeg",
-          directory: ".private",
-        }),
-      });
-      const uploadData = await uploadRes.json();
-
-      if (uploadData.uploadUrl) {
-        const imageResponse = await fetch(uri);
-        const blob = await imageResponse.blob();
-        await fetch(uploadData.uploadUrl, {
-          method: "PUT",
-          headers: { "Content-Type": "image/jpeg" },
-          body: blob,
-        });
-      }
-
-      const fileUrl = uploadData.objectPath || uri;
+      const fileUrl = await uploadImage(
+        uri,
+        result.assets[0].mimeType || "image/jpeg",
+      );
       setUploadedDocs((prev) => ({ ...prev, [docKey]: fileUrl }));
     } catch (err) {
       setError("Failed to upload document. Please try again.");
@@ -167,9 +164,13 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
       return;
     }
     if (step === 4) {
-      const missingDocs = REQUIRED_DOCUMENTS.filter((d) => !uploadedDocs[d.key]);
+      const missingDocs = REQUIRED_DOCUMENTS.filter(
+        (d) => !uploadedDocs[d.key],
+      );
       if (missingDocs.length > 0) {
-        setError(`Please upload: ${missingDocs.map((d) => d.label).join(", ")}`);
+        setError(
+          `Please upload: ${missingDocs.map((d) => d.label).join(", ")}`,
+        );
         return;
       }
     }
@@ -201,7 +202,7 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
     setSelectedServices((prev) =>
       prev.includes(service)
         ? prev.filter((s) => s !== service)
-        : [...prev, service]
+        : [...prev, service],
     );
   };
 
@@ -211,25 +212,21 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
     setError(null);
 
     try {
-      const profileResponse = await apiRequest("POST", "/api/mechanics/onboard", {
-        userId: user.id,
-        specialty,
-        bio: bio.trim() || `Specializing in ${specialty}`,
-        hourlyRate,
-        serviceRadius: parseInt(serviceRadius) || 10,
-      });
-      const profile: MechanicOnboardResponse = await profileResponse.json();
-
-      const mechanicId = profile.id;
-      if (mechanicId) {
-        const docUploads = Object.entries(uploadedDocs).map(([docType, fileUrl]) =>
-          apiRequest("POST", `/api/mechanics/${mechanicId}/documents`, {
-            documentType: docType,
-            fileUrl,
-          })
-        );
-        await Promise.all(docUploads);
-      }
+      const profileResponse = await apiRequest(
+        "POST",
+        "/api/mechanics/onboard",
+        {
+          specialty,
+          bio: bio.trim() || `Specializing in ${specialty}`,
+          hourlyRate,
+          serviceRadius: parseInt(serviceRadius) || 10,
+          selectedServices,
+          backgroundCheckConsent,
+          agreementAccepted,
+          documents: uploadedDocs,
+        },
+      );
+      await profileResponse.json();
 
       onComplete();
     } catch (err: any) {
@@ -245,13 +242,23 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
         return (
           <Animated.View entering={FadeIn.duration(300)} key="step0">
             <View style={styles.stepHeader}>
-              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+              <View
+                style={[
+                  styles.stepIconCircle,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
                 <Feather name="award" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
                 What&apos;s your specialty?
               </ThemedText>
-              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[
+                  styles.stepDescription,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 Choose the type of vehicles you work with most
               </ThemedText>
             </View>
@@ -264,8 +271,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     style={[
                       styles.specialtyCard,
                       {
-                        backgroundColor: isSelected ? `${colors.primary}12` : colors.backgroundDefault,
-                        borderColor: isSelected ? colors.primary : colors.border,
+                        backgroundColor: isSelected
+                          ? `${colors.primary}12`
+                          : colors.backgroundDefault,
+                        borderColor: isSelected
+                          ? colors.primary
+                          : colors.border,
                       },
                     ]}
                     onPress={() => setSpecialty(item.label)}
@@ -274,13 +285,19 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     <View
                       style={[
                         styles.specialtyIcon,
-                        { backgroundColor: isSelected ? `${colors.primary}20` : `${colors.textSecondary}10` },
+                        {
+                          backgroundColor: isSelected
+                            ? `${colors.primary}20`
+                            : `${colors.textSecondary}10`,
+                        },
                       ]}
                     >
                       <Feather
                         name={item.icon}
                         size={22}
-                        color={isSelected ? colors.primary : colors.textSecondary}
+                        color={
+                          isSelected ? colors.primary : colors.textSecondary
+                        }
                       />
                     </View>
                     <ThemedText
@@ -292,7 +309,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                       {item.label}
                     </ThemedText>
                     {isSelected ? (
-                      <View style={[styles.checkBadge, { backgroundColor: colors.primary }]}>
+                      <View
+                        style={[
+                          styles.checkBadge,
+                          { backgroundColor: colors.primary },
+                        ]}
+                      >
                         <Feather name="check" size={12} color="#FFFFFF" />
                       </View>
                     ) : null}
@@ -307,13 +329,23 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
         return (
           <Animated.View entering={FadeIn.duration(300)} key="step1">
             <View style={styles.stepHeader}>
-              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+              <View
+                style={[
+                  styles.stepIconCircle,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
                 <Feather name="list" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
                 Services you offer
               </ThemedText>
-              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[
+                  styles.stepDescription,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 Select all the services you can provide
               </ThemedText>
             </View>
@@ -326,8 +358,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     style={[
                       styles.serviceItem,
                       {
-                        backgroundColor: isSelected ? `${colors.primary}12` : colors.backgroundDefault,
-                        borderColor: isSelected ? colors.primary : colors.border,
+                        backgroundColor: isSelected
+                          ? `${colors.primary}12`
+                          : colors.backgroundDefault,
+                        borderColor: isSelected
+                          ? colors.primary
+                          : colors.border,
                       },
                     ]}
                     onPress={() => toggleService(service)}
@@ -337,8 +373,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                       style={[
                         styles.serviceCheck,
                         {
-                          backgroundColor: isSelected ? colors.primary : "transparent",
-                          borderColor: isSelected ? colors.primary : colors.border,
+                          backgroundColor: isSelected
+                            ? colors.primary
+                            : "transparent",
+                          borderColor: isSelected
+                            ? colors.primary
+                            : colors.border,
                         },
                       ]}
                     >
@@ -365,25 +405,50 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
         return (
           <Animated.View entering={FadeIn.duration(300)} key="step2">
             <View style={styles.stepHeader}>
-              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+              <View
+                style={[
+                  styles.stepIconCircle,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
                 <Feather name="dollar-sign" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
                 Set your rates
               </ThemedText>
-              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[
+                  styles.stepDescription,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 You can always change these later
               </ThemedText>
             </View>
 
-            <View style={[styles.rateCard, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
-              <ThemedText style={[styles.rateLabel, { color: colors.textSecondary }]}>
+            <View
+              style={[
+                styles.rateCard,
+                { backgroundColor: colors.backgroundDefault },
+                Shadows.small,
+              ]}
+            >
+              <ThemedText
+                style={[styles.rateLabel, { color: colors.textSecondary }]}
+              >
                 HOURLY RATE
               </ThemedText>
               <View style={styles.rateInputRow}>
-                <ThemedText style={[styles.dollarSign, { color: colors.primary }]}>$</ThemedText>
+                <ThemedText
+                  style={[styles.dollarSign, { color: colors.primary }]}
+                >
+                  $
+                </ThemedText>
                 <TextInput
-                  style={[styles.rateInput, { color: colors.text, borderColor: colors.border }]}
+                  style={[
+                    styles.rateInput,
+                    { color: colors.text, borderColor: colors.border },
+                  ]}
                   value={hourlyRate}
                   onChangeText={setHourlyRate}
                   keyboardType="numeric"
@@ -391,7 +456,11 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                   placeholderTextColor={colors.textSecondary}
                   testID="input-hourly-rate"
                 />
-                <ThemedText style={[styles.rateUnit, { color: colors.textSecondary }]}>/hr</ThemedText>
+                <ThemedText
+                  style={[styles.rateUnit, { color: colors.textSecondary }]}
+                >
+                  /hr
+                </ThemedText>
               </View>
               <View style={styles.rateSuggestions}>
                 {["50", "75", "85", "100"].map((rate) => (
@@ -400,8 +469,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     style={[
                       styles.ratePill,
                       {
-                        backgroundColor: hourlyRate === rate ? `${colors.primary}15` : `${colors.textSecondary}08`,
-                        borderColor: hourlyRate === rate ? colors.primary : "transparent",
+                        backgroundColor:
+                          hourlyRate === rate
+                            ? `${colors.primary}15`
+                            : `${colors.textSecondary}08`,
+                        borderColor:
+                          hourlyRate === rate ? colors.primary : "transparent",
                       },
                     ]}
                     onPress={() => setHourlyRate(rate)}
@@ -409,7 +482,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     <ThemedText
                       style={[
                         styles.ratePillText,
-                        { color: hourlyRate === rate ? colors.primary : colors.textSecondary },
+                        {
+                          color:
+                            hourlyRate === rate
+                              ? colors.primary
+                              : colors.textSecondary,
+                        },
                       ]}
                     >
                       ${rate}
@@ -422,16 +500,24 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
             <View
               style={[
                 styles.rateCard,
-                { backgroundColor: colors.backgroundDefault, marginTop: Spacing.lg },
+                {
+                  backgroundColor: colors.backgroundDefault,
+                  marginTop: Spacing.lg,
+                },
                 Shadows.small,
               ]}
             >
-              <ThemedText style={[styles.rateLabel, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[styles.rateLabel, { color: colors.textSecondary }]}
+              >
                 SERVICE RADIUS
               </ThemedText>
               <View style={styles.rateInputRow}>
                 <TextInput
-                  style={[styles.rateInput, { color: colors.text, borderColor: colors.border }]}
+                  style={[
+                    styles.rateInput,
+                    { color: colors.text, borderColor: colors.border },
+                  ]}
                   value={serviceRadius}
                   onChangeText={setServiceRadius}
                   keyboardType="numeric"
@@ -439,7 +525,11 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                   placeholderTextColor={colors.textSecondary}
                   testID="input-service-radius"
                 />
-                <ThemedText style={[styles.rateUnit, { color: colors.textSecondary }]}>miles</ThemedText>
+                <ThemedText
+                  style={[styles.rateUnit, { color: colors.textSecondary }]}
+                >
+                  miles
+                </ThemedText>
               </View>
               <View style={styles.rateSuggestions}>
                 {["5", "10", "15", "25"].map((radius) => (
@@ -448,8 +538,14 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     style={[
                       styles.ratePill,
                       {
-                        backgroundColor: serviceRadius === radius ? `${colors.primary}15` : `${colors.textSecondary}08`,
-                        borderColor: serviceRadius === radius ? colors.primary : "transparent",
+                        backgroundColor:
+                          serviceRadius === radius
+                            ? `${colors.primary}15`
+                            : `${colors.textSecondary}08`,
+                        borderColor:
+                          serviceRadius === radius
+                            ? colors.primary
+                            : "transparent",
                       },
                     ]}
                     onPress={() => setServiceRadius(radius)}
@@ -457,7 +553,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     <ThemedText
                       style={[
                         styles.ratePillText,
-                        { color: serviceRadius === radius ? colors.primary : colors.textSecondary },
+                        {
+                          color:
+                            serviceRadius === radius
+                              ? colors.primary
+                              : colors.textSecondary,
+                        },
                       ]}
                     >
                       {radius} mi
@@ -473,18 +574,34 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
         return (
           <Animated.View entering={FadeIn.duration(300)} key="step3">
             <View style={styles.stepHeader}>
-              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+              <View
+                style={[
+                  styles.stepIconCircle,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
                 <Feather name="edit-3" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
                 Tell customers about yourself
               </ThemedText>
-              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[
+                  styles.stepDescription,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 A short bio helps build trust with customers
               </ThemedText>
             </View>
 
-            <View style={[styles.bioCard, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
+            <View
+              style={[
+                styles.bioCard,
+                { backgroundColor: colors.backgroundDefault },
+                Shadows.small,
+              ]}
+            >
               <TextInput
                 style={[
                   styles.bioInput,
@@ -503,36 +620,53 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                 textAlignVertical="top"
                 testID="input-bio"
               />
-              <ThemedText style={[styles.charCount, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[styles.charCount, { color: colors.textSecondary }]}
+              >
                 {bio.length}/500
               </ThemedText>
             </View>
 
-            <View style={[styles.summaryCard, { backgroundColor: `${colors.primary}08` }]}>
+            <View
+              style={[
+                styles.summaryCard,
+                { backgroundColor: `${colors.primary}08` },
+              ]}
+            >
               <ThemedText style={[styles.summaryTitle, { color: colors.text }]}>
                 Profile Summary
               </ThemedText>
               <View style={styles.summaryRow}>
                 <Feather name="award" size={16} color={colors.primary} />
-                <ThemedText style={[styles.summaryText, { color: colors.textSecondary }]}>
+                <ThemedText
+                  style={[styles.summaryText, { color: colors.textSecondary }]}
+                >
                   {specialty || "Not set"}
                 </ThemedText>
               </View>
               <View style={styles.summaryRow}>
                 <Feather name="list" size={16} color={colors.primary} />
-                <ThemedText style={[styles.summaryText, { color: colors.textSecondary }]}>
-                  {selectedServices.length > 0 ? `${selectedServices.length} services` : "None selected"}
+                <ThemedText
+                  style={[styles.summaryText, { color: colors.textSecondary }]}
+                >
+                  {selectedServices.length > 0
+                    ? `${selectedServices.length} services`
+                    : "None selected"}
                 </ThemedText>
               </View>
               <View style={styles.summaryRow}>
                 <Feather name="dollar-sign" size={16} color={colors.primary} />
-                <ThemedText style={[styles.summaryText, { color: colors.textSecondary }]}>
+                <ThemedText
+                  style={[styles.summaryText, { color: colors.textSecondary }]}
+                >
                   ${hourlyRate}/hr
                 </ThemedText>
               </View>
               <View style={styles.summaryRow}>
                 <Feather name="map-pin" size={16} color={colors.primary} />
-                <ThemedText style={[styles.summaryText, { color: colors.textSecondary }]}>
+                <ThemedText
+                  style={[styles.summaryText, { color: colors.textSecondary }]}
+                >
                   {serviceRadius} mile radius
                 </ThemedText>
               </View>
@@ -544,13 +678,23 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
         return (
           <Animated.View entering={FadeIn.duration(300)} key="step4">
             <View style={styles.stepHeader}>
-              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+              <View
+                style={[
+                  styles.stepIconCircle,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
                 <Feather name="upload" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
                 Upload your documents
               </ThemedText>
-              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[
+                  styles.stepDescription,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 Required for verification before you can accept jobs
               </ThemedText>
             </View>
@@ -565,8 +709,12 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     style={[
                       styles.docCard,
                       {
-                        backgroundColor: isUploaded ? `${colors.success}08` : colors.backgroundDefault,
-                        borderColor: isUploaded ? colors.success : colors.border,
+                        backgroundColor: isUploaded
+                          ? `${colors.success}08`
+                          : colors.backgroundDefault,
+                        borderColor: isUploaded
+                          ? colors.success
+                          : colors.border,
                       },
                       Shadows.small,
                     ]}
@@ -574,31 +722,74 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
                     disabled={isUploading}
                     testID={`doc-upload-${doc.key}`}
                   >
-                    <View style={[styles.docIconWrap, { backgroundColor: isUploaded ? `${colors.success}15` : `${colors.textSecondary}10` }]}>
+                    <View
+                      style={[
+                        styles.docIconWrap,
+                        {
+                          backgroundColor: isUploaded
+                            ? `${colors.success}15`
+                            : `${colors.textSecondary}10`,
+                        },
+                      ]}
+                    >
                       {isUploading ? (
-                        <ActivityIndicator size="small" color={colors.primary} />
+                        <ActivityIndicator
+                          size="small"
+                          color={colors.primary}
+                        />
                       ) : (
-                        <Feather name={isUploaded ? "check-circle" : doc.icon} size={22} color={isUploaded ? colors.success : colors.textSecondary} />
+                        <Feather
+                          name={isUploaded ? "check-circle" : doc.icon}
+                          size={22}
+                          color={
+                            isUploaded ? colors.success : colors.textSecondary
+                          }
+                        />
                       )}
                     </View>
                     <View style={styles.docContent}>
-                      <ThemedText style={[styles.docTitle, { color: isUploaded ? colors.success : colors.text }]}>
+                      <ThemedText
+                        style={[
+                          styles.docTitle,
+                          { color: isUploaded ? colors.success : colors.text },
+                        ]}
+                      >
                         {doc.label}
                       </ThemedText>
-                      <ThemedText style={[styles.docDesc, { color: colors.textSecondary }]} numberOfLines={1}>
-                        {isUploaded ? "Uploaded - tap to replace" : doc.description}
+                      <ThemedText
+                        style={[
+                          styles.docDesc,
+                          { color: colors.textSecondary },
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {isUploaded
+                          ? "Uploaded - tap to replace"
+                          : doc.description}
                       </ThemedText>
                     </View>
-                    <Feather name={isUploaded ? "check" : "upload"} size={18} color={isUploaded ? colors.success : colors.primary} />
+                    <Feather
+                      name={isUploaded ? "check" : "upload"}
+                      size={18}
+                      color={isUploaded ? colors.success : colors.primary}
+                    />
                   </Pressable>
                 );
               })}
             </View>
 
-            <View style={[styles.infoBox, { backgroundColor: `${colors.primary}08` }]}>
+            <View
+              style={[
+                styles.infoBox,
+                { backgroundColor: `${colors.primary}08` },
+              ]}
+            >
               <Feather name="info" size={16} color={colors.primary} />
-              <ThemedText style={[styles.infoText, { color: colors.textSecondary }]}>
-                Documents are reviewed within 24-48 hours. You can begin onboarding now but won&apos;t receive jobs until verified.
+              <ThemedText
+                style={[styles.infoText, { color: colors.textSecondary }]}
+              >
+                Documents are reviewed within 24-48 hours. You can begin
+                onboarding now but won&apos;t receive jobs until verified.
               </ThemedText>
             </View>
           </Animated.View>
@@ -608,50 +799,128 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
         return (
           <Animated.View entering={FadeIn.duration(300)} key="step5">
             <View style={styles.stepHeader}>
-              <View style={[styles.stepIconCircle, { backgroundColor: `${colors.primary}15` }]}>
+              <View
+                style={[
+                  styles.stepIconCircle,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
                 <Feather name="check-square" size={28} color={colors.primary} />
               </View>
               <ThemedText style={[styles.stepTitle, { color: colors.text }]}>
                 Agreement & Background Check
               </ThemedText>
-              <ThemedText style={[styles.stepDescription, { color: colors.textSecondary }]}>
+              <ThemedText
+                style={[
+                  styles.stepDescription,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 Review and accept the terms to complete your setup
               </ThemedText>
             </View>
 
-            <View style={[styles.agreementCard, { backgroundColor: colors.backgroundDefault }, Shadows.small]}>
-              <ThemedText style={[styles.agreementTitle, { color: colors.text }]}>
+            <View
+              style={[
+                styles.agreementCard,
+                { backgroundColor: colors.backgroundDefault },
+                Shadows.small,
+              ]}
+            >
+              <ThemedText
+                style={[styles.agreementTitle, { color: colors.text }]}
+              >
                 Independent Contractor Agreement
               </ThemedText>
-              <ScrollView style={[styles.agreementScroll, { backgroundColor: colors.backgroundRoot, borderColor: colors.border }]} nestedScrollEnabled>
-                <ThemedText style={[styles.agreementBody, { color: colors.textSecondary }]}>
+              <ScrollView
+                style={[
+                  styles.agreementScroll,
+                  {
+                    backgroundColor: colors.backgroundRoot,
+                    borderColor: colors.border,
+                  },
+                ]}
+                nestedScrollEnabled
+              >
+                <ThemedText
+                  style={[
+                    styles.agreementBody,
+                    { color: colors.textSecondary },
+                  ]}
+                >
                   {`By accepting this agreement, you acknowledge and agree to the following terms:\n\n1. INDEPENDENT CONTRACTOR STATUS: You are an independent contractor, not an employee of PrimeMechanic. You are responsible for your own taxes, insurance, and business expenses.\n\n2. SERVICE STANDARDS: You agree to perform all services in a professional, workmanlike manner consistent with industry standards.\n\n3. COMMISSION: PrimeMechanic retains a 20% platform commission on all completed jobs. Your payout is 80% of the job total.\n\n4. BEFORE/AFTER DOCUMENTATION: You are required to photograph the vehicle before and after every service for quality assurance and dispute resolution.\n\n5. INSURANCE: You must maintain valid general liability insurance at all times while active on the platform.\n\n6. COMPLIANCE: You agree to comply with all applicable federal, state, and local laws and regulations in the state of Georgia.\n\n7. CANCELLATION: Either party may terminate this agreement at any time with written notice.\n\n8. W-9: You agree to provide a completed W-9 form for tax reporting purposes. PrimeMechanic will issue a 1099 for earnings over $600/year.`}
                 </ThemedText>
               </ScrollView>
             </View>
 
             <Pressable
-              style={[styles.checkboxRow, { borderColor: agreementAccepted ? colors.primary : colors.border }]}
+              style={[
+                styles.checkboxRow,
+                {
+                  borderColor: agreementAccepted
+                    ? colors.primary
+                    : colors.border,
+                },
+              ]}
               onPress={() => setAgreementAccepted(!agreementAccepted)}
               testID="checkbox-agreement"
             >
-              <View style={[styles.checkbox, { backgroundColor: agreementAccepted ? colors.primary : "transparent", borderColor: agreementAccepted ? colors.primary : colors.border }]}>
-                {agreementAccepted ? <Feather name="check" size={14} color="#FFFFFF" /> : null}
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    backgroundColor: agreementAccepted
+                      ? colors.primary
+                      : "transparent",
+                    borderColor: agreementAccepted
+                      ? colors.primary
+                      : colors.border,
+                  },
+                ]}
+              >
+                {agreementAccepted ? (
+                  <Feather name="check" size={14} color="#FFFFFF" />
+                ) : null}
               </View>
-              <ThemedText style={[styles.checkboxLabel, { color: colors.text }]}>
+              <ThemedText
+                style={[styles.checkboxLabel, { color: colors.text }]}
+              >
                 I have read and accept the Independent Contractor Agreement
               </ThemedText>
             </Pressable>
 
             <Pressable
-              style={[styles.checkboxRow, { borderColor: backgroundCheckConsent ? colors.primary : colors.border }]}
+              style={[
+                styles.checkboxRow,
+                {
+                  borderColor: backgroundCheckConsent
+                    ? colors.primary
+                    : colors.border,
+                },
+              ]}
               onPress={() => setBackgroundCheckConsent(!backgroundCheckConsent)}
               testID="checkbox-background-check"
             >
-              <View style={[styles.checkbox, { backgroundColor: backgroundCheckConsent ? colors.primary : "transparent", borderColor: backgroundCheckConsent ? colors.primary : colors.border }]}>
-                {backgroundCheckConsent ? <Feather name="check" size={14} color="#FFFFFF" /> : null}
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    backgroundColor: backgroundCheckConsent
+                      ? colors.primary
+                      : "transparent",
+                    borderColor: backgroundCheckConsent
+                      ? colors.primary
+                      : colors.border,
+                  },
+                ]}
+              >
+                {backgroundCheckConsent ? (
+                  <Feather name="check" size={14} color="#FFFFFF" />
+                ) : null}
               </View>
-              <ThemedText style={[styles.checkboxLabel, { color: colors.text }]}>
+              <ThemedText
+                style={[styles.checkboxLabel, { color: colors.text }]}
+              >
                 I consent to a background check as required by PrimeMechanic
               </ThemedText>
             </Pressable>
@@ -664,19 +933,37 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
+    <View
+      style={[styles.container, { backgroundColor: colors.backgroundRoot }]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.flex}
       >
         <View style={[styles.topBar, { paddingTop: insets.top + Spacing.md }]}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              void signOut().catch(() => setError("Sign out failed"));
+            }}
+          >
+            <ThemedText>Sign out</ThemedText>
+          </Pressable>
           <View style={styles.progressContainer}>
-            <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+            <View
+              style={[styles.progressTrack, { backgroundColor: colors.border }]}
+            >
               <Animated.View
-                style={[styles.progressFill, { backgroundColor: colors.primary }, progressStyle]}
+                style={[
+                  styles.progressFill,
+                  { backgroundColor: colors.primary },
+                  progressStyle,
+                ]}
               />
             </View>
-            <ThemedText style={[styles.stepIndicator, { color: colors.textSecondary }]}>
+            <ThemedText
+              style={[styles.stepIndicator, { color: colors.textSecondary }]}
+            >
               Step {step + 1} of {TOTAL_STEPS}
             </ThemedText>
           </View>
@@ -685,15 +972,25 @@ export default function MechanicOnboardingScreen({ onComplete }: Props) {
         <ScrollView
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: insets.bottom + 100 },
+          ]}
           keyboardShouldPersistTaps="handled"
         >
           {renderStepContent()}
 
           {error ? (
-            <View style={[styles.errorContainer, { backgroundColor: `${colors.error}15` }]}>
+            <View
+              style={[
+                styles.errorContainer,
+                { backgroundColor: `${colors.error}15` },
+              ]}
+            >
               <Feather name="alert-circle" size={16} color={colors.error} />
-              <ThemedText style={[styles.errorText, { color: colors.error }]}>{error}</ThemedText>
+              <ThemedText style={[styles.errorText, { color: colors.error }]}>
+                {error}
+              </ThemedText>
             </View>
           ) : null}
         </ScrollView>

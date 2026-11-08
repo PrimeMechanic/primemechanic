@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { useAuth } from "./AuthContext";
 
 type UserRole = "customer" | "mechanic";
 
@@ -16,6 +23,10 @@ interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps) {
   const [role, setRole] = useState<UserRole>("customer");
+  const { user } = useAuth();
+  useEffect(() => {
+    setRole(user?.role === "mechanic" ? "mechanic" : "customer");
+  }, [user?.id, user?.role]);
 
   const toggleRole = () => {
     setRole((prev) => (prev === "customer" ? "mechanic" : "customer"));

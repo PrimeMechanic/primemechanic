@@ -1,0 +1,26 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check:types
+      - run: npm run lint
+      - run: npm test
+      - run: npm run server:build
+      - run: npm run build
+        env:
+          EXPO_PUBLIC_DOMAIN: staging.example.invalid
+      - run: npm run expo:static:build
+        env:
+          PUBLIC_APP_URL: https://staging.example.invalid
+          EXPO_PUBLIC_DOMAIN: staging.example.invalid
+      - run: npm run test:deployment
